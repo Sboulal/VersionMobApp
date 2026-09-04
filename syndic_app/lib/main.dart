@@ -1,14 +1,16 @@
 // Importing important packages require to connect
 // Flutter and Dart
 import 'package:flutter/material.dart';
-import 'package:syndic_app/pages/login_page.dart';
+import 'dart:io'; // 🟢 هاد السطر ضروري باش يخدم HttpOverrides
+
+import 'package:syndic_app/pages/landing_page.dart';
 
 // Main Function
 void main() {
-// Giving command to runApp() to run the app.
-
-// The purpose of the runApp() function is to attach
-// the given widget to the screen.
+  // Giving command to runApp() to run the app.
+  HttpOverrides.global = MyHttpOverrides(); // 🟢 تخطي مشكل SSL
+  // The purpose of the runApp() function is to attach
+  // the given widget to the screen.
   runApp(const MyApp());
 }
 
@@ -17,13 +19,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-// This widget is the root of your application.
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        
+      debugShowCheckedModeBanner: false, 
       // title of the application
-      title: 'Hello World Demo Application',
+      title: 'Syndify App',
       
       // theme of the widget
       theme: ThemeData(
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
       ),
       
       // Inner UI of the application
-      home: const LoginPage(),
+      home: const LandingPage(), // 🟢 من الأحسن تزيدي const هنا
     );
   }
 }
@@ -54,11 +56,19 @@ class MyHomePage extends StatelessWidget {
       // Sets the content to the
       // center of the application page
       body: const Center(
-          
           // Sets the content of the Application
           child: Text(
         'Welcome to SyndifyApp!',
       )),
     );
+  }
+}
+
+// 🟢 Classe pour ignorer les erreurs de certificat SSL (En développement)
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }
