@@ -355,7 +355,7 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
             ],
           ),
 
-          const SizedBox(height: 15), 
+          const SizedBox(height: 20), // Espace avant "Vos services"
 
           // ======================================================
           // SERVICES
@@ -375,13 +375,14 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
             ),
           ),
 
-          const SizedBox(height: 5), 
+          const SizedBox(height: 10), // Petit espace après le titre
 
           // ======================================================
           // SERVICES GRID
           // ======================================================
 
           GridView.count(
+            padding: EdgeInsets.zero, // <-- ENLEVE L'ESPACE CACHÉ QUI POSE PROBLÈME
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
 
@@ -390,7 +391,7 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
 
-            childAspectRatio: 1.12, // 🟢 Taux d'aspect corrigé
+            childAspectRatio: 1.12, 
 
             children: [
               // --------------------------------------------------
@@ -514,9 +515,8 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
         : const Color(0xFF172033);
 
     return Container(
-      height: 115, // 🟢 Hauteur augmentée
-
-      padding: const EdgeInsets.all(12), // 🟢 Padding réduit
+      // <-- Hauteur (height) supprimée totalement pour s'adapter au contenu dynamiquement
+      padding: const EdgeInsets.all(14), 
 
       decoration: BoxDecoration(
         color: cardColor,
@@ -538,7 +538,7 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min, // 🟢 S'assure que la colonne ne prend que l'espace nécessaire
+        mainAxisSize: MainAxisSize.min, // <-- Permet à la colonne de prendre juste l'espace nécessaire
         children: [
           Container(
             width: 38,
@@ -556,7 +556,7 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
             ),
           ),
 
-          const SizedBox(height: 8), // 🟢 Remplacement de Spacer par SizedBox pour éviter l'overflow
+          const SizedBox(height: 12), 
 
           Text(
             title,
