@@ -340,8 +340,13 @@ class _CreerAnnoncePageState extends State<CreerAnnoncePage> {
                     ),
                     const SizedBox(height: 16),
 
-                    _buildInputLabel("Date d'expiration (YYYY-MM-DD)"),
-                    TextField(controller: _expDateController, decoration: _inputDecoration("Optionnel", icon: Icons.calendar_today)),
+                   _buildInputLabel("Date d'expiration"),
+TextField(
+  controller: _expDateController,
+  readOnly: true, // 🟢 Empêche le clavier de s'ouvrir
+  onTap: () => _selectDate(context), // 🟢 Ouvre le calendrier
+  decoration: _inputDecoration("Choisir une date (Optionnel)", icon: Icons.calendar_today),
+),
                     const SizedBox(height: 16),
 
                     Row(
@@ -390,5 +395,32 @@ class _CreerAnnoncePageState extends State<CreerAnnoncePage> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
     );
+  }
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)), // Demain par défaut
+      firstDate: DateTime.now(), // On ne peut pas choisir une date passée
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: mainBlue, 
+              onPrimary: Colors.white, 
+              onSurface: Colors.black, 
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        // Formater la date en YYYY-MM-DD pour Laravel
+        _expDateController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      });
+    }
   }
 }

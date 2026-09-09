@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syndic_app/widgets/custom_header.dart';
 import 'package:syndic_app/pages/main_layout.dart';
-import 'package:url_launcher/url_launcher.dart'; // 🟢 Ajout de url_launcher
+import 'package:url_launcher/url_launcher.dart'; 
 import 'pdf_viewer_page.dart';
+
+
 
 // ==========================================
 // 1. LISTE DES DOCUMENTS (Écran 15)
@@ -57,23 +58,20 @@ class _DocumentsPageState extends State<DocumentsPage> {
     }
   }
 
-  // 🟢 Fonction activée pour ouvrir les PDF
-void _openFile(String url, String fileName) {
-  // Vérifie s'il s'agit d'un PDF
-  if (url.toLowerCase().endsWith('.pdf')) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PdfViewerPage(pdfUrl: url, documentName: fileName),
-      ),
-    );
-  } else {
-    // Si ce n'est pas un PDF (ex: image), on garde url_launcher ou on affiche un message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Format de fichier non pris en charge pour la lecture interne.")),
-    );
+  void _openFile(String url, String fileName) {
+    if (url.toLowerCase().endsWith('.pdf')) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PdfViewerPage(pdfUrl: url, documentName: fileName),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Format de fichier non pris en charge pour la lecture interne.")),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -81,19 +79,15 @@ void _openFile(String url, String fileName) {
       backgroundColor: bgLight,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
-              child: CustomHeader(
-                title: "Sindy",
-                subtitle: "Résidence Les Jardins\nDocuments",
-                showBackButton: true,
-                onBackPressed: widget.isMainScreen 
-                    ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainLayout()), (route) => false)
-                    : null,
-              ),
-            ),
-            const SizedBox(height: 8),
+            // 🟢 L'en-tête blanc
+            _buildTopHeader(),
+            
+            // 🟢 La bannière image avec texte
+            _buildImageBanner(),
+            
+            const SizedBox(height: 16),
 
             Expanded(
               child: _isLoading 
@@ -101,13 +95,12 @@ void _openFile(String url, String fileName) {
                 : _groupedDocuments.isEmpty
                   ? const Center(child: Text("Aucun document trouvé.", style: TextStyle(color: Colors.grey)))
                   : ListView.builder(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       itemCount: _groupedDocuments.length,
                       itemBuilder: (context, index) {
                         final group = _groupedDocuments[index];
                         final files = group['files'] as List;
                         
-                        // 🟢 UI façon "Dossiers" (ExpansionTile)
                         return Theme(
                           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                           child: ExpansionTile(
@@ -124,21 +117,20 @@ void _openFile(String url, String fileName) {
                                       border: Border.all(color: Colors.grey.shade200)
                                     ),
                                     child: ListTile(
-  leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent, size: 28),
-  // 🟢 AJOUT DE maxLines ET overflow ICI
-  title: Text(
-    file['name'], 
-    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-  ),
-  subtitle: Text("${file['date']} • ${file['size']}", style: const TextStyle(color: Colors.black54, fontSize: 12)),
-  trailing: IconButton(
-    icon: const Icon(Icons.download_rounded, color: Colors.black54),
-    onPressed: () => _openFile(file['url'], file['name']),
-  ),
-  onTap: () => _openFile(file['url'], file['name']),
-)
+                                      leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent, size: 28),
+                                      title: Text(
+                                        file['name'], 
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      subtitle: Text("${file['date']} • ${file['size']}", style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.download_rounded, color: Colors.black54),
+                                        onPressed: () => _openFile(file['url'], file['name']),
+                                      ),
+                                      onTap: () => _openFile(file['url'], file['name']),
+                                    )
                                   )).toList(),
                           ),
                         );
@@ -148,11 +140,15 @@ void _openFile(String url, String fileName) {
             
             Container(
               padding: const EdgeInsets.all(16.0),
-              color: Colors.white,
+              color: Colors.transparent,
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainBlue, 
+                    padding: const EdgeInsets.symmetric(vertical: 16), 
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                  ),
                   icon: const Icon(Icons.add, color: Colors.white),
                   label: const Text("Ajouter un document", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                   onPressed: () {
@@ -163,6 +159,79 @@ void _openFile(String url, String fileName) {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ==========================================================
+  // WIDGETS D'EN-TÊTE
+  // ==========================================================
+  Widget _buildTopHeader() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (widget.isMainScreen) 
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black87),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MainLayout()), 
+                  (Route<dynamic> route) => false,
+                );
+              },
+            ),
+          const Icon(Icons.apartment, color: Colors.black87, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Sindy", style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("Résidence Les Jardins\nDocuments", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, height: 1.3)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+Widget _buildImageBanner() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      width: double.infinity,
+      height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        image: DecorationImage(
+          // 🟢 MODIFICATION ICI : Nouvelle URL d'image valide
+          image: const NetworkImage(
+            "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"
+          ), 
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.4), 
+            BlendMode.darken,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Documents",
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Consultez et gérez les documents de la résidence",
+            style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
+          ),
+        ],
       ),
     );
   }
@@ -185,7 +254,6 @@ class _AjouterDocumentPageState extends State<AjouterDocumentPage> {
   final TextEditingController _nomController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
   
-  // 🟢 Catégories exactes selon le cahier des charges
   String _selectedCategory = "Assemblées générales";
   final List<String> _categories = ["Assemblées générales", "Factures", "Règlement", "Charges", "Autres"];
 
@@ -250,81 +318,104 @@ class _AjouterDocumentPageState extends State<AjouterDocumentPage> {
       backgroundColor: bgLight,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CustomHeader(title: "Sindy", subtitle: "Créer un document", showBackButton: true),
-              const SizedBox(height: 16),
-
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade300)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // 🟢 En-tête simple pour la page d'ajout
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
                   children: [
-                    const Text("NOUVEAU DOCUMENT", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    const SizedBox(height: 16),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Sindy", style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text("Créer un document", style: TextStyle(color: Colors.black54, fontSize: 12)),
+                      ],
+                    )
+                  ],
+                ),
+              ),
 
-                    _buildInputLabel("Nom du document *"),
-                    _buildTextField("Ex: PV d'AG 2026", _nomController, null),
-                    const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade300)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("NOUVEAU DOCUMENT", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
+                      const SizedBox(height: 16),
 
-                    _buildInputLabel("Catégorie"),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(color: bgLight, borderRadius: BorderRadius.circular(8)),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedCategory,
-                          isExpanded: true,
-                          items: _categories.map((cat) => DropdownMenuItem(value: cat, child: Text(cat, style: const TextStyle(fontSize: 13)))).toList(),
-                          onChanged: (val) => setState(() => _selectedCategory = val!),
+                      _buildInputLabel("Nom du document *"),
+                      _buildTextField("Ex: PV d'AG 2026", _nomController, null),
+                      const SizedBox(height: 16),
+
+                      _buildInputLabel("Catégorie"),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(color: bgLight, borderRadius: BorderRadius.circular(8)),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _selectedCategory,
+                            isExpanded: true,
+                            items: _categories.map((cat) => DropdownMenuItem(value: cat, child: Text(cat, style: const TextStyle(fontSize: 13)))).toList(),
+                            onChanged: (val) => setState(() => _selectedCategory = val!),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    _buildInputLabel("Description éventuelle"),
-                    _buildTextField("Saisissez une courte description...", _descController, null, maxLines: 3),
-                    const SizedBox(height: 16),
+                      _buildInputLabel("Description éventuelle"),
+                      _buildTextField("Saisissez une courte description...", _descController, null, maxLines: 3),
+                      const SizedBox(height: 16),
 
-                    _buildInputLabel("Fichier à publier *"),
-                    _pickedFile != null
-                        ? Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade200)),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                                const SizedBox(width: 8),
-                                Expanded(child: Text(_pickedFile!.path.split('/').last, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13))),
-                                IconButton(icon: const Icon(Icons.close, size: 18, color: Colors.black45), onPressed: () => setState(() => _pickedFile = null)),
-                              ],
+                      _buildInputLabel("Fichier à publier *"),
+                      _pickedFile != null
+                          ? Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade200)),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: Text(_pickedFile!.path.split('/').last, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13))),
+                                  IconButton(icon: const Icon(Icons.close, size: 18, color: Colors.black45), onPressed: () => setState(() => _pickedFile = null)),
+                                ],
+                              ),
+                            )
+                          : SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE3F2FD), foregroundColor: mainBlue, elevation: 0, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                                icon: const Icon(Icons.upload_file),
+                                label: const Text("Choisir un fichier", style: TextStyle(fontWeight: FontWeight.bold)),
+                                onPressed: _pickFile,
+                              ),
                             ),
-                          )
-                        : SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE3F2FD), foregroundColor: mainBlue, elevation: 0, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                              icon: const Icon(Icons.upload_file),
-                              label: const Text("Choisir un fichier", style: TextStyle(fontWeight: FontWeight.bold)),
-                              onPressed: _pickFile,
-                            ),
-                          ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: _isPublishing ? null : _publishDocument,
-                  child: _isPublishing ? const CircularProgressIndicator(color: Colors.white) : const Text("Publier", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    onPressed: _isPublishing ? null : _publishDocument,
+                    child: _isPublishing ? const CircularProgressIndicator(color: Colors.white) : const Text("Publier", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  ),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

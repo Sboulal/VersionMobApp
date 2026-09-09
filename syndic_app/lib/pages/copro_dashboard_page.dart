@@ -1,33 +1,43 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:syndic_app/pages/copro_charges_page.dart';
 import 'package:syndic_app/pages/copro_documents_page.dart';
 import 'package:syndic_app/pages/copro_annonces_page.dart';
 import 'package:syndic_app/pages/copro_paiements_page.dart';
+import 'package:syndic_app/pages/notifications_page.dart';
+import 'package:syndic_app/pages/login_page.dart';
+import 'package:syndic_app/pages/profile_page.dart';
+import 'package:syndic_app/pages/forgot_password_page.dart';
 
 class CoproDashboardPage extends StatefulWidget {
   const CoproDashboardPage({super.key});
 
   @override
-  State<CoproDashboardPage> createState() => _CoproDashboardPageState();
+  State<CoproDashboardPage> createState() =>
+      _CoproDashboardPageState();
 }
 
-class _CoproDashboardPageState extends State<CoproDashboardPage> {
+class _CoproDashboardPageState
+    extends State<CoproDashboardPage> {
+
   final Color mainBlue = const Color(0xFF1A5EAC);
   final Color bgLight = const Color(0xFFF4F6F9);
 
+  static const String dashboardUrl =
+      'https://api.syndify.nomade-cloud.com/api/mobile/copro/dashboard';
+
   bool _isLoading = true;
+
   Map<String, dynamic>? _dashboardData;
 
-  final String _residenceName = "Résidence Les Palmiers";
-  final String _lotInfo = "Lot 12B";
+  String _residenceName = 'Ma Résidence';
+  String _lotInfo = '';
 
-  // ==========================================================
-  // INIT
-  // ==========================================================
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -40,38 +50,238 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
   // ==========================================================
 
   Future<void> _fetchDashboardData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
 
-    try {
-      final response = await http.get(
-        Uri.parse(
-          "https://api.syndify.nomade-cloud.com/api/mobile/copro/dashboard",
-        ),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+    }
 
-      final data = jsonDecode(response.body);
+    final prefs =
+        await SharedPreferences.getInstance();
 
-      if (response.statusCode == 200 && data['success'] == true) {
-        setState(() {
-          _dashboardData = data['data'];
-          _isLoading = false;
-        });
-      } else {
+    final token =
+        prefs.getString('auth_token');
+
+    if (token == null || token.isEmpty) {
+
+      if (mounted) {
         setState(() {
           _isLoading = false;
+          _errorMessage =
+              'Session expirée. Veuillez vous reconnecter.';
         });
       }
-    } catch (e) {
-      debugPrint("Dashboard error : $e");
 
+      return;
+    }
+
+    // Cache
+    final cachedResidence =
+        prefs.getString('residence_name');
+
+    final cachedLot =
+        prefs.getString('lot_info');
+
+    if (mounted) {
       setState(() {
-        _isLoading = false;
+
+        if (cachedResidence != null &&
+            cachedResidence.isNotEmpty) {
+          _residenceName =
+              cachedResidence;
+        }
+
+        if (cachedLot != null) {
+          _lotInfo = cachedLot;
+        }
       });
+    }
+
+    try {
+
+      final headers = <String, String>{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      // إذا كان عندك residence_id مخزنة في SharedPreferences
+      final residenceId =
+          prefs.getString('residence_id');
+
+      if (residenceId != null &&
+          residenceId.isNotEmpty) {
+        headers['residence_id'] =
+            residenceId;
+      }
+
+      debugPrint(
+        'DASHBOARD REQUEST: $dashboardUrl',
+      );
+
+      final response = await http
+          .get(
+            Uri.parse(dashboardUrl),
+            headers: headers,
+          )
+          .timeout(
+            const Duration(seconds: 20),
+          );
+
+      debugPrint(
+        'DASHBOARD STATUS: ${response.statusCode}',
+      );
+
+      debugPrint(
+        'DASHBOARD BODY: ${response.body}',
+      );
+
+      dynamic decoded;
+
+      try {
+        decoded =
+            jsonDecode(response.body);
+      } catch (_) {
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage =
+                'Réponse serveur invalide.';
+          });
+        }
+
+        return;
+      }
+
+      if (response.statusCode == 401) {
+
+        await prefs.remove('auth_token');
+
+        if (!mounted) return;
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                const LoginPage(),
+          ),
+          (_) => false,
+        );
+
+        return;
+      }
+
+      if (response.statusCode == 200 &&
+          decoded is Map &&
+          decoded['success'] == true) {
+
+        final root =
+            Map<String, dynamic>.from(
+          decoded as Map,
+        );
+
+        final dynamic rawData =
+            root['data'];
+
+        final Map<String, dynamic> data =
+            rawData is Map
+                ? Map<String, dynamic>.from(
+                    rawData,
+                  )
+                : <String, dynamic>{};
+
+        // ------------------------------------------------------
+        // Residence
+        // ------------------------------------------------------
+
+        final residenceFromApi =
+            root['residence_name'] ??
+            data['residence_name'];
+
+        if (residenceFromApi != null &&
+            residenceFromApi
+                .toString()
+                .trim()
+                .isNotEmpty) {
+
+          _residenceName =
+              residenceFromApi
+                  .toString()
+                  .trim();
+
+          await prefs.setString(
+            'residence_name',
+            _residenceName,
+          );
+        }
+
+        // ------------------------------------------------------
+        // Lot
+        // ------------------------------------------------------
+
+        final lotFromApi =
+            root['lot_info'] ??
+            data['lot_info'];
+
+        if (lotFromApi != null) {
+
+          _lotInfo =
+              lotFromApi
+                  .toString()
+                  .trim();
+
+          await prefs.setString(
+            'lot_info',
+            _lotInfo,
+          );
+        }
+
+        if (!mounted) return;
+
+        setState(() {
+
+          _dashboardData = data;
+
+          _isLoading = false;
+
+          _errorMessage = '';
+        });
+
+      } else {
+
+        String message =
+            'Erreur de chargement';
+
+        if (decoded is Map &&
+            decoded['message'] != null) {
+          message =
+              decoded['message'].toString();
+        }
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = message;
+          });
+        }
+      }
+
+    } catch (e) {
+
+      debugPrint(
+        'DASHBOARD EXCEPTION: $e',
+      );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage =
+              'Impossible de charger le dashboard.';
+        });
+      }
     }
   }
 
@@ -81,13 +291,12 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: bgLight,
+
       body: Stack(
         children: [
-          // ======================================================
-          // BACKGROUND SKYLINE
-          // ======================================================
 
           Positioned(
             bottom: 0,
@@ -96,41 +305,16 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
             child: _buildCitySkyline(),
           ),
 
-          // ======================================================
-          // CONTENT
-          // ======================================================
-
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+
             children: [
-              // ====================================================
-              // BANNER
-              // ====================================================
 
               _buildBanner(context),
 
-              // ====================================================
-              // BODY
-              // ====================================================
-
               Expanded(
-                child: _isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: mainBlue,
-                        ),
-                      )
-                    : _dashboardData == null
-                        ? const Center(
-                            child: Text(
-                              "Erreur de chargement",
-                              style: TextStyle(
-                                color: Colors.blueGrey,
-                                fontSize: 15,
-                              ),
-                            ),
-                          )
-                        : _buildDashboardContent(),
+                child: _buildBody(),
               ),
             ],
           ),
@@ -140,52 +324,146 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
   }
 
   // ==========================================================
-  // BANNER - EXACT STYLE CHARGES
+  // BODY
   // ==========================================================
 
-  Widget _buildBanner(BuildContext context) {
-    final firstName =
-        (_dashboardData?['first_name'] ?? 'Copropriétaire').toString();
+  Widget _buildBody() {
 
-    final String photoUrl =
-        (_dashboardData?['photo_url'] ?? '').toString();
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: mainBlue,
+        ),
+      );
+    }
+
+    if (_dashboardData == null) {
+
+      return RefreshIndicator(
+        color: mainBlue,
+
+        onRefresh:
+            _fetchDashboardData,
+
+        child: ListView(
+          physics:
+              const AlwaysScrollableScrollPhysics(),
+
+          padding:
+              const EdgeInsets.only(
+            top: 150,
+            left: 25,
+            right: 25,
+          ),
+
+          children: [
+
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 52,
+              color: Colors.blueGrey.shade200,
+            ),
+
+            const SizedBox(height: 18),
+
+            Text(
+              _errorMessage.isNotEmpty
+                  ? _errorMessage
+                  : 'Erreur de chargement',
+              textAlign:
+                  TextAlign.center,
+              style: TextStyle(
+                color: Colors.blueGrey.shade600,
+                fontSize: 15,
+                fontWeight:
+                    FontWeight.w500,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              'Tirez vers le bas pour réessayer.',
+              textAlign:
+                  TextAlign.center,
+              style: TextStyle(
+                color: Colors.blueGrey.shade400,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _buildDashboardContent();
+  }
+
+  // ==========================================================
+  // BANNER
+  // ==========================================================
+
+  Widget _buildBanner(
+      BuildContext context) {
+
+    final firstName =
+        (_dashboardData?['first_name'] ??
+                'Copropriétaire')
+            .toString();
+
+    final photoUrl =
+        (_dashboardData?['photo_url'] ??
+                '')
+            .toString();
 
     return Container(
+
       width: double.infinity,
 
       decoration: BoxDecoration(
         color: mainBlue,
 
         image: DecorationImage(
+
           image: const NetworkImage(
-            "https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop",
+            'https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop',
           ),
+
           fit: BoxFit.cover,
 
-          colorFilter: ColorFilter.mode(
-            mainBlue.withOpacity(0.85),
+          colorFilter:
+              ColorFilter.mode(
+            mainBlue.withOpacity(0.84),
             BlendMode.srcOver,
           ),
         ),
       ),
 
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
+        top:
+            MediaQuery.of(context)
+                    .padding
+                    .top +
+                16,
+
         bottom: 16,
+
         left: 16,
+
         right: 16,
       ),
 
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+
         children: [
-          // ------------------------------------------------------
-          // TOP ROW
-          // ------------------------------------------------------
 
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+
             children: [
+
               const Icon(
                 Icons.apartment,
                 color: Colors.white,
@@ -196,44 +474,136 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
 
               Expanded(
                 child: Text(
-                  "Sindy | $_residenceName",
-                  style: const TextStyle(
+
+                  _residenceName
+                          .trim()
+                          .isNotEmpty
+                      ? 'Sindy | $_residenceName'
+                      : 'Sindy',
+
+                  maxLines: 1,
+
+                  overflow:
+                      TextOverflow.ellipsis,
+
+                  style:
+                      const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                        FontWeight.bold,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
 
               const SizedBox(width: 8),
 
-              const Icon(
-                Icons.notifications_none,
-                color: Colors.white,
-                size: 26,
+              // Notification
+              InkWell(
+
+                borderRadius:
+                    BorderRadius.circular(
+                  30,
+                ),
+
+                onTap: () {
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          const NotificationsPage(),
+                    ),
+                  );
+                },
+
+                child: const Icon(
+                  Icons.notifications_none,
+                  color: Colors.white,
+                  size: 26,
+                ),
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
 
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2,
+              // Profile dropdown
+              PopupMenuButton<String>(
+
+                offset:
+                    const Offset(0, 50),
+
+                shape:
+                    RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(
+                    12,
                   ),
                 ),
-                child: CircleAvatar(
-                  radius: 14,
-                  backgroundColor: Colors.white,
 
-                  backgroundImage: photoUrl.isNotEmpty
-                      ? NetworkImage(photoUrl)
-                      : const NetworkImage(
-                          "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
-                        ),
+                color: Colors.white,
+
+                elevation: 5,
+
+                onSelected:
+                    _handleProfileAction,
+
+                itemBuilder:
+                    (context) => [
+
+                  _buildPopupMenuItem(
+                    'profile',
+                    Icons.person_outline,
+                    'Profil',
+                  ),
+
+                  _buildPopupMenuItem(
+                    'password',
+                    Icons.lock_outline,
+                    'Changer mot de passe',
+                  ),
+
+                  const PopupMenuDivider(),
+
+                  _buildPopupMenuItem(
+                    'logout',
+                    Icons.logout,
+                    'Déconnexion',
+                    isDestructive: true,
+                  ),
+                ],
+
+                child: Container(
+
+                  width: 34,
+                  height: 34,
+
+                  decoration:
+                      BoxDecoration(
+                    shape:
+                        BoxShape.circle,
+                    border:
+                        Border.all(
+                      color: Colors.white,
+                      width: 2,
+                    ),
+                  ),
+
+                  child: CircleAvatar(
+
+                    radius: 14,
+
+                    backgroundColor:
+                        Colors.white,
+
+                    backgroundImage:
+                        photoUrl.isNotEmpty
+                            ? NetworkImage(
+                                photoUrl,
+                              )
+                            : const NetworkImage(
+                                'https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true',
+                              ),
+                  ),
                 ),
               ),
             ],
@@ -241,27 +611,136 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
 
           const SizedBox(height: 20),
 
-          // ------------------------------------------------------
-          // GREETING
-          // ------------------------------------------------------
-
           Text(
-            "Bonjour, $firstName",
+            'Bonjour, $firstName',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 23,
-              fontWeight: FontWeight.w800,
+              fontWeight:
+                  FontWeight.w800,
             ),
           ),
 
-          const SizedBox(height: 3),
+          const SizedBox(height: 4),
 
           Text(
-            "$_residenceName • $_lotInfo",
+
+            _lotInfo.isNotEmpty
+                ? '$_residenceName • $_lotInfo'
+                : _residenceName,
+
+            maxLines: 1,
+
+            overflow:
+                TextOverflow.ellipsis,
+
             style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
+              color:
+                  Colors.white.withOpacity(
+                0.86,
+              ),
               fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontWeight:
+                  FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================================
+  // PROFILE MENU
+  // ==========================================================
+
+  Future<void> _handleProfileAction(
+      String value) async {
+
+    if (value == 'profile') {
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const UnifiedProfilePage(),
+        ),
+      );
+
+      if (mounted) {
+        _fetchDashboardData();
+      }
+
+    } else if (value == 'password') {
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const ForgotPasswordPage(),
+        ),
+      );
+
+    } else if (value == 'logout') {
+
+      final prefs =
+          await SharedPreferences
+              .getInstance();
+
+      await prefs.remove(
+        'auth_token',
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+
+        MaterialPageRoute(
+          builder: (_) =>
+              const LoginPage(),
+        ),
+
+        (_) => false,
+      );
+    }
+  }
+
+  PopupMenuItem<String>
+      _buildPopupMenuItem(
+    String value,
+    IconData icon,
+    String text, {
+    bool isDestructive = false,
+  }) {
+
+    final color =
+        isDestructive
+            ? Colors.redAccent
+            : mainBlue;
+
+    return PopupMenuItem<String>(
+
+      value: value,
+
+      child: Row(
+
+        children: [
+
+          Icon(
+            icon,
+            color: color,
+            size: 20,
+          ),
+
+          const SizedBox(width: 12),
+
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight:
+                  FontWeight.w500,
+              fontSize: 14,
             ),
           ),
         ],
@@ -274,279 +753,362 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
   // ==========================================================
 
   Widget _buildDashboardContent() {
-    final double solde =
-        (_dashboardData!['solde'] ?? 0).toDouble();
+
+    final data =
+        _dashboardData ??
+            <String, dynamic>{};
+
+    final solde =
+        _toDouble(
+      data['solde'],
+    );
 
     final charge =
-        _dashboardData!['prochaine_charge'];
+        data['prochaine_charge'];
 
     final paiement =
-        _dashboardData!['dernier_paiement'];
+        data['dernier_paiement'];
 
-    final List annonces =
-        _dashboardData!['annonces'] is List
-            ? _dashboardData!['annonces']
-            : [];
+    final List<dynamic> annonces =
+        data['annonces'] is List
+            ? data['annonces']
+                as List<dynamic>
+            : <dynamic>[];
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
+    return RefreshIndicator(
 
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        18,
-        16,
-        110,
-      ),
+      color: mainBlue,
 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ======================================================
-          // TITLE
-          // ======================================================
+      onRefresh:
+          _fetchDashboardData,
 
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 2,
-            ),
-            child: Text(
+      child: SingleChildScrollView(
+
+        physics:
+            const AlwaysScrollableScrollPhysics(),
+
+        padding:
+            const EdgeInsets.fromLTRB(
+          16,
+          18,
+          16,
+          110,
+        ),
+
+        child: Column(
+
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+
+          children: [
+
+            Text(
               "Vue d'ensemble",
               style: TextStyle(
                 fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey.shade800,
+                fontWeight:
+                    FontWeight.bold,
+                color:
+                    Colors.blueGrey.shade800,
               ),
             ),
-          ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // ======================================================
-          // FINANCIAL CARDS
-          // ======================================================
+            Row(
 
-          Row(
-            children: [
-              Expanded(
-                child: _buildFinancialCard(
-                  title: "Solde actuel",
-                  value: solde > 0
-                      ? "${solde.toStringAsFixed(0)} MAD"
-                      : solde < 0
-                          ? "Crédit"
-                          : "À jour",
-                  icon: Icons.account_balance_wallet,
-                  isAlert: solde > 0,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+
+              children: [
+
+                Expanded(
+                  child:
+                      _buildFinancialCard(
+                    title:
+                        'Solde actuel',
+
+                    value:
+                        _formatSolde(
+                      solde,
+                    ),
+
+                    icon:
+                        Icons.account_balance_wallet_rounded,
+
+                    isAlert:
+                        solde > 0,
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 12),
+                const SizedBox(
+                    width: 12),
 
-              Expanded(
-                child: _buildFinancialCard(
-                  title: "Prochaine charge",
-                  value: charge != null
-                      ? "${charge['amount'] ?? 0} MAD"
-                      : "Aucune",
-                  icon: Icons.calendar_today,
-                  isAlert: false,
+                Expanded(
+                  child:
+                      _buildFinancialCard(
+                    title:
+                        'Prochaine charge',
+
+                    value:
+                        charge is Map
+                            ? _formatAmount(
+                                charge['amount'],
+                              )
+                            : 'Aucune',
+
+                    icon:
+                        Icons.calendar_today_rounded,
+
+                    isAlert: false,
+                  ),
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 20), // Espace avant "Vos services"
-
-          // ======================================================
-          // SERVICES
-          // ======================================================
-
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 2,
+              ],
             ),
-            child: Text(
-              "Vos services",
+
+            const SizedBox(height: 24),
+
+            Text(
+              'Vos services',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Colors.blueGrey.shade800,
+                fontWeight:
+                    FontWeight.w700,
+                color:
+                    Colors.blueGrey.shade800,
               ),
             ),
-          ),
 
-          const SizedBox(height: 10), // Petit espace après le titre
+            const SizedBox(height: 10),
 
-          // ======================================================
-          // SERVICES GRID
-          // ======================================================
+            GridView.count(
 
-          GridView.count(
-            padding: EdgeInsets.zero, // <-- ENLEVE L'ESPACE CACHÉ QUI POSE PROBLÈME
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
 
-            crossAxisCount: 2,
+              shrinkWrap: true,
 
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+              physics:
+                  const NeverScrollableScrollPhysics(),
 
-            childAspectRatio: 1.12, 
+              crossAxisCount: 2,
 
-            children: [
-              // --------------------------------------------------
-              // PAIEMENTS
-              // --------------------------------------------------
+              crossAxisSpacing: 12,
 
-              _buildServiceCard(
-                icon: Icons.credit_score_rounded,
-                iconColor: const Color(0xFF10B981),
-                title: "Paiements",
-                subtitle: paiement != null
-                    ? _formatDate(
-                        paiement['date']?.toString() ?? '',
-                      )
-                    : "Historique",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const CoproPaiementsPage(),
-                    ),
-                  );
-                },
-              ),
+              mainAxisSpacing: 12,
 
-              // --------------------------------------------------
-              // ANNONCES
-              // --------------------------------------------------
+              childAspectRatio: 1.12,
 
-              _buildServiceCard(
-                icon: Icons.campaign_rounded,
-                iconColor: const Color(0xFFF59E0B),
-                title: "Annonces",
-                subtitle: "${annonces.length} nouveautés",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const CoproAnnoncesPage(),
-                    ),
-                  );
-                },
-              ),
+              children: [
 
-              // --------------------------------------------------
-              // DOCUMENTS
-              // --------------------------------------------------
+                _buildServiceCard(
+                  icon:
+                      Icons.credit_score_rounded,
 
-              _buildServiceCard(
-                icon: Icons.folder_copy_rounded,
-                iconColor: const Color(0xFF3B82F6),
-                title: "Documents",
-                subtitle: "Règlements & PV",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const CoproDocumentsPage(),
-                    ),
-                  );
-                },
-              ),
+                  iconColor:
+                      const Color(0xFF10B981),
 
-              // --------------------------------------------------
-              // CHARGES
-              // --------------------------------------------------
+                  title:
+                      'Paiements',
 
-              _buildServiceCard(
-                icon: Icons.receipt_long_rounded,
-                iconColor: const Color(0xFF8B5CF6),
-                title: "Charges",
-                subtitle: "Détails & Appels",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const CoproChargesPage(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
+                  subtitle:
+                      paiement is Map
+                          ? _formatDate(
+                              paiement[
+                                      'date']
+                                  ?.toString() ??
+                                  '',
+                            )
+                          : 'Historique',
+
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const CoproPaiementsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                _buildServiceCard(
+                  icon:
+                      Icons.campaign_rounded,
+
+                  iconColor:
+                      const Color(0xFFF59E0B),
+
+                  title:
+                      'Annonces',
+
+                  subtitle:
+                      annonces.isEmpty
+                          ? 'Aucune nouveauté'
+                          : '${annonces.length} nouveautés',
+
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const CoproAnnoncesPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                _buildServiceCard(
+                  icon:
+                      Icons.folder_copy_rounded,
+
+                  iconColor:
+                      const Color(0xFF3B82F6),
+
+                  title:
+                      'Documents',
+
+                  subtitle:
+                      'Règlements & PV',
+
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const CoproDocumentsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                _buildServiceCard(
+                  icon:
+                      Icons.receipt_long_rounded,
+
+                  iconColor:
+                      const Color(0xFF8B5CF6),
+
+                  title:
+                      'Charges',
+
+                  subtitle:
+                      'Détails & Appels',
+
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const CoproChargesPage(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   // ==========================================================
-  // FINANCIAL CARD (CORRIGÉ POUR ÉVITER LE OVERFLOW)
+  // FINANCIAL CARD
   // ==========================================================
 
   Widget _buildFinancialCard({
+
     required String title,
+
     required String value,
+
     required IconData icon,
+
     required bool isAlert,
   }) {
-    final Color cardColor = isAlert
-        ? const Color(0xFFFFF3F3)
-        : Colors.white;
 
-    final Color borderColor = isAlert
-        ? const Color(0xFFFF8A8A)
-        : Colors.grey.shade200;
+    final cardColor =
+        isAlert
+            ? const Color(0xFFFFF3F3)
+            : Colors.white;
 
-    final Color iconBg = isAlert
-        ? const Color(0xFFFFE1E1)
-        : const Color(0xFFF1F5F9);
+    final borderColor =
+        isAlert
+            ? const Color(0xFFFF8A8A)
+            : Colors.grey.shade200;
 
-    final Color iconColor = isAlert
-        ? const Color(0xFFD32F2F)
-        : mainBlue;
+    final iconBg =
+        isAlert
+            ? const Color(0xFFFFE1E1)
+            : const Color(0xFFF1F5F9);
 
-    final Color valueColor = isAlert
-        ? const Color(0xFFD32F2F)
-        : const Color(0xFF172033);
+    final iconColor =
+        isAlert
+            ? const Color(0xFFD32F2F)
+            : mainBlue;
+
+    final valueColor =
+        isAlert
+            ? const Color(0xFFD32F2F)
+            : const Color(0xFF172033);
 
     return Container(
-      // <-- Hauteur (height) supprimée totalement pour s'adapter au contenu dynamiquement
-      padding: const EdgeInsets.all(14), 
 
-      decoration: BoxDecoration(
+      padding:
+          const EdgeInsets.all(14),
+
+      decoration:
+          BoxDecoration(
+
         color: cardColor,
-        borderRadius: BorderRadius.circular(18),
 
-        border: Border.all(
+        borderRadius:
+            BorderRadius.circular(18),
+
+        border:
+            Border.all(
           color: borderColor,
-          width: isAlert ? 1.2 : 1,
+          width:
+              isAlert ? 1.2 : 1,
         ),
 
         boxShadow: [
+
           BoxShadow(
-            color: Colors.black.withOpacity(0.035),
+            color:
+                Colors.black
+                    .withOpacity(0.035),
+
             blurRadius: 10,
-            offset: const Offset(0, 4),
+
+            offset:
+                const Offset(0, 4),
           ),
         ],
       ),
 
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min, // <-- Permet à la colonne de prendre juste l'espace nécessaire
+
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+
+        mainAxisSize:
+            MainAxisSize.min,
+
         children: [
+
           Container(
+
             width: 38,
             height: 38,
 
-            decoration: BoxDecoration(
+            decoration:
+                BoxDecoration(
               color: iconBg,
-              borderRadius: BorderRadius.circular(11),
+              borderRadius:
+                  BorderRadius.circular(
+                11,
+              ),
             ),
 
             child: Icon(
@@ -556,14 +1118,17 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
             ),
           ),
 
-          const SizedBox(height: 12), 
+          const SizedBox(height: 12),
 
           Text(
             title,
-            style: const TextStyle(
+            style:
+                const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.blueGrey,
+              fontWeight:
+                  FontWeight.w600,
+              color:
+                  Colors.blueGrey,
             ),
           ),
 
@@ -572,10 +1137,12 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
           Text(
             value,
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            overflow:
+                TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 17,
-              fontWeight: FontWeight.bold,
+              fontWeight:
+                  FontWeight.bold,
               color: valueColor,
             ),
           ),
@@ -589,61 +1156,100 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
   // ==========================================================
 
   Widget _buildServiceCard({
+
     required IconData icon,
+
     required Color iconColor,
+
     required String title,
+
     required String subtitle,
+
     required VoidCallback onTap,
   }) {
+
     return GestureDetector(
+
       onTap: onTap,
 
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.96),
 
-          borderRadius: BorderRadius.circular(18),
+        decoration:
+            BoxDecoration(
 
-          border: Border.all(
-            color: Colors.grey.shade100,
+          color:
+              Colors.white.withOpacity(
+            0.96,
+          ),
+
+          borderRadius:
+              BorderRadius.circular(
+            18,
+          ),
+
+          border:
+              Border.all(
+            color:
+                Colors.grey.shade100,
           ),
 
           boxShadow: [
+
             BoxShadow(
-              color: Colors.black.withOpacity(0.035),
+              color:
+                  Colors.black
+                      .withOpacity(0.035),
+
               blurRadius: 10,
-              offset: const Offset(0, 4),
+
+              offset:
+                  const Offset(0, 4),
             ),
           ],
         ),
 
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 50, 
-              height: 50, 
 
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.10),
-                shape: BoxShape.circle,
+          mainAxisAlignment:
+              MainAxisAlignment.center,
+
+          children: [
+
+            Container(
+
+              width: 50,
+              height: 50,
+
+              decoration:
+                  BoxDecoration(
+
+                color:
+                    iconColor.withOpacity(
+                  0.10,
+                ),
+
+                shape:
+                    BoxShape.circle,
               ),
 
               child: Icon(
                 icon,
                 color: iconColor,
-                size: 24, 
+                size: 24,
               ),
             ),
 
-            const SizedBox(height: 10), 
+            const SizedBox(height: 10),
 
             Text(
               title,
-              style: const TextStyle(
+              style:
+                  const TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                fontWeight:
+                    FontWeight.bold,
+                color:
+                    Color(0xFF1E293B),
               ),
             ),
 
@@ -652,12 +1258,17 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
             Text(
               subtitle,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
+              overflow:
+                  TextOverflow.ellipsis,
+              textAlign:
+                  TextAlign.center,
+              style:
+                  const TextStyle(
                 fontSize: 11,
-                color: Color(0xFF94A3B8),
-                fontWeight: FontWeight.w500,
+                color:
+                    Color(0xFF94A3B8),
+                fontWeight:
+                    FontWeight.w500,
               ),
             ),
           ],
@@ -671,108 +1282,123 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
   // ==========================================================
 
   Widget _buildCitySkyline() {
-    final color = mainBlue.withOpacity(0.03);
+
+    final color =
+        mainBlue.withOpacity(0.03);
 
     return IgnorePointer(
+
       child: SizedBox(
+
         height: 220,
 
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+          crossAxisAlignment:
+              CrossAxisAlignment.end,
+
+          mainAxisAlignment:
+              MainAxisAlignment.spaceEvenly,
 
           children: [
-            _buildBuilding(
-              50,
-              120,
-              color,
-            ),
 
             _buildBuilding(
-              65,
-              180,
-              color,
-            ),
+                50, 120, color),
 
             _buildBuilding(
-              45,
-              140,
-              color,
-            ),
+                65, 180, color),
 
             _buildBuilding(
-              75,
-              210,
-              color,
-            ),
+                45, 140, color),
 
             _buildBuilding(
-              60,
-              160,
-              color,
-            ),
+                75, 210, color),
 
             _buildBuilding(
-              50,
-              100,
-              color,
-            ),
+                60, 160, color),
+
+            _buildBuilding(
+                50, 100, color),
           ],
         ),
       ),
     );
   }
 
-  // ==========================================================
-  // BUILDING
-  // ==========================================================
-
   Widget _buildBuilding(
     double width,
     double height,
     Color color,
   ) {
+
     return Container(
+
       width: width,
+
       height: height,
 
-      decoration: BoxDecoration(
+      decoration:
+          BoxDecoration(
+
         color: color,
 
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
+        borderRadius:
+            const BorderRadius.only(
+          topLeft:
+              Radius.circular(8),
+          topRight:
+              Radius.circular(8),
         ),
       ),
 
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+        mainAxisAlignment:
+            MainAxisAlignment.spaceEvenly,
 
         children: List.generate(
-          (height / 25).floor(),
+
+          (height / 25)
+              .floor(),
 
           (index) => Row(
+
             mainAxisAlignment:
-                MainAxisAlignment.spaceEvenly,
+                MainAxisAlignment
+                    .spaceEvenly,
 
             children: [
+
               Container(
                 width: 8,
                 height: 10,
-                color: Colors.white.withOpacity(0.4),
+                color:
+                    Colors.white
+                        .withOpacity(
+                  0.4,
+                ),
               ),
 
               Container(
                 width: 8,
                 height: 10,
-                color: Colors.white.withOpacity(0.4),
+                color:
+                    Colors.white
+                        .withOpacity(
+                  0.4,
+                ),
               ),
 
               if (width > 55)
+
                 Container(
                   width: 8,
                   height: 10,
-                  color: Colors.white.withOpacity(0.4),
+                  color:
+                      Colors.white
+                          .withOpacity(
+                    0.4,
+                  ),
                 ),
             ],
           ),
@@ -782,21 +1408,75 @@ class _CoproDashboardPageState extends State<CoproDashboardPage> {
   }
 
   // ==========================================================
-  // DATE
+  // HELPERS
   // ==========================================================
 
-  String _formatDate(String dateStr) {
+  double _toDouble(dynamic value) {
+
+    if (value == null) {
+      return 0;
+    }
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(
+          value
+              .toString()
+              .replaceAll(',', '.')
+              .replaceAll('MAD', '')
+              .trim(),
+        ) ??
+        0;
+  }
+
+  String _formatSolde(
+      double solde) {
+
+    if (solde > 0) {
+      return '${solde.toStringAsFixed(0)} MAD';
+    }
+
+    if (solde < 0) {
+      return 'Crédit';
+    }
+
+    return 'À jour';
+  }
+
+  String _formatAmount(
+      dynamic amount) {
+
+    final value =
+        _toDouble(amount);
+
+    if (value == 0) {
+      return 'Aucune';
+    }
+
+    return '${value.toStringAsFixed(0)} MAD';
+  }
+
+  String _formatDate(
+      String dateStr) {
+
     if (dateStr.isEmpty) {
-      return "Historique";
+      return 'Historique';
     }
 
     try {
-      final date = DateTime.parse(dateStr);
 
-      return "${date.day.toString().padLeft(2, '0')}/"
-          "${date.month.toString().padLeft(2, '0')}/"
-          "${date.year}";
-    } catch (e) {
+      final date =
+          DateTime.parse(dateStr);
+
+      return
+          '${date.day.toString().padLeft(2, '0')}/'
+          '${date.month.toString().padLeft(2, '0')}/'
+          '${date.year}';
+
+    } catch (_) {
+
       return dateStr;
     }
   }

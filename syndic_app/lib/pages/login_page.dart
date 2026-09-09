@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/main_layout.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
+import 'package:syndic_app/pages/copro_dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
   }
 
-Future<void> _login() async {
+  Future<void> _login() async {
     final String apiUrl = "https://api.syndify.nomade-cloud.com/api/mobile/syndic/login"; 
 
     setState(() {
@@ -97,18 +98,20 @@ Future<void> _login() async {
         await Future.delayed(const Duration(milliseconds: 1500));
         
         if (mounted) {
-          // 🟢 التوجيه حسب الدور
-          if (role == 'coproprietaire') {
-            Navigator.pushReplacement(
-              context, 
-              MaterialPageRoute(builder: (context) => const CoproMainLayout())
-            );
-          } else {
-            Navigator.pushReplacement(
-              context, 
-              MaterialPageRoute(builder: (context) => const MainLayout())
-            );
-          }
+          // 🟢 التوجيه حسب الدور (M9ad mzyan, kaysift l'MainLayout li fih l'menu)
+         if (role == 'coproprietaire') {
+  Navigator.pushAndRemoveUntil(
+    context, 
+    MaterialPageRoute(builder: (context) => const CoproMainLayout()),
+    (Route<dynamic> route) => false, // 🔴 Hadi hiya sser: Katmsa7 ga3 l'historique (Login, Splash...)
+  );
+} else {
+  Navigator.pushAndRemoveUntil(
+    context, 
+    MaterialPageRoute(builder: (context) => const MainLayout()),
+    (Route<dynamic> route) => false, // 🔴 Katkhlli ghir MainLayout f l'application
+  );
+}
         }
       } else {
         setState(() {
@@ -124,7 +127,8 @@ Future<void> _login() async {
         _isLoading = false;
       });
     }
-}
+  }
+
   @override
   Widget build(BuildContext context) {
     // 🟢 Ila nja7 l-login, kan-affichiw l-page dyal Succès li fih l-khder l-fo9
@@ -146,7 +150,12 @@ Future<void> _login() async {
             top: 50, left: 16,
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                // 🟢 MODIFICATION HNA: kattrj3ek b pop 3adi bla matkherebe9 l'Navigation
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              }
             ),
           ),
 

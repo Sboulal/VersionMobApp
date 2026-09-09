@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'package:syndic_app/models/NotificationModel.dart';
 
 class SyndicAuthService {
   static const String baseUrl = 'https://api.syndify.nomade-cloud.com/api';
@@ -144,5 +145,36 @@ class SyndicAuthService {
     } else {
       throw Exception(data['message'] ?? 'Erreur lors de la publication du document');
     }
+  }
+
+  // Récupérer les notifications
+  Future<List<NotificationModel>> getNotifications(String token) async {
+    final response = await http.get(
+      Uri.parse('URL_DIAL_BACKEND/api/mobile/copro/notifications'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['success']) {
+        List data = jsonResponse['data'];
+        return data.map((notif) => NotificationModel.fromJson(notif)).toList();
+      }
+    }
+    throw Exception('Erreur lors du chargement des notifications');
+  }
+
+  // Marquer comme lu
+  Future<void> marquerCommeLu(String token, String notifId) async {
+    await http.post(
+      Uri.parse('URL_DIAL_BACKEND/api/mobile/copro/notifications/$notifId/lu'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
   }
 }

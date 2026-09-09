@@ -7,6 +7,8 @@ import 'package:syndic_app/pages/paiements_page.dart';
 import 'package:syndic_app/pages/depenses_page.dart'; 
 import 'package:syndic_app/pages/annonces_page.dart';
 import 'package:syndic_app/pages/charges_page.dart'; 
+import 'package:syndic_app/pages/profile_page.dart';
+import 'package:syndic_app/pages/forgot_password_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -23,6 +25,9 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _isLoading = true;
   Map<String, dynamic>? _dashboardData;
   String _errorMessage = "";
+  
+  // 🟢 AJOUT : Variable pour stocker l'image du cache
+  String _cachedPhotoUrl = ""; 
 
   @override
   void initState() {
@@ -39,6 +44,11 @@ class _DashboardPageState extends State<DashboardPage> {
       return;
     }
 
+    // 🟢 AJOUT : On charge la photo depuis le cache local du téléphone
+    setState(() {
+      _cachedPhotoUrl = prefs.getString('photo_url') ?? "";
+    });
+
     final String apiUrl = "https://api.syndify.nomade-cloud.com/api/mobile/syndic/dashboard";
 
     try {
@@ -54,6 +64,7 @@ class _DashboardPageState extends State<DashboardPage> {
       final decodedBody = jsonDecode(response.body);
 
       if (response.statusCode == 200 && decodedBody['success'] == true) {
+        if (!mounted) return; 
         setState(() {
           _dashboardData = decodedBody['data'];
           _isLoading = false;
@@ -62,13 +73,14 @@ class _DashboardPageState extends State<DashboardPage> {
         await prefs.remove('auth_token');
         if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
       } else {
+        if (!mounted) return; 
         setState(() {
-          // 🟢 هكا غيبان الخطأ الحقيقي لي صيفط Laravel
           _errorMessage = decodedBody['message'] ?? "Erreur serveur : ${response.statusCode}";
           _isLoading = false;
         });
       }
     } catch (e) {
+      if (!mounted) return; 
       setState(() {
         _errorMessage = "Problème de connexion au réseau.";
         _isLoading = false;
@@ -114,16 +126,62 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  // ==========================================================
+  // HEADER AVEC DROPDOWN PROFIL
+  // ==========================================================
   Widget _buildHeader() {
-    final prenom = _dashboardData?['utilisateur']['prenom'] ?? "Syndic";
-    final coproNom = _dashboardData?['copropriete']['nom'] ?? "Ma Résidence";
+    final prenom = _dashboardData?['utilisateur']?['prenom'] ?? "Syndic";
+    final coproNom = _dashboardData?['copropriete']?['nom'] ?? "Ma Résidence";
+    
+    // 🟢 LOGIQUE BLINDÉE POUR L'IMAGE
+    String apiPhotoUrl = _dashboardData?['utilisateur']?['photo_url'] ?? "";
+    String apiPhoto = _dashboardData?['utilisateur']?['photo'] ?? "";
+    
+    // On prend l'API si elle existe, SINON on prend le CACHE local
+    String rawPhoto = apiPhotoUrl.isNotEmpty 
+        ? apiPhotoUrl 
+        : (apiPhoto.isNotEmpty ? apiPhoto : _cachedPhotoUrl);
+    
+    final photoUrl = rawPhoto.isNotEmpty 
+        ? rawPhoto 
+        : "https://ui-avatars.com/api/?name=${prenom[0]}&background=ffffff&color=1A5EAC&size=128&bold=true";
 
     return Row(
       children: [
-        const CircleAvatar(
-          radius: 24,
-          backgroundColor: Colors.white,
-          backgroundImage: NetworkImage('https://cdn-icons-png.flaticon.com/512/3135/3135715.png'), 
+        PopupMenuButton<String>(
+          offset: const Offset(0, 50),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: Colors.white,
+          elevation: 4,
+          onSelected: (value) async {
+            if (value == 'profile') {
+              await Navigator.push(context, MaterialPageRoute(builder: (context) => const UnifiedProfilePage()));
+              _fetchDashboardData(); 
+            } else if (value == 'password') {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordPage()));
+            } else if (value == 'logout') {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('auth_token');
+              if (mounted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (route) => false,
+                );
+              }
+            }
+          },
+          itemBuilder: (BuildContext context) => [
+            _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+            _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
+            const PopupMenuDivider(),
+            _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
+          ],
+          child: CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.grey.shade200,
+            backgroundImage: NetworkImage(photoUrl),
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -135,16 +193,33 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        GestureDetector(
+          onTap: () {},
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+            ),
+            child: const Icon(Icons.notifications_none, color: Colors.black87, size: 22),
           ),
-          child: const Icon(Icons.notifications_none, color: Colors.black87, size: 22),
         )
       ],
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
+    final color = isDestructive ? Colors.redAccent : mainBlueDark;
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 12),
+          Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
+        ],
+      ),
     );
   }
 
@@ -238,7 +313,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-Widget _buildStatistiquesSection() {
+  Widget _buildStatistiquesSection() {
     final kpis = _dashboardData?['kpis'] ?? {};
     
     return Container(
@@ -271,7 +346,7 @@ Widget _buildStatistiquesSection() {
               ),
               _buildLargeStatCard(
                 Icons.warning_amber_rounded, const Color(0xFFFFEBEE), const Color(0xFFF44336), "Total des impayés", _formatMontant(kpis['impayes']),
-                () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage())), // Redirige vers ChargesPage par défaut
+                () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage())),
               ),
               _buildLargeStatCard(
                 Icons.credit_card, const Color(0xFFFFF3E0), const Color(0xFFFF9800), "Dépenses", _formatMontant(kpis['depenses']),
@@ -340,7 +415,12 @@ Widget _buildStatistiquesSection() {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Dernières Activités", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-              Text("Voir tout", style: TextStyle(fontSize: 12, color: mainBlueLight, fontWeight: FontWeight.w600)),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()));
+                },
+                child: Text("Voir tout", style: TextStyle(fontSize: 12, color: mainBlueLight, fontWeight: FontWeight.w600)),
+              ),
             ],
           ),
           const SizedBox(height: 16),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syndic_app/widgets/custom_header.dart'; 
 import 'package:syndic_app/pages/main_layout.dart'; 
 import 'package:syndic_app/pages/login_page.dart';
 
@@ -77,8 +76,6 @@ class _CoproprietePageState extends State<CoproprietePage> {
     }
   }
 
- 
-
   void _showAddLotModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -114,24 +111,17 @@ class _CoproprietePageState extends State<CoproprietePage> {
       backgroundColor: bgLight,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
-              child: CustomHeader(
-                title: "Sindy",
-                subtitle: "Résidence Les Jardins\nCopropriété",
-                showBackButton: true,
-                onBackPressed: widget.isMainScreen 
-                    ? () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MainLayout()), 
-                          (Route<dynamic> route) => false,
-                        );
-                      }
-                    : null,
-              ),
-            ),
+            // 🟢 L'en-tête blanc avec le logo et le titre (comme l'image)
+            _buildTopHeader(),
+            
+            // 🟢 La bannière image avec texte par-dessus
+            _buildImageBanner(),
+
+            const SizedBox(height: 16),
+            
+            // 🟢 Filtres
             SizedBox(
               height: 40,
               child: ListView.builder(
@@ -142,9 +132,15 @@ class _CoproprietePageState extends State<CoproprietePage> {
               ),
             ),
             const SizedBox(height: 16),
-            Padding(padding: const EdgeInsets.symmetric(horizontal: 16.0), child: _buildSearchBar()),
+            
+            // 🟢 Barre de recherche
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0), 
+              child: _buildSearchBar()
+            ),
             const SizedBox(height: 16),
             
+            // 🟢 Liste des lots
             Expanded(
               child: _isLoading 
                   ? Center(child: CircularProgressIndicator(color: mainBlue))
@@ -158,6 +154,8 @@ class _CoproprietePageState extends State<CoproprietePage> {
                               itemBuilder: (context, index) => _buildLotCard(filteredLots[index]),
                             ),
             ),
+            
+            // 🟢 Bouton Ajouter
             Container(
               padding: const EdgeInsets.all(16.0),
               color: bgLight,
@@ -181,6 +179,81 @@ class _CoproprietePageState extends State<CoproprietePage> {
     );
   }
 
+  // ==========================================================
+  // NOUVEAUX WIDGETS D'EN-TÊTE
+  // ==========================================================
+  Widget _buildTopHeader() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (widget.isMainScreen) 
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black87),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MainLayout()), 
+                  (Route<dynamic> route) => false,
+                );
+              },
+            ),
+          const Icon(Icons.apartment, color: Colors.black87, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Sindy", style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("Résidence Les Jardins\nCopropriété", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, height: 1.3)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageBanner() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      width: double.infinity,
+      height: 120, // Hauteur de l'image
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        image: DecorationImage(
+          // Une belle image de bâtiments comme sur le design
+          image: const NetworkImage("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.4), // Filtre sombre pour faire ressortir le texte
+            BlendMode.darken,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end, // Aligner le texte en bas
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Copropriété",
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Gérez les lots et les copropriétaires de la résidence",
+            style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================================
+  // ANCIENS WIDGETS CONSERVÉS INTACTS
+  // ==========================================================
   Widget _buildFilterChip(String label) {
     bool isSelected = selectedFilter == label;
     return GestureDetector(
@@ -267,7 +340,6 @@ class _CoproprietePageState extends State<CoproprietePage> {
               ),
             ),
             
-            // 🟢 الأزرار الجديدة المطابقة للتصميم المرفق (Edit & Delete)
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -276,7 +348,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0F4F8), // لون أزرق رمادي فاتح
+                      color: const Color(0xFFF0F4F8), 
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: const Color(0xFFE2E8F0), width: 1)
                     ),
@@ -623,11 +695,23 @@ class LotDetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CustomHeader(
-                  title: "Sindy",
-                  subtitle: "Résidence Les Jardins\nDétail du lot",
+              // 🔴 La page détail pourrait aussi utiliser ce nouveau layout ou un CustomHeader
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Sindy", style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text("Résidence Les Jardins\nDétail du lot", style: TextStyle(color: Colors.black54, fontSize: 12)),
+                      ],
+                    )
+                  ],
                 ),
               ),
 

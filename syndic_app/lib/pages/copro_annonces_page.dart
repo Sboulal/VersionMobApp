@@ -2,9 +2,227 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:syndic_app/pages/profile_page.dart'; 
+import 'package:syndic_app/pages/forgot_password_page.dart'; 
+import 'package:syndic_app/pages/login_page.dart'; 
+import 'package:syndic_app/pages/notifications_page.dart';
+import 'package:syndic_app/pages/NotificationsScreen.dart';
+// ==========================================
+// WIDGET RÉUTILISABLE : CUSTOM HEADER
+// ==========================================
+class CustomHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String residenceName;
+  final String photoUrl;
+  final bool showBackButton;
+  final String userRole;
+  final VoidCallback? onBackTap;
+  final VoidCallback? onNotificationTap;
 
+  const CustomHeader({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.residenceName,
+    required this.photoUrl,
+    this.showBackButton = false,
+    this.userRole = 'copro',
+    this.onBackTap,
+    this.onNotificationTap,
+  });
+
+  // Fonction pour créer les items du menu déroulant
+  PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+    final color = isDestructive ? Colors.redAccent : mainBlue;
+
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: mainBlue,
+        image: DecorationImage(
+          image: const NetworkImage(
+            "https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop",
+          ),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            mainBlue.withOpacity(0.85),
+            BlendMode.srcOver,
+          ),
+        ),
+      ),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 16,
+        bottom: 16,
+        left: 16,
+        right: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Bouton Retour
+              if (showBackButton && onBackTap != null) 
+                InkWell(
+                  onTap: onBackTap,
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                  ),
+                ),
+              
+              const Icon(Icons.apartment, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              
+              // Nom de la résidence
+              Expanded(
+                child: Text(
+                  residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              
+              // Bouton Notifications
+              InkWell(
+             onTap: onNotificationTap ?? () {
+               // 🟢 S'il n'y a pas d'action définie, on ouvre la page par défaut
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                   builder: (context) => NotificationsScreen(role: userRole),
+                 ),
+               );
+             },
+             child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
+           ),
+              const SizedBox(width: 12),
+              
+              // ======================================================
+              // USER DROPDOWN (AVATAR)
+              // ======================================================
+              PopupMenuButton<String>(
+                offset: const Offset(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                color: Colors.white,
+                elevation: 4,
+                onSelected: (value) async {
+                  if (value == 'profile') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UnifiedProfilePage()),
+                    );
+                  } else if (value == 'password') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                    );
+                  } else if (value == 'logout') {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('auth_token');
+                    
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (route) => false,
+                      );
+                    }
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+                  _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
+                  const PopupMenuDivider(),
+                  _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
+                ],
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: CircleAvatar(
+                    radius: 14,
+                    backgroundColor: Colors.white,
+                    backgroundImage: photoUrl.isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : const NetworkImage(
+                            "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // Titre de la page
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 23,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 3),
+          
+          // Sous-titre
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ==========================================
+// PAGE DES ANNONCES
+// ==========================================
 class CoproAnnoncesPage extends StatefulWidget {
-  const CoproAnnoncesPage({super.key});
+  final bool showBackButton;
+
+  const CoproAnnoncesPage({super.key, this.showBackButton = false});
 
   @override
   State<CoproAnnoncesPage> createState() => _CoproAnnoncesPageState();
@@ -17,7 +235,10 @@ class _CoproAnnoncesPageState extends State<CoproAnnoncesPage> {
   bool _isLoading = true;
   List<dynamic> _annoncesList = [];
   List<String> _readAnnoncesIds = [];
-  final String _residenceName = "Résidence Les Palmiers";
+  
+  // 🟢 Plus de fausses données (Fake data retirée)
+  String _residenceName = "Chargement...";
+  String _photoUrl = "";
 
   @override
   void initState() {
@@ -45,10 +266,15 @@ class _CoproAnnoncesPageState extends State<CoproAnnoncesPage> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
+    // 🟢 Préchargement rapide depuis le cache pour éviter l'écran blanc
+    setState(() {
+      _residenceName = prefs.getString('residence_name') ?? "Ma Résidence";
+      _photoUrl = prefs.getString('photo_url') ?? "";
+    });
+
     try {
       final response = await http.get(
-        Uri.parse(
-            "https://api.syndify.nomade-cloud.com/api/mobile/copro/mes-annonces"),
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/copro/mes-annonces"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token"
@@ -58,6 +284,15 @@ class _CoproAnnoncesPageState extends State<CoproAnnoncesPage> {
       if (response.statusCode == 200 && data['success'] == true) {
         setState(() {
           _annoncesList = data['data'];
+          
+          // Récupération sécurisée des infos depuis l'API
+          if (data['residence_name'] != null) {
+            _residenceName = data['residence_name'];
+          }
+          if (data['user'] != null && data['user']['photo_url'] != null) {
+            _photoUrl = data['user']['photo_url'];
+          }
+          
           _isLoading = false;
         });
       } else {
@@ -107,106 +342,33 @@ class _CoproAnnoncesPageState extends State<CoproAnnoncesPage> {
           // ======================================================
           // CONTENT
           // ======================================================
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // BANNIÈRE COMME LE DASHBOARD
-              _buildBanner(context),
+          SafeArea( 
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 🟢 CustomHeader avec l'avatar fonctionnel et la flèche de retour
+                CustomHeader(
+                  title: "Tableau d'affichage",
+                  subtitle: "Actualités de votre copropriété",
+                  showBackButton: true,
+                  residenceName: _residenceName,
+                  photoUrl: _photoUrl,
+                  onBackTap: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  }
+                ),
 
-              // RESTE DU CONTENU
-              Expanded(
-                child: _isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(color: mainBlue),
-                      )
-                    : _buildContent(),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================================
-  // BANNER EXACTEMENT COMME DASHBOARD
-  // ==========================================================
-  Widget _buildBanner(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: mainBlue,
-        image: DecorationImage(
-          image: const NetworkImage(
-            "https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop",
-          ),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            mainBlue.withOpacity(0.85),
-            BlendMode.srcOver,
-          ),
-        ),
-      ),
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        bottom: 16,
-        left: 16,
-        right: 16,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  "Sindy | $_residenceName",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                // RESTE DU CONTENU
+                Expanded(
+                  child: _isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(color: mainBlue),
+                        )
+                      : _buildContent(),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.notifications_none, color: Colors.white, size: 26),
-              const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: const CircleAvatar(
-                  radius: 14,
-                  backgroundColor: Colors.white,
-                  backgroundImage: NetworkImage(
-                    "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            "Tableau d'affichage",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            "Actualités de votre copropriété",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+              ],
             ),
           ),
         ],

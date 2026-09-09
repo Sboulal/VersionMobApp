@@ -2,101 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:syndic_app/pages/copro_charge_detail_page.dart';
+import 'package:syndic_app/pages/copro_main_layout.dart'; 
+// import 'package:syndic_app/pages/notifications_page.dart';
+import 'package:syndic_app/pages/profile_page.dart'; 
+import 'package:syndic_app/pages/forgot_password_page.dart'; 
+import 'package:syndic_app/pages/login_page.dart'; 
+import 'package:syndic_app/pages/NotificationsScreen.dart';
+// ==========================================
+// WIDGET RÉUTILISABLE : CUSTOM HEADER
+// ==========================================
+class CustomHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String residenceName;
+  final String photoUrl;
+  final bool showBackButton;
+  final String userRole;
+  final VoidCallback? onBackTap;
+  final VoidCallback? onNotificationTap;
 
-class CoproPaiementsPage extends StatefulWidget {
-  const CoproPaiementsPage({super.key});
+  const CustomHeader({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.residenceName,
+    required this.photoUrl,
+    this.showBackButton = false,
+    this.userRole = 'copro',
+    this.onBackTap,
+    this.onNotificationTap,
+  });
 
-  @override
-  State<CoproPaiementsPage> createState() => _CoproPaiementsPageState();
-}
+  // Fonction pour créer les items du menu déroulant
+  PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+    final color = isDestructive ? Colors.redAccent : mainBlue;
 
-class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
-  final Color mainBlue = const Color(0xFF1A5EAC);
-  final Color bgLight = const Color(0xFFF4F6F9);
-
-  bool _isLoading = true;
-  List<dynamic> _paiementsList = [];
-  final String _residenceName = "Résidence Les Palmiers";
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPaiements();
-  }
-
-  Future<void> _fetchPaiements() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-
-    try {
-      final response = await http.get(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/copro/mes-paiements"),
-        headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
-      );
-      final data = jsonDecode(response.body);
-      if (response.statusCode == 200 && data['success'] == true) {
-        setState(() {
-          _paiementsList = data['data'];
-          _isLoading = false;
-        });
-      } else {
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Color _hexToColor(String hexString) {
-    var hexColor = hexString.replaceAll("#", "");
-    if (hexColor.length == 6) hexColor = "FF$hexColor";
-    return Color(int.parse("0x$hexColor"));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgLight,
-      body: Stack(
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
         children: [
-          // ======================================================
-          // BACKGROUND SKYLINE
-          // ======================================================
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _buildCitySkyline(),
-          ),
-
-          // ======================================================
-          // CONTENT
-          // ======================================================
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // BANNIÈRE COMME LE DASHBOARD
-              _buildBanner(context),
-
-              // RESTE DU CONTENU
-              Expanded(
-                child: _isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(color: mainBlue),
-                      )
-                    : _buildContent(),
-              ),
-            ],
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ==========================================================
-  // BANNER EXACTEMENT COMME DASHBOARD
-  // ==========================================================
-  Widget _buildBanner(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -124,11 +89,23 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Bouton Retour
+              if (showBackButton && onBackTap != null) 
+                InkWell(
+                  onTap: onBackTap,
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                  ),
+                ),
+              
               const Icon(Icons.apartment, color: Colors.white, size: 24),
               const SizedBox(width: 8),
+              
+              // Nom de la résidence
               Expanded(
                 child: Text(
-                  "Sindy | $_residenceName",
+                  residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -139,35 +116,96 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.notifications_none, color: Colors.white, size: 26),
+              
+              // Bouton Notifications
+              InkWell(
+             onTap: onNotificationTap ?? () {
+               // 🟢 S'il n'y a pas d'action définie, on ouvre la page par défaut
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                   builder: (context) => NotificationsScreen(role: userRole),
+                 ),
+               );
+             },
+             child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
+           ),
               const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+              
+              // ======================================================
+              // USER DROPDOWN (AVATAR)
+              // ======================================================
+              PopupMenuButton<String>(
+                offset: const Offset(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const CircleAvatar(
-                  radius: 14,
-                  backgroundColor: Colors.white,
-                  backgroundImage: NetworkImage(
-                    "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
+                color: Colors.white,
+                elevation: 4,
+                onSelected: (value) async {
+                  if (value == 'profile') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UnifiedProfilePage()),
+                    );
+                  } else if (value == 'password') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                    );
+                  } else if (value == 'logout') {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('auth_token');
+                    
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (route) => false,
+                      );
+                    }
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+                  _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
+                  const PopupMenuDivider(),
+                  _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
+                ],
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: CircleAvatar(
+                    radius: 14,
+                    backgroundColor: Colors.white,
+                    backgroundImage: photoUrl.isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : const NetworkImage(
+                            "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
+                          ),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 20),
-          const Text(
-            "Mes Paiements",
-            style: TextStyle(
+          
+          // Titre de la page
+          Text(
+            title,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 23,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 3),
+          
+          // Sous-titre
           Text(
-            "Historique de vos transactions",
+            subtitle,
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
               fontSize: 12,
@@ -178,10 +216,125 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
       ),
     );
   }
+}
 
-  // ==========================================================
-  // CONTENU DE LA PAGE
-  // ==========================================================
+class CoproPaiementsPage extends StatefulWidget {
+  const CoproPaiementsPage({super.key});
+
+  @override
+  State<CoproPaiementsPage> createState() => _CoproPaiementsPageState();
+}
+
+class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
+  final Color mainBlue = const Color(0xFF1A5EAC);
+  final Color bgLight = const Color(0xFFF4F6F9);
+
+  bool _isLoading = true;
+  List<dynamic> _paiementsList = [];
+  
+  // Variables dynamiques pour le header
+  String _residenceName = "Chargement...";
+  String _photoUrl = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPaiements();
+  }
+
+  Future<void> _fetchPaiements() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    // Pré-chargement depuis le cache local pour un affichage instantané
+    setState(() {
+      _residenceName = prefs.getString('residence_name') ?? "Ma Résidence";
+      _photoUrl = prefs.getString('photo_url') ?? "";
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/copro/mes-paiements"),
+        headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
+      );
+      final data = jsonDecode(response.body);
+      
+      if (response.statusCode == 200 && data['success'] == true) {
+        setState(() {
+          _paiementsList = data['data'];
+
+          // Mise à jour de la résidence et photo depuis l'API si dispo
+          if (data['residence_name'] != null) {
+            _residenceName = data['residence_name'];
+          }
+          if (data['user'] != null && data['user']['photo_url'] != null) {
+            _photoUrl = data['user']['photo_url'];
+          }
+
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Color _hexToColor(String hexString) {
+    var hexColor = hexString.replaceAll("#", "");
+    if (hexColor.length == 6) hexColor = "FF$hexColor";
+    return Color(int.parse("0x$hexColor"));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: bgLight,
+      body: Stack(
+        children: [
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildCitySkyline(),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ======================================================
+              // UTILISATION DE CUSTOMHEADER (Dropdown activé)
+              // ======================================================
+              CustomHeader(
+               title: "Mes Paiements",
+               subtitle: "Historique de vos transactions",
+               showBackButton: true,
+               residenceName: _residenceName,
+               photoUrl: _photoUrl,
+               onBackTap: () {
+                 if (Navigator.canPop(context)) {
+                   Navigator.pop(context);
+                 }
+               }
+                ),
+
+              // ======================================================
+              // RESTE DU CONTENU
+              // ======================================================
+              Expanded(
+                child: _isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(color: mainBlue),
+                      )
+                    : _buildContent(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,8 +359,7 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   itemCount: _paiementsList.length,
                   itemBuilder: (context, index) {
                     final p = _paiementsList[index];
@@ -238,7 +390,6 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Icône circulaire
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
@@ -249,8 +400,6 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
                                 color: modeColor, size: 24),
                           ),
                           const SizedBox(width: 16),
-
-                          // Détails
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,8 +420,6 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
                               ],
                             ),
                           ),
-
-                          // Badge de succès (Vert forêt unifié)
                           const Icon(Icons.check_circle,
                               color: Color(0xFF1B5E20), size: 22),
                         ],
@@ -285,9 +432,6 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
     );
   }
 
-  // ==========================================================
-  // CITY SKYLINE
-  // ==========================================================
   Widget _buildCitySkyline() {
     final color = mainBlue.withOpacity(0.03);
     return SizedBox(

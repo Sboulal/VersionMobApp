@@ -1,11 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:syndic_app/pages/login_page.dart';
-import 'package:syndic_app/widgets/custom_header.dart';
 import 'package:syndic_app/pages/main_layout.dart';
 import 'package:syndic_app/services/syndic_auth_service.dart';
-
-import 'package:syndic_app/pages/annonces_page.dart';
+import 'package:syndic_app/pages/copro_annonces_page.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UnifiedProfilePage extends StatefulWidget {
   final bool isMainScreen;
@@ -21,11 +24,13 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
   final Color redColor = const Color(0xFFD32F2F);
 
   final SyndicAuthService _authService = SyndicAuthService();
+  final ImagePicker _picker = ImagePicker();
 
   bool _notificationsEnabled = true;
   bool _isLoading = true;
   String? _errorMessage;
   Map<String, dynamic>? _profil;
+  File? _imageFile;
 
   @override
   void initState() {
@@ -40,6 +45,14 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
     });
     try {
       final data = await _authService.getProfil();
+      
+      // 🟢 Mettre à jour le Cache si l'API renvoie une photo
+      final photo = data['photo_url'] ?? data['photo'];
+      if (photo != null && photo.isNotEmpty) {
+         final prefs = await SharedPreferences.getInstance();
+         await prefs.setString('photo_url', photo);
+      }
+
       setState(() {
         _profil = data;
         _isLoading = false;
@@ -52,6 +65,95 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
     }
   }
 
+Future<void> _pickImage() async {
+    try {
+      // 🟢 1. COMPRESSION OBLIGATOIRE (pour éviter le blocage Nginx)
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 30, // On réduit la qualité à 30% pour être sûr que ça passe !
+      );
+      
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Envoi de la photo en cours..."), duration: Duration(seconds: 2)),
+        );
+
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('auth_token');
+
+        final role = _profil?['role'] == 'syndic' ? 'syndic' : 'copro';
+        final url = Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/$role/profil/photo"); 
+
+        var request = http.MultipartRequest('POST', url);
+        request.headers.addAll({
+          "Authorization": "Bearer $token",
+          "Accept": "application/json",
+        });
+
+        // 🟢 SI LARAVEL DONNE L'ERREUR 405 (Method Not Allowed), DÉCOMMENTE CETTE LIGNE :
+        // request.fields['_method'] = 'PUT';
+
+        request.files.add(
+          await http.MultipartFile.fromPath('photo', _imageFile!.path)
+        );
+
+        var streamedResponse = await request.send();
+        var response = await http.Response.fromStream(streamedResponse);
+        
+        try {
+          var data = jsonDecode(response.body);
+
+          if (response.statusCode == 200 && data['success'] == true) {
+            
+            // 🟢 Sauvegarde l'URL localement
+            if (data['photo_url'] != null) {
+               await prefs.setString('photo_url', data['photo_url']);
+            }
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Photo mise à jour avec succès !"), backgroundColor: Colors.green),
+              );
+              _loadProfil(); // Recharge le profil
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(data['message'] ?? "Erreur d'enregistrement."), backgroundColor: Colors.orange),
+              );
+            }
+          }
+        } catch (formatException) {
+          // 🟢 2. DÉTECTEUR D'ERREUR INTELLIGENT
+          if (mounted) {
+            String serverResponse = response.body;
+            // On coupe le texte s'il est trop long pour la SnackBar
+            if (serverResponse.length > 50) {
+              serverResponse = serverResponse.substring(0, 50) + "..."; 
+            }
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Erreur Serveur ${response.statusCode} : $serverResponse"), 
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 8),
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur réseau : $e"), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
   Future<void> _handleLogout() async {
     try {
       await _authService.logout();
@@ -61,6 +163,299 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
       (route) => false,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSyndic = _profil?['role'] == 'syndic';
+
+    return Scaffold(
+      backgroundColor: bgLight,
+      appBar: AppBar(
+        backgroundColor: bgLight,
+        elevation: 0,
+        centerTitle: true,
+        leading: widget.isMainScreen 
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => isSyndic ? const MainLayout() : const CoproMainLayout(),
+                  ),
+                  (Route<dynamic> route) => false,
+                );
+              },
+            )
+          : null,
+        title: const Text(
+          "Profile",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+      ),
+      body: SafeArea(
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage != null
+                ? Center(
+                    child: Text(_errorMessage!, style: TextStyle(color: redColor)),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _loadProfil,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _buildProfileHeader(isSyndic),
+                          const SizedBox(height: 24),
+
+                          _buildStatsCards(),
+                          const SizedBox(height: 24),
+
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Settings",
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          _buildSettingTile(
+                            icon: Icons.person_outline,
+                            title: "Mes informations",
+                            subtitle: "Modifier mon nom et téléphone",
+                            onTap: _showEditProfileDialog,
+                          ),
+                          const SizedBox(height: 12),
+
+                          _buildSettingTile(
+                            icon: Icons.lock_outline,
+                            title: "Mot de passe",
+                            subtitle: "Changer mon mot de passe",
+                            onTap: _showChangePasswordDialog,
+                          ),
+                          const SizedBox(height: 12),
+
+                          _buildSettingTile(
+                            icon: Icons.campaign_outlined,
+                            title: "Dernières annonces",
+                            subtitle: "Voir les nouveautés",
+                            trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const CoproAnnoncesPage()),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          _buildSettingTile(
+                            icon: Icons.notifications_none,
+                            title: "Notifications",
+                            subtitle: "Alertes et rappels",
+                            trailing: Switch(
+                              value: _notificationsEnabled,
+                              activeColor: Colors.white,
+                              activeTrackColor: mainBlue,
+                              onChanged: (val) => setState(() => _notificationsEnabled = val),
+                            ),
+                            onTap: () {},
+                          ),
+                          const SizedBox(height: 12),
+
+                          _buildSettingTile(
+                            icon: Icons.logout,
+                            title: "Se déconnecter",
+                            subtitle: "Quitter l'application",
+                            iconColor: redColor,
+                            onTap: _handleLogout,
+                          ),
+                          const SizedBox(height: 30),
+                        ],
+                      ),
+                    ),
+                  ),
+      ),
+    );
+  }
+
+  // --- WIDGETS ---
+
+  Widget _buildProfileHeader(bool isSyndic) {
+    // 🟢 Récupération de l'URL de l'image depuis l'API
+    final String? photoUrl = _profil?['photo_url'] ?? _profil?['photo'];
+
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            // 🟢 L'avatar affiche désormais l'image du serveur ou l'image locale choisie
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: mainBlue.withOpacity(0.1),
+              backgroundImage: _imageFile != null 
+                  ? FileImage(_imageFile!) as ImageProvider
+                  : (photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null),
+              child: (_imageFile == null && (photoUrl == null || photoUrl.isEmpty))
+                  ? Icon(isSyndic ? Icons.manage_accounts : Icons.person, color: mainBlue, size: 50)
+                  : null,
+            ),
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                ),
+                child: Icon(Icons.camera_alt, color: mainBlue, size: 20),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          _profil?['nom'] ?? 'Utilisateur',
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _profil?['email'] ?? '',
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildBadge(isSyndic ? "Syndic" : "Copropriétaire", mainBlue),
+            const SizedBox(width: 8),
+            _buildBadge(
+              isSyndic ? (_profil?['copropriete'] ?? 'N/A') : (_profil?['lot'] ?? 'N/A'),
+              Colors.green,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _buildStatsCards() {
+    return Row(
+      children: [
+        _buildStatCard(
+          "Solde", 
+          _profil?['solde_formate']?.replaceAll(' MAD', '') ?? "0", 
+          mainBlue
+        ),
+        const SizedBox(width: 12),
+        _buildStatCard(
+          "Prochaine", 
+          _profil?['prochaine_charge'] ?? "-", 
+          Colors.orange
+        ),
+        const SizedBox(width: 12),
+        _buildStatCard(
+          "Impayé", 
+          _profil?['dernier_impaye'] ?? "-", 
+          redColor
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    Color? iconColor,
+    Widget? trailing,
+    required VoidCallback onTap,
+  }) {
+    final effectiveColor = iconColor ?? mainBlue;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4))],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: effectiveColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: effectiveColor, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+            ),
+            if (trailing != null) trailing,
+          ],
+        ),
+      ),
     );
   }
 
@@ -139,256 +534,6 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
           },
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isSyndic = _profil?['role'] == 'syndic';
-
-    return Scaffold(
-      backgroundColor: bgLight,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadProfil,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomHeader(
-                  title: "Sindy",
-                  subtitle: isSyndic ? "Espace Syndic\nMon Profil" : "Résidence Les Jardins\nMon Profil",
-                  showBackButton: true,
-                  onBackPressed: widget.isMainScreen
-                      ? () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => isSyndic 
-                                  ? const MainLayout() 
-                                  : const CoproMainLayout(),
-                            ),
-                            (Route<dynamic> route) => false,
-                          );
-                        }
-                      : null,
-                ),
-                const SizedBox(height: 16),
-
-                if (_isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (_errorMessage != null)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_errorMessage!, style: TextStyle(color: redColor, fontSize: 13)),
-                        const SizedBox(height: 8),
-                        TextButton(onPressed: _loadProfil, child: const Text("Réessayer")),
-                      ],
-                    ),
-                  )
-                else ...[
-                  // بطاقة الهوية
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: mainBlue.withOpacity(0.1),
-                          child: Icon(isSyndic ? Icons.manage_accounts : Icons.person, color: mainBlue, size: 32),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _profil?['nom'] ?? '',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                isSyndic ? "Syndic de copropriété" : "Copropriétaire",
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: mainBlue),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(_profil?['email'] ?? '', style: const TextStyle(fontSize: 13, color: Colors.black54)),
-                              Text(_profil?['telephone'] ?? '', style: const TextStyle(fontSize: 13, color: Colors.black54)),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // تفاصيل الوحدة أو الإقامة (🟢 L'ERREUR KANT HNA WA T7ELLAT)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(isSyndic ? Icons.apartment : Icons.door_front_door, color: Colors.black54, size: 20),
-                        const SizedBox(width: 12),
-                        // 🟢 EXPANDED zednaha hna bach mayb9ach l'overflow
-                        Expanded(
-                          child: Text(
-                            isSyndic 
-                                ? "Copropriété : ${_profil?['copropriete'] ?? 'N/A'}"
-                                : "Lot / Appartement : ${_profil?['lot'] ?? 'N/A'}",
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  _buildActionButton(Icons.edit, "Modifier mes informations", mainBlue, _showEditProfileDialog),
-                  const SizedBox(height: 12),
-
-                  _buildActionButton(Icons.lock, "Modifier mon mot de passe", mainBlue, _showChangePasswordDialog),
-                  const SizedBox(height: 12),
-
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: mainBlue,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: const [
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Icon(Icons.notifications, color: Colors.white, size: 20),
-                            ),
-                            Text("Notifications", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Switch(
-                          value: _notificationsEnabled,
-                          activeColor: Colors.white,
-                          activeTrackColor: Colors.blue.shade300,
-                          onChanged: (val) => setState(() => _notificationsEnabled = val),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildActionButton(Icons.logout, "Se déconnecter", redColor, _handleLogout),
-                  const SizedBox(height: 24),
-
-                  // البطاقة المالية و الإعلانات
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildInfoRow(
-                          "Solde", 
-                          _profil?['solde_formate'] ?? "0 MAD", 
-                          isAmount: true, 
-                          amountValue: _profil?['solde_brut']
-                        ),
-                        const Divider(height: 30, color: Color(0xFFEEEEEE)),
-                        _buildInfoRow("Prochaine charge", _profil?['prochaine_charge'] ?? "N/A"),
-                        const Divider(height: 30, color: Color(0xFFEEEEEE)),
-                        _buildInfoRow("Dernier impayé", _profil?['dernier_impaye'] ?? "Aucun"),
-                        const Divider(height: 30, color: Color(0xFFEEEEEE)),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()));
-                          },
-                          child: Container(
-                            color: Colors.transparent, 
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text("Dernières annonces", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
-                                Icon(Icons.chevron_right, color: Colors.grey, size: 20),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String title, String value, {bool isAmount = false, dynamic amountValue}) {
-    Color valueColor = Colors.black87;
-    if (isAmount && amountValue != null) {
-      double val = double.tryParse(amountValue.toString()) ?? 0;
-      valueColor = val < 0 ? redColor : Colors.black87; 
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
-        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: valueColor)),
-      ],
-    );
-  }
-
-  Widget _buildActionButton(IconData icon, String label, Color color, VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          alignment: Alignment.centerLeft,
-        ),
-        icon: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Icon(icon, color: Colors.white, size: 20),
-        ),
-        label: Text(label, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-        onPressed: onPressed,
-      ),
     );
   }
 
