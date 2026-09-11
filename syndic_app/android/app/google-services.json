@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "82081509654",
+    "project_id": "notificationsyndify",
+    "storage_bucket": "notificationsyndify.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82081509654:android:c67e6cffa77c4c9c2ca037",
+        "android_client_info": {
+          "package_name": "com.example.syndic_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoSQ2DZlaJ4IWix9zP4dEEPb_uJ8uqYEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -12,6 +12,219 @@ import 'package:syndic_app/pages/notifications_page.dart';
 import 'package:syndic_app/pages/login_page.dart';
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
+import 'package:syndic_app/pages/NotificationsScreen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+// ==========================================
+// WIDGET RÉUTILISABLE : CUSTOM HEADER
+// ==========================================
+class CustomHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String residenceName;
+  final String photoUrl;
+  final bool showBackButton;
+  
+  final String userRole;
+  final VoidCallback? onBackTap;
+  final VoidCallback? onNotificationTap;
+
+  const CustomHeader({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.residenceName,
+    required this.photoUrl,
+    this.showBackButton = false,
+    this.userRole = 'copro',
+    this.onBackTap,
+    this.onNotificationTap,
+  });
+
+  // Fonction pour créer les items du menu déroulant
+  PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+    final color = isDestructive ? Colors.redAccent : mainBlue;
+
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: mainBlue,
+        image: DecorationImage(
+          image: const NetworkImage(
+            "https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop",
+          ),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            mainBlue.withOpacity(0.85),
+            BlendMode.srcOver,
+          ),
+        ),
+      ),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 16,
+        bottom: 16,
+        left: 16,
+        right: 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Bouton Retour
+              if (showBackButton && onBackTap != null) 
+                InkWell(
+                  onTap: onBackTap,
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                  ),
+                ),
+              
+              const Icon(Icons.apartment, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              
+              // Nom de la résidence
+              Expanded(
+                child: Text(
+                  residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              
+              // Bouton Notifications
+              InkWell(
+             onTap: onNotificationTap ?? () {
+               // 🟢 S'il n'y a pas d'action définie, on ouvre la page par défaut
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                   builder: (context) => NotificationsScreen(role: userRole),
+                 ),
+               );
+             },
+             child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
+           ),
+              const SizedBox(width: 12),
+              
+              // ======================================================
+              // USER DROPDOWN (AVATAR)
+              // ======================================================
+              PopupMenuButton<String>(
+                offset: const Offset(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                color: Colors.white,
+                elevation: 4,
+                onSelected: (value) async {
+                  if (value == 'profile') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UnifiedProfilePage()),
+                    );
+                  } else if (value == 'password') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                    );
+                  } else if (value == 'logout') {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('auth_token');
+                    
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (route) => false,
+                      );
+                    }
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+                  _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
+                  const PopupMenuDivider(),
+                  _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
+                ],
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: CircleAvatar(
+                    radius: 14,
+                    backgroundColor: Colors.white,
+                    backgroundImage: photoUrl.isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : const NetworkImage(
+                            "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // Titre de la page
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 23,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 3),
+          
+          // Sous-titre
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class CoproDashboardPage extends StatefulWidget {
   const CoproDashboardPage({super.key});
@@ -33,8 +246,10 @@ class _CoproDashboardPageState
   bool _isLoading = true;
 
   Map<String, dynamic>? _dashboardData;
+  String _photoUrl = '';
 
   String _residenceName = 'Ma Résidence';
+  
   String _lotInfo = '';
 
   String _errorMessage = '';
@@ -61,40 +276,54 @@ class _CoproDashboardPageState
     final prefs =
         await SharedPreferences.getInstance();
 
-    final token =
-        prefs.getString('auth_token');
+   final token = prefs.getString('auth_token');
 
     if (token == null || token.isEmpty) {
-
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'Session expirée. Veuillez vous reconnecter.';
+          _errorMessage = 'Session expirée. Veuillez vous reconnecter.';
         });
       }
-
       return;
     }
 
-    // Cache
-    final cachedResidence =
-        prefs.getString('residence_name');
+    // ==========================================
+    // 🟢 NOUVEAU: ENVOYER LE FCM TOKEN AU BACKEND
+    // ==========================================
+    try {
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await http.post(
+          Uri.parse('https://api.syndify.nomade-cloud.com/api/mobile/update-fcm-token'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({'fcm_token': fcmToken}),
+        );
+        debugPrint('✅ FCM Token envoyé au serveur avec succès.');
+      }
+    } catch (e) {
+      debugPrint('❌ Erreur lors de l\'envoi du FCM Token: $e');
+    }
 
-    final cachedLot =
-        prefs.getString('lot_info');
+   // 🟢 1. Récupération des données du cache (Y COMPRIS PHOTO_URL)
+    final cachedResidence = prefs.getString('residence_name');
+    final cachedLot = prefs.getString('lot_info');
+    final cachedPhoto = prefs.getString('photo_url'); // <-- NOUVEAU
 
     if (mounted) {
       setState(() {
-
-        if (cachedResidence != null &&
-            cachedResidence.isNotEmpty) {
-          _residenceName =
-              cachedResidence;
+        if (cachedResidence != null && cachedResidence.isNotEmpty) {
+          _residenceName = cachedResidence;
         }
-
         if (cachedLot != null) {
           _lotInfo = cachedLot;
+        }
+        if (cachedPhoto != null) {
+          _photoUrl = cachedPhoto; // <-- MISE À JOUR DE L'AVATAR
         }
       });
     }
@@ -279,6 +508,7 @@ class _CoproDashboardPageState
         setState(() {
           _isLoading = false;
           _errorMessage =
+          
               'Impossible de charger le dashboard.';
         });
       }
@@ -311,7 +541,18 @@ class _CoproDashboardPageState
 
             children: [
 
-              _buildBanner(context),
+             CustomHeader(
+                title: "Dashboard",
+                subtitle: _lotInfo.isNotEmpty ? "$_residenceName • $_lotInfo" : _residenceName,
+                 showBackButton: true,
+                  residenceName: _residenceName,
+                  photoUrl: _photoUrl,
+                  onBackTap: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  }
+                ),
 
               Expanded(
                 child: _buildBody(),

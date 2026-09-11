@@ -5,8 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/profile_page.dart'; 
 import 'package:syndic_app/pages/forgot_password_page.dart'; 
 import 'package:syndic_app/pages/login_page.dart'; 
-import 'package:syndic_app/pages/notifications_page.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
+
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
 // ==========================================
@@ -16,6 +16,7 @@ class CustomHeader extends StatelessWidget {
   final String residenceName;
   final String photoUrl;
   final bool showBackButton;
+  
   final String userRole;
   final VoidCallback? onBackTap;
   final VoidCallback? onNotificationTap;
@@ -353,7 +354,8 @@ class _CoproAnnoncesPageState extends State<CoproAnnoncesPage> {
                   showBackButton: true,
                   residenceName: _residenceName,
                   photoUrl: _photoUrl,
-                  onBackTap: () {
+               
+                   onBackTap: () {
                     if (Navigator.canPop(context)) {
                       Navigator.pop(context);
                     }

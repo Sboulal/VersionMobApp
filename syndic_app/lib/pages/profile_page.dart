@@ -67,93 +67,92 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
 
 Future<void> _pickImage() async {
     try {
-      // 🟢 1. COMPRESSION OBLIGATOIRE (pour éviter le blocage Nginx)
+      // 🟢 1. COMPRESSION ROBUSTE (Réduit la taille et les dimensions pour éviter le crash Nginx)
       final XFile? pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 30, // On réduit la qualité à 30% pour être sûr que ça passe !
+        imageQuality: 50, 
+        maxWidth: 800,  // <-- TRÈS IMPORTANT : Force l'image à être petite
+        maxHeight: 800, // <-- TRÈS IMPORTANT
       );
       
-      if (pickedFile != null) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
+      if (pickedFile == null) return; // Si l'utilisateur annule
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Envoi de la photo en cours..."), duration: Duration(seconds: 2)),
-        );
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
 
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString('auth_token');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Envoi de la photo en cours..."), duration: Duration(seconds: 2)),
+      );
 
-        final role = _profil?['role'] == 'syndic' ? 'syndic' : 'copro';
-        final url = Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/$role/profil/photo"); 
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
 
-        var request = http.MultipartRequest('POST', url);
-        request.headers.addAll({
-          "Authorization": "Bearer $token",
-          "Accept": "application/json",
-        });
+      final role = _profil?['role'] == 'syndic' ? 'syndic' : 'copro';
+      final url = Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/$role/profil/photo"); 
 
-        // 🟢 SI LARAVEL DONNE L'ERREUR 405 (Method Not Allowed), DÉCOMMENTE CETTE LIGNE :
-        // request.fields['_method'] = 'PUT';
+      var request = http.MultipartRequest('POST', url);
+      request.headers.addAll({
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      });
 
-        request.files.add(
-          await http.MultipartFile.fromPath('photo', _imageFile!.path)
-        );
+      request.files.add(
+        await http.MultipartFile.fromPath('photo', _imageFile!.path)
+      );
 
-        var streamedResponse = await request.send();
-        var response = await http.Response.fromStream(streamedResponse);
-        
-        try {
-          var data = jsonDecode(response.body);
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      
+      try {
+        var data = jsonDecode(response.body);
 
-          if (response.statusCode == 200 && data['success'] == true) {
-            
-            // 🟢 Sauvegarde l'URL localement
-            if (data['photo_url'] != null) {
-               await prefs.setString('photo_url', data['photo_url']);
-            }
-
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Photo mise à jour avec succès !"), backgroundColor: Colors.green),
-              );
-              _loadProfil(); // Recharge le profil
-            }
-          } else {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(data['message'] ?? "Erreur d'enregistrement."), backgroundColor: Colors.orange),
-              );
-            }
+        if (response.statusCode == 200 && data['success'] == true) {
+          
+          // Sauvegarde l'URL localement
+          if (data['photo_url'] != null) {
+             await prefs.setString('photo_url', data['photo_url']);
           }
-        } catch (formatException) {
-          // 🟢 2. DÉTECTEUR D'ERREUR INTELLIGENT
+
           if (mounted) {
-            String serverResponse = response.body;
-            // On coupe le texte s'il est trop long pour la SnackBar
-            if (serverResponse.length > 50) {
-              serverResponse = serverResponse.substring(0, 50) + "..."; 
-            }
-            
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Erreur Serveur ${response.statusCode} : $serverResponse"), 
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 8),
-              ),
+              const SnackBar(content: Text("Photo mise à jour avec succès !"), backgroundColor: Colors.green),
+            );
+            _loadProfil(); // Recharge le profil
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(data['message'] ?? "Erreur d'enregistrement."), backgroundColor: Colors.orange),
             );
           }
+        }
+      } catch (e) {
+        // 🟢 2. DÉTECTEUR D'ERREUR PRÉCIS 
+        if (mounted) {
+          String serverResponse = response.body;
+          if (serverResponse.length > 50) {
+            serverResponse = serverResponse.substring(0, 50) + "..."; 
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Erreur Serveur ${response.statusCode} : $serverResponse"), 
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 8),
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erreur réseau : $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text("Erreur système : $e"), backgroundColor: Colors.red),
         );
       }
     }
   }
+  
   Future<void> _handleLogout() async {
     try {
       await _authService.logout();

@@ -1,7 +1,9 @@
+import 'dart:async'; // 🟢 Pour le Timer
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:syndic_app/pages/login_page.dart';
 import 'package:syndic_app/pages/paiements_page.dart'; 
 import 'package:syndic_app/pages/depenses_page.dart'; 
@@ -9,6 +11,8 @@ import 'package:syndic_app/pages/annonces_page.dart';
 import 'package:syndic_app/pages/charges_page.dart'; 
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
+// Décommente cette ligne si tu as déjà créé la page NotificationsScreen
+// import 'package:syndic_app/pages/notifications_screen.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -26,13 +30,83 @@ class _DashboardPageState extends State<DashboardPage> {
   Map<String, dynamic>? _dashboardData;
   String _errorMessage = "";
   
-  // 🟢 AJOUT : Variable pour stocker l'image du cache
   String _cachedPhotoUrl = ""; 
+  
+  // 🟢 Variables pour les notifications
+  Timer? _notifTimer;
+  int _unreadCount = 0; 
 
   @override
   void initState() {
     super.initState();
     _fetchDashboardData();
+    _startNotificationListener(); // 🟢 On lance l'écouteur au démarrage
+  }
+
+  @override
+  void dispose() {
+    _notifTimer?.cancel(); // 🟢 On arrête l'écouteur quand on quitte la page
+    super.dispose();
+  }
+
+  // ==========================================================
+  // 🟢 ÉCOUTEUR DE NOTIFICATIONS (POLLING)
+  // ==========================================================
+  void _startNotificationListener() {
+    _notifTimer = Timer.periodic(const Duration(seconds: 15), (timer) async {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null) return;
+
+      try {
+        final response = await http.get(
+          Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/dashboard"),
+          headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
+        );
+        
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          int newUnread = data['data']['unread_notifications'] ?? 0;
+
+          // Si le nombre de notifications non lues a augmenté
+          if (newUnread > _unreadCount) {
+            if (mounted) {
+              // 1. Afficher le Pop-up
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.notifications_active, color: Colors.white),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Vous avez une nouvelle notification !",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: mainBlueLight,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
+                  elevation: 8,
+                  duration: const Duration(seconds: 4),
+                ),
+              );
+              
+              // 2. Mettre à jour l'UI (le badge rouge)
+              setState(() {
+                _dashboardData?['unread_notifications'] = newUnread;
+              });
+            }
+          }
+          _unreadCount = newUnread; // On synchronise le compteur
+        }
+      } catch (e) {
+        // On ignore les erreurs en arrière-plan pour ne pas spammer l'écran
+      }
+    });
   }
 
   Future<void> _fetchDashboardData() async {
@@ -44,7 +118,6 @@ class _DashboardPageState extends State<DashboardPage> {
       return;
     }
 
-    // 🟢 AJOUT : On charge la photo depuis le cache local du téléphone
     setState(() {
       _cachedPhotoUrl = prefs.getString('photo_url') ?? "";
     });
@@ -67,6 +140,7 @@ class _DashboardPageState extends State<DashboardPage> {
         if (!mounted) return; 
         setState(() {
           _dashboardData = decodedBody['data'];
+          _unreadCount = _dashboardData?['unread_notifications'] ?? 0; // 🟢 On initialise le compteur
           _isLoading = false;
         });
       } else if (response.statusCode == 401) {
@@ -127,17 +201,15 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // ==========================================================
-  // HEADER AVEC DROPDOWN PROFIL
+  // HEADER AVEC DROPDOWN PROFIL ET BADGE NOTIFICATIONS
   // ==========================================================
   Widget _buildHeader() {
     final prenom = _dashboardData?['utilisateur']?['prenom'] ?? "Syndic";
     final coproNom = _dashboardData?['copropriete']?['nom'] ?? "Ma Résidence";
     
-    // 🟢 LOGIQUE BLINDÉE POUR L'IMAGE
     String apiPhotoUrl = _dashboardData?['utilisateur']?['photo_url'] ?? "";
     String apiPhoto = _dashboardData?['utilisateur']?['photo'] ?? "";
     
-    // On prend l'API si elle existe, SINON on prend le CACHE local
     String rawPhoto = apiPhotoUrl.isNotEmpty 
         ? apiPhotoUrl 
         : (apiPhoto.isNotEmpty ? apiPhoto : _cachedPhotoUrl);
@@ -193,16 +265,53 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
         ),
+        // 🟢 ICONE DE NOTIFICATION AVEC LE BADGE ROUGE
         GestureDetector(
-          onTap: () {},
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-            ),
-            child: const Icon(Icons.notifications_none, color: Colors.black87, size: 22),
+          onTap: () {
+             // 🟢 Mets ici la navigation vers ta page de notifications
+             // Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen(role: 'syndic'))).then((_) => _fetchDashboardData());
+          },
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                ),
+                child: const Icon(Icons.notifications_none, color: Colors.black87, size: 22),
+              ),
+              if (_unreadCount > 0) // 🟢 Afficher le point rouge seulement si > 0
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: bgLight, width: 1.5),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _unreadCount > 9 ? '9+' : '$_unreadCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         )
       ],

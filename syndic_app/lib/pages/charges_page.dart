@@ -221,11 +221,12 @@ Future<void> _submitCharge() async {
       }
 
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (mounted) {
+      if (!mounted) return;
+      if (response.statusCode == 200 && data['success']) {
+        setState(() {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Appel créé et réparti avec succès.", style: TextStyle(color: Colors.white)), backgroundColor: Colors.green));
           Navigator.pop(context); 
-        }
+        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? "Erreur"), backgroundColor: Colors.redAccent));
       }

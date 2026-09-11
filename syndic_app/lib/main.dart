@@ -4,15 +4,46 @@ import 'package:flutter/material.dart';
 import 'dart:io'; // 🟢 هاد السطر ضروري باش يخدم HttpOverrides
 
 import 'package:syndic_app/pages/landing_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("🔥 Message reçu en background: ${message.messageId}");
+}
 // Main Function
-void main() {
+void main() async {
+  // 1. Darori t-zidi hadi 9bel Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 2. Initialisation dyal Firebase
+  await Firebase.initializeApp();
+  // --- NOUVEAU CODE FCM ---
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  // Demander les permissions (Darori l'Android 13+ w iOS)
+  await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
   // Giving command to runApp() to run the app.
   HttpOverrides.global = MyHttpOverrides(); // 🟢 تخطي مشكل SSL
   // The purpose of the runApp() function is to attach
   // the given widget to the screen.
+
+  // Gérer les messages f l'arrière-plan
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Récupérer le Token et l'afficher dans la console
+  String? token = await messaging.getToken();
+  print("====================================");
+  print("🔑 FCM TOKEN: $token");
+  print("====================================");
+  // -------------------------
   runApp(const MyApp());
 }
+
+
+
 
 // MyApp extends StatelessWidget and overrides its
 // build method.

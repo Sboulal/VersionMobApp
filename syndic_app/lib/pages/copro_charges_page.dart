@@ -19,6 +19,7 @@ class CustomHeader extends StatelessWidget {
   final String residenceName;
   final String photoUrl;
   final bool showBackButton;
+  
   final String userRole;
   final VoidCallback? onBackTap;
   final VoidCallback? onNotificationTap;

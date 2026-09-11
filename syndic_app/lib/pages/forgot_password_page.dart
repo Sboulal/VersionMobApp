@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:syndic_app/pages/login_page.dart'; 
+import 'package:http/http.dart' as http;
+
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -14,30 +16,108 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final Color successGreen = const Color(0xFFE8F5E9);
   final Color successTextGreen = const Color(0xFF2E7D32);
 
+  // حط رابط الـ API ديالك هنا
+  final String apiUrl = "https://api.syndify.nomade-cloud.com/api"; 
+
   int _currentStep = 1; // 1: Email, 2: Code & Nouveau MP, 3: Succès
   bool _isLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController(); // 🟢 زدت هادا
   final TextEditingController _newPwdController = TextEditingController();
   final TextEditingController _confirmPwdController = TextEditingController();
 
-  // Fake API Calls l-simulation
-  void _sendCode() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2)); // Simulation dyal chargement
-    setState(() {
-      _isLoading = false;
-      _currentStep = 2;
-    });
+  // 🟢 دالة لعرض رسائل الخطأ أو النجاح
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
   }
 
-  void _resetPassword() async {
+  // 🟢 1. Appel API باش نصيفطو الكود
+  Future<void> _sendCode() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showSnackBar("Veuillez entrer votre email.", isError: true);
+      return;
+    }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      _isLoading = false;
-      _currentStep = 3;
-    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/forgot-password/send-code'),
+        headers: {'Accept': 'application/json'},
+        body: {'email': email},
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        _showSnackBar(data['message']);
+        setState(() {
+          _currentStep = 2; // دوز للمرحلة الثانية
+        });
+      } else {
+        _showSnackBar(data['message'] ?? "Erreur lors de l'envoi du code", isError: true);
+      }
+    } catch (e) {
+      _showSnackBar("Erreur de connexion au serveur.", isError: true);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // 🟢 2. Appel API باش نبدلو المودباس
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+    final code = _codeController.text.trim();
+    final newPwd = _newPwdController.text.trim();
+    final confirmPwd = _confirmPwdController.text.trim();
+
+    if (code.length != 5) {
+      _showSnackBar("Le code doit contenir 5 chiffres.", isError: true);
+      return;
+    }
+    if (newPwd.length < 6) {
+      _showSnackBar("Le mot de passe doit contenir au moins 6 caractères.", isError: true);
+      return;
+    }
+    if (newPwd != confirmPwd) {
+      _showSnackBar("Les mots de passe ne correspondent pas.", isError: true);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/forgot-password/reset'),
+        headers: {'Accept': 'application/json'},
+        body: {
+          'email': email,
+          'code': code,
+          'nouveau_password': newPwd,
+        },
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        setState(() {
+          _currentStep = 3; // دوز لمرحلة النجاح
+        });
+      } else {
+        _showSnackBar(data['message'] ?? "Code invalide ou erreur.", isError: true);
+      }
+    } catch (e) {
+      _showSnackBar("Erreur de connexion au serveur.", isError: true);
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -48,12 +128,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       backgroundColor: bgGrey,
       body: Stack(
         children: [
-          // Background b les immeubles (B7al login)
+          // Background (assurez-vous que BuildingsBackground existe)
           Positioned(
             top: 0, left: 0, right: 0,
-            child: BuildingsBackground(
-              mainColor: isSuccess ? successTextGreen : mainColor, 
-              height: MediaQuery.of(context).size.height * 0.45
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.45,
+              color: isSuccess ? successTextGreen : mainColor,
+              // child: BuildingsBackground(...), 
             ),
           ),
           
@@ -65,7 +146,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
           ),
 
-          // L-Formulaire l-ta7t
+          // Formulaire
           Align(
             alignment: Alignment.bottomCenter,
             child: AnimatedContainer(
@@ -87,35 +168,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isSuccess ? successTextGreen : mainColor),
                     ),
-                    const Text(
-                      'Résidence Les Palmiers',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
-                    ),
                     const SizedBox(height: 30),
 
-                    // --- STEP 1: SAISIE IDENTIFIANT ---
+                    // --- STEP 1 ---
                     if (_currentStep == 1) ...[
                       const Text(
-                        "Pour réinitialiser votre mot de passe, entrez votre identifiant.",
+                        "Pour réinitialiser votre mot de passe, entrez votre email.",
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                       const SizedBox(height: 20),
-                      _buildTextField(label: "Email ou Téléphone", hint: "Saisissez votre email ou numéro", controller: _emailController),
+                      _buildTextField(label: "Email", hint: "Saisissez votre email", controller: _emailController),
                       const SizedBox(height: 30),
                       _buildButton(label: "RECEVOIR LE CODE", onPressed: _sendCode, color: mainColor),
                     ],
 
-                    // --- STEP 2: CODE & NOUVEAU MOT DE PASSE ---
+                    // --- STEP 2 ---
                     if (_currentStep == 2) ...[
                       const Text("Code de vérification", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
                       const SizedBox(height: 8),
                       TextField(
+                        controller: _codeController, // 🟢 ضفنا الكنترولر هنا باش نقراو الكود
                         textAlign: TextAlign.center,
                         maxLength: 5,
                         keyboardType: TextInputType.number,
-                        // 🟢 CORRECTION ICI : letterSpacing khass tkon wst TextStyle
                         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 24),
                         decoration: InputDecoration(
                           counterText: "",
@@ -127,7 +203,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: Text("Renvoyer le code (59s)", style: TextStyle(fontSize: 12, color: mainColor, fontWeight: FontWeight.bold)),
+                        child: TextButton(
+                          onPressed: _sendCode, // 🟢 يعاود يصيفط الكود
+                          child: Text("Renvoyer le code", style: TextStyle(fontSize: 12, color: mainColor, fontWeight: FontWeight.bold)),
+                        )
                       ),
                       const SizedBox(height: 16),
                       _buildTextField(label: "Nouveau mot de passe", hint: "Votre nouveau mot de passe", controller: _newPwdController, isPwd: true),
@@ -137,7 +216,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       _buildButton(label: "RÉINITIALISER MON MOT DE PASSE", onPressed: _resetPassword, color: mainColor),
                     ],
 
-                    // --- STEP 3: SUCCÈS ---
+                    // --- STEP 3 ---
                     if (_currentStep == 3) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -160,7 +239,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       const SizedBox(height: 40),
                       _buildButton(
                         label: "SE CONNECTER À VOTRE ESPACE", 
-                        onPressed: () => Navigator.pop(context), // Kayreje3 l-login
+                        onPressed: () => Navigator.pop(context), 
                         color: mainColor
                       ),
                     ]
