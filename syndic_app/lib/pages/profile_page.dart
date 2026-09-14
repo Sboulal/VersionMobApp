@@ -9,6 +9,7 @@ import 'package:syndic_app/services/syndic_auth_service.dart';
 import 'package:syndic_app/pages/copro_annonces_page.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:syndic_app/pages/landing_page.dart';
 
 class UnifiedProfilePage extends StatefulWidget {
   final bool isMainScreen;
@@ -264,7 +265,15 @@ Future<void> _pickImage() async {
                             ),
                             onTap: () {},
                           ),
-                          const SizedBox(height: 12),
+                            const SizedBox(height: 12),
+                            _buildSettingTile(
+                              icon: Icons.person_remove_alt_1_outlined,
+                              title: "Supprimer mon compte",
+                              subtitle: "Suppression de vos données",
+                              iconColor: redColor,
+                              onTap: () => _supprimerCompte(context),
+                            ),
+                            const SizedBox(height: 12),
 
                           _buildSettingTile(
                             icon: Icons.logout,
@@ -457,6 +466,76 @@ Future<void> _pickImage() async {
       ),
     );
   }
+
+
+Future<void> _supprimerCompte(BuildContext context) async {
+  // 1. Afficher une boîte de dialogue de confirmation
+  bool? confirmer = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text("Supprimer le compte"),
+      content: const Text(
+        "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et vos données personnelles ne seront plus accessibles.",
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text("Annuler", style: TextStyle(color: Colors.grey)),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text("Supprimer", style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmer != true) return;
+
+  // 2. Appel API de suppression
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    final response = await http.delete(
+      Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/account/delete"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200 && data['success'] == true) {
+      // Nettoyer les préférences locales
+      await prefs.clear();
+
+      if (context.mounted) {
+        // Rediriger vers la page Landing ou Login
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LandingPage()),
+          (route) => false,
+        );
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "Erreur lors de la suppression"), backgroundColor: Colors.red),
+        );
+      }
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur réseau : $e"), backgroundColor: Colors.red),
+      );
+    }
+  }
+}
 
   Future<void> _showChangePasswordDialog() async {
     final ancienCtrl = TextEditingController();

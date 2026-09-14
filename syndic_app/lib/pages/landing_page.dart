@@ -84,7 +84,8 @@ class LandingPage extends StatelessWidget {
                           ),
                           child: TextButton(
                             onPressed: () {
-                              // Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage()));
+                              // 🟢 Hna wllat kat-dih l-page dyal l-info
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterInfoPage()));
                             },
                             child: Text("Register", style: TextStyle(color: mainColor, fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
@@ -102,6 +103,72 @@ class LandingPage extends StatelessWidget {
   }
 }
 
+// ==========================================
+// L-Page jdida dyal Message d'inscription
+// ==========================================
+class RegisterInfoPage extends StatelessWidget {
+  final Color mainColor = const Color(0xFF1A5EAC);
+
+  const RegisterInfoPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: mainColor),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: mainColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.admin_panel_settings_rounded, size: 80, color: mainColor),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              "Inscription Gérée par l'Administration",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "La création de compte sur Syndify est exclusivement réservée à l'administration de votre copropriété.\n\nVeuillez contacter votre syndic pour obtenir vos identifiants de connexion.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.6),
+            ),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: mainColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Retour à l'accueil", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const Spacer(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// L-Khalfiya (Background)
+// ==========================================
 class BuildingsBackground extends StatelessWidget {
   final Color mainColor;
   final double height;
@@ -122,25 +189,21 @@ class BuildingsBackground extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Immeuble 1
           Positioned(
             bottom: 0,
             left: 20,
             child: _buildBuilding(60, 150, Colors.white.withOpacity(0.1)),
           ),
-          // Immeuble 2 (Twil)
           Positioned(
             bottom: 0,
             left: 90,
             child: _buildBuilding(80, 220, Colors.white.withOpacity(0.15)),
           ),
-          // Immeuble 3
           Positioned(
             bottom: 0,
             right: 30,
             child: _buildBuilding(70, 180, Colors.white.withOpacity(0.08)),
           ),
-          // Immeuble 4 (Sghir)
           Positioned(
             bottom: 0,
             right: -10,
