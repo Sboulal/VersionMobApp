@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+    <string>Syndify a besoin de l'accès à la caméra pour prendre des photos des factures.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Syndify a besoin de l'accès à votre galerie pour importer des images et des PDF.</string>
 </dict>
 </plist>

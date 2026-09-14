@@ -13,8 +13,6 @@ import 'package:syndic_app/pages/login_page.dart';
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
 // ==========================================
@@ -288,26 +286,7 @@ class _CoproDashboardPageState
       return;
     }
 
-    // ==========================================
-    // 🟢 NOUVEAU: ENVOYER LE FCM TOKEN AU BACKEND
-    // ==========================================
-    try {
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
-      if (fcmToken != null) {
-        await http.post(
-          Uri.parse('https://api.syndify.nomade-cloud.com/api/mobile/update-fcm-token'),
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({'fcm_token': fcmToken}),
-        );
-        debugPrint('✅ FCM Token envoyé au serveur avec succès.');
-      }
-    } catch (e) {
-      debugPrint('❌ Erreur lors de l\'envoi du FCM Token: $e');
-    }
+   
 
    // 🟢 1. Récupération des données du cache (Y COMPRIS PHOTO_URL)
     final cachedResidence = prefs.getString('residence_name');
