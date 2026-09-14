@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart'; // 🟢 Ajout indispensable pour ouvrir la facture
 import 'package:syndic_app/widgets/custom_header.dart';
 import 'package:syndic_app/pages/main_layout.dart';
 
@@ -80,13 +84,14 @@ class _DepensesPageState extends State<DepensesPage> {
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
               child: CustomHeader(
-                title: "Sindy",
-                subtitle: "Résidence Les Jardins\nGestion des Dépenses",
-                showBackButton: true,
-                onBackPressed: widget.isMainScreen 
-                    ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainLayout()), (route) => false)
-                    : null,
-              ),
+  title: "Sindy",
+  subtitle: "Résidence Les Jardins\nGestion des Dépenses",
+  showBackButton: true,
+  // 🟢 Bdel onBackTap b onBackPressed hna :
+  onBackPressed: widget.isMainScreen 
+      ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainLayout()), (route) => false)
+      : null,
+),
             ),
             
             Padding(
@@ -97,11 +102,11 @@ class _DepensesPageState extends State<DepensesPage> {
                   children: [
                     Image.network('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', height: 120, width: double.infinity, fit: BoxFit.cover),
                     Container(height: 120, decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.black.withOpacity(0.7), Colors.transparent], begin: Alignment.bottomCenter, end: Alignment.topCenter))),
-                    Positioned(
+                    const Positioned(
                       bottom: 16, left: 16,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text("Gestion des Dépenses", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                           SizedBox(height: 4),
                           Text("Suivez les charges et factures de la résidence", style: TextStyle(color: Colors.white70, fontSize: 12)),
@@ -142,7 +147,7 @@ class _DepensesPageState extends State<DepensesPage> {
                         final dep = depensesList[index];
                         final Color dColor = _hexToColor(dep['colorHex']);
                         return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center, // 🟢 Mieux aligné avec le bouton
                           children: [
                             Container(
                               padding: const EdgeInsets.all(10),
@@ -161,7 +166,31 @@ class _DepensesPageState extends State<DepensesPage> {
                                 ],
                               ),
                             ),
-                            Text(dep["amount"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(dep["amount"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                                // 🟢 BOUTON VOIR FACTURE POUR APPLE
+                                if (dep["document_url"] != null) ...[
+                                  const SizedBox(height: 4),
+                                  InkWell(
+                                    onTap: () async {
+                                      final url = Uri.parse(dep["document_url"]);
+                                      if (await canLaunchUrl(url)) {
+                                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                                      }
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.attachment, size: 16, color: Colors.blue),
+                                        SizedBox(width: 4),
+                                        Text("Voir facture", style: TextStyle(color: Colors.blue, fontSize: 11, fontWeight: FontWeight.bold))
+                                      ],
+                                    ),
+                                  )
+                                ]
+                              ],
+                            ),
                           ],
                         );
                       },
@@ -193,6 +222,7 @@ class _DepensesPageState extends State<DepensesPage> {
 // ==========================================
 // 2. AJOUTER UNE DÉPENSE (Écran 14)
 // ==========================================
+// 🟢 VOICI LA CLASSE MANQUANTE QUI PROVOQUAIT L'ERREUR
 class AjouterDepensePage extends StatefulWidget {
   const AjouterDepensePage({super.key});
 
@@ -213,6 +243,46 @@ class _AjouterDepensePageState extends State<AjouterDepensePage> {
   final List<String> _categories = ["Maintenance", "Entretien", "Frais administratifs", "Autre"];
   bool _isSubmitting = false;
 
+  // Variables pour le fichier
+  File? _selectedFile;
+  String? _selectedFileName;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: source, imageQuality: 50, maxWidth: 800, maxHeight: 800);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedFile = File(pickedFile.path);
+          _selectedFileName = pickedFile.name;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur caméra : $e")));
+    }
+  }
+
+Future<void> _pickPDF() async {
+    try {
+      // Nouvelle syntaxe v12 : "pickFile" au singulier et on utilise PlatformFile
+      PlatformFile? result = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+      
+      if (result != null && result.path != null) {
+        setState(() {
+          _selectedFile = File(result.path!);
+          _selectedFileName = result.name;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur fichier : $e"))
+      );
+    }
+  }
+  
   Future<void> _submitDepense() async {
     if (_titleController.text.isEmpty || _amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("La description et le montant sont obligatoires.")));
@@ -224,20 +294,30 @@ class _AjouterDepensePageState extends State<AjouterDepensePage> {
     final token = prefs.getString('auth_token');
 
     try {
-      final response = await http.post(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/depenses"),
-        headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
-        body: jsonEncode({
-          "title": _titleController.text,
-          "amount": num.tryParse(_amountController.text) ?? 0,
-          "date": DateTime.now().toIso8601String().split('T')[0],
-          "category": _selectedCategory,
-          "fournisseur": _fournisseurController.text,
-          "reference": _refController.text,
-        }),
-      );
+      var uri = Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/depenses");
+      var request = http.MultipartRequest('POST', uri);
+      
+      request.headers.addAll({
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      });
 
+      request.fields['title'] = _titleController.text;
+      request.fields['amount'] = (num.tryParse(_amountController.text) ?? 0).toString();
+      request.fields['date'] = DateTime.now().toIso8601String().split('T')[0];
+      request.fields['category'] = _selectedCategory;
+      request.fields['fournisseur'] = _fournisseurController.text;
+      request.fields['reference'] = _refController.text;
+
+      // Ajouter le fichier s'il a été sélectionné
+      if (_selectedFile != null) {
+        request.files.add(await http.MultipartFile.fromPath('document', _selectedFile!.path));
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
       final data = jsonDecode(response.body);
+
       if (response.statusCode == 200 && data['success'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message']), backgroundColor: Colors.green));
@@ -264,9 +344,9 @@ class _AjouterDepensePageState extends State<AjouterDepensePage> {
           children: [
             Text("Confirmez-vous l'ajout de la dépense de ${_amountController.text} MAD (${_titleController.text}) ?", textAlign: TextAlign.center, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 16),
-            Row(
+            const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Icon(Icons.info, color: Colors.green, size: 16),
                 SizedBox(width: 8),
                 Expanded(child: Text("Le solde des copropriétaires sera automatiquement recalculé selon les tantièmes.", style: TextStyle(fontSize: 12, color: Colors.black54))),
@@ -308,7 +388,13 @@ class _AjouterDepensePageState extends State<AjouterDepensePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CustomHeader(title: "Sindy", subtitle: "Ajouter une dépense"),
+             CustomHeader(
+  title: "Sindy", 
+  subtitle: "Ajouter une dépense", 
+  showBackButton: true,
+  // 🟢 Bdel onBackTap b onBackPressed hna :
+  onBackPressed: () => Navigator.pop(context),
+),
               const SizedBox(height: 16),
               
               Container(
@@ -356,15 +442,34 @@ class _AjouterDepensePageState extends State<AjouterDepensePage> {
 
                     const Text("Pièce justificative (Facture)", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
                     const SizedBox(height: 12),
-                    _buildUploadButton("+ Ajouter une facture", Icons.add, Colors.grey.shade200, Colors.black87),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(child: _buildUploadButton("Prendre photo", Icons.camera_alt, Colors.grey.shade100, Colors.black54)),
-                        const SizedBox(width: 8),
-                        Expanded(child: _buildUploadButton("Importer PDF", Icons.picture_as_pdf, Colors.grey.shade100, Colors.black54)),
-                      ],
-                    ),
+                    
+                    if (_selectedFile != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade200)),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle, color: Colors.green),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(_selectedFileName ?? "Fichier sélectionné", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.redAccent),
+                              onPressed: () => setState(() { _selectedFile = null; _selectedFileName = null; }),
+                            )
+                          ],
+                        ),
+                      )
+                    else ...[
+                      Row(
+                        children: [
+                          Expanded(child: _buildUploadButton("Prendre photo", Icons.camera_alt, Colors.grey.shade100, Colors.black54, () => _pickImage(ImageSource.camera))),
+                          const SizedBox(width: 8),
+                          Expanded(child: _buildUploadButton("Galerie", Icons.photo_library, Colors.grey.shade100, Colors.black54, () => _pickImage(ImageSource.gallery))),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _buildUploadButton("Importer PDF", Icons.picture_as_pdf, Colors.blue.shade50, mainBlue, _pickPDF),
+                    ],
                   ],
                 ),
               ),
@@ -424,7 +529,7 @@ class _AjouterDepensePageState extends State<AjouterDepensePage> {
     );
   }
 
-  Widget _buildUploadButton(String label, IconData icon, Color bgColor, Color textColor) {
+  Widget _buildUploadButton(String label, IconData icon, Color bgColor, Color textColor, VoidCallback onPressed) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -437,7 +542,7 @@ class _AjouterDepensePageState extends State<AjouterDepensePage> {
         ),
         icon: Icon(icon, size: 16),
         label: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-        onPressed: () {},
+        onPressed: onPressed,
       ),
     );
   }
