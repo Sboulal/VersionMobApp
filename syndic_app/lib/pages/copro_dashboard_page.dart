@@ -523,14 +523,10 @@ class _CoproDashboardPageState
              CustomHeader(
                 title: "Dashboard",
                 subtitle: _lotInfo.isNotEmpty ? "$_residenceName • $_lotInfo" : _residenceName,
-                 showBackButton: true,
+                 
                   residenceName: _residenceName,
                   photoUrl: _photoUrl,
-                  onBackTap: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  }
+                 
                 ),
 
               Expanded(
@@ -1171,7 +1167,7 @@ class _CoproDashboardPageState
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            const CoproAnnoncesPage(),
+                            const CoproAnnoncesPage(showBackButton: true),
                       ),
                     );
                   },
@@ -1195,7 +1191,7 @@ class _CoproDashboardPageState
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            const CoproDocumentsPage(),
+                            const CoproDocumentsPage(showBackButton: true),
                       ),
                     );
                   },
@@ -1219,7 +1215,7 @@ class _CoproDashboardPageState
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            const CoproChargesPage(),
+                            const CoproChargesPage(showBackButton: true),
                       ),
                     );
                   },

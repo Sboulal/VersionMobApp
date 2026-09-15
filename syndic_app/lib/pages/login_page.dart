@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/main_layout.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
-import 'package:syndic_app/pages/copro_dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,16 +18,35 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   
   bool _isLoading = false; 
-  bool _isSuccess = false; // 🟢 Kat-géri l'état dyal naja7 l-connexion
+  bool _isSuccess = false; 
   bool _rememberMe = true; 
   bool _obscurePassword = true; 
   
   String? _emailError;
   String? _passwordError;
   String? _globalError;
+
+  // 🟢 زدنا هاد المتغيرات باش نسجلو فيهم معلومات اليوزر
+  String _residenceName = "";
+  String _userName = "";
   
   final Color mainColor = const Color(0xFF1A5EAC); 
   final Color bgGrey = const Color(0xFFF4F7FC); 
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _emailController.text = prefs.getString('saved_identifiant') ?? '';
+      _passwordController.text = prefs.getString('saved_password') ?? '';
+      _rememberMe = prefs.getBool('remember_me') ?? true;
+    });
+  }
 
   bool _isValidEmail(String email) {
     return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
@@ -44,12 +62,12 @@ class _LoginPageState extends State<LoginPage> {
       _isSuccess = false;
     });
 
-    String emailText = _emailController.text.trim();
+    String identifiantText = _emailController.text.trim();
     String passwordText = _passwordController.text.trim();
     bool hasError = false;
 
-    if (emailText.isEmpty) {
-      _emailError = "L'email est obligatoire";
+    if (identifiantText.isEmpty) {
+      _emailError = "L'identifiant est obligatoire";
       hasError = true;
     }
 
@@ -74,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: jsonEncode({'email': emailText, 'password': passwordText}),
+        body: jsonEncode({'identifiant': identifiantText, 'password': passwordText}),
       );
 
       final data = jsonDecode(response.body);
@@ -84,12 +102,27 @@ class _LoginPageState extends State<LoginPage> {
         
         await prefs.setString('auth_token', data['data']['token']); 
 
-        // 🟢 حفظ الدور (Role)
         final String role = (data['data']['role'] ?? 'syndic').toString().toLowerCase();
         await prefs.setString('user_role', role);
+
+        // 🟢 كنجبدو السمية دالاقامة واليوزر من الـ API
+        String fetchedResidence = data['data']['residence_name'] ?? 'Votre Résidence';
+        String fetchedName = data['data']['user']['nom'] ?? '';
+
+        if (_rememberMe) {
+          await prefs.setString('saved_identifiant', identifiantText);
+          await prefs.setString('saved_password', passwordText);
+          await prefs.setBool('remember_me', true);
+        } else {
+          await prefs.remove('saved_identifiant');
+          await prefs.remove('saved_password');
+          await prefs.setBool('remember_me', false);
+        }
         
         if (mounted) {
           setState(() {
+            _residenceName = fetchedResidence; // 🟢 كنسجلو السمية باش تافيشا
+            _userName = fetchedName;
             _isLoading = false;
             _isSuccess = true;
           });
@@ -98,20 +131,19 @@ class _LoginPageState extends State<LoginPage> {
         await Future.delayed(const Duration(milliseconds: 1500));
         
         if (mounted) {
-          // 🟢 التوجيه حسب الدور (M9ad mzyan, kaysift l'MainLayout li fih l'menu)
-         if (role == 'coproprietaire') {
-  Navigator.pushAndRemoveUntil(
-    context, 
-    MaterialPageRoute(builder: (context) => const CoproMainLayout()),
-    (Route<dynamic> route) => false, // 🔴 Hadi hiya sser: Katmsa7 ga3 l'historique (Login, Splash...)
-  );
-} else {
-  Navigator.pushAndRemoveUntil(
-    context, 
-    MaterialPageRoute(builder: (context) => const MainLayout()),
-    (Route<dynamic> route) => false, // 🔴 Katkhlli ghir MainLayout f l'application
-  );
-}
+          if (role == 'coproprietaire') {
+            Navigator.pushAndRemoveUntil(
+              context, 
+              MaterialPageRoute(builder: (context) => const CoproMainLayout()),
+              (Route<dynamic> route) => false, 
+            );
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context, 
+              MaterialPageRoute(builder: (context) => const MainLayout()),
+              (Route<dynamic> route) => false,
+            );
+          }
         }
       } else {
         setState(() {
@@ -131,12 +163,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 🟢 Ila nja7 l-login, kan-affichiw l-page dyal Succès li fih l-khder l-fo9
     if (_isSuccess) {
       return _buildSuccessScreen();
     }
 
-    // Sinon, kan-affichiw l-formulaire normal dyal login
     return Scaffold(
       backgroundColor: bgGrey, 
       body: Stack(
@@ -151,7 +181,6 @@ class _LoginPageState extends State<LoginPage> {
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
               onPressed: () {
-                // 🟢 MODIFICATION HNA: kattrj3ek b pop 3adi bla matkherebe9 l'Navigation
                 if (Navigator.canPop(context)) {
                   Navigator.pop(context);
                 }
@@ -186,9 +215,9 @@ class _LoginPageState extends State<LoginPage> {
                     ],
 
                     _buildTextField(
-                      label: 'Email',
+                      label: 'Email ou Téléphone',
                       controller: _emailController,
-                      hintText: 'name@example.com',
+                      hintText: 'name@example.com ou 0600000000',
                       obscureText: false,
                       errorText: _emailError,
                     ),
@@ -254,7 +283,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // 🟢 L-Page j-jdida li katban mli kaynj7 l-login (Félicitations)
   Widget _buildSuccessScreen() {
     return Scaffold(
       body: Column(
@@ -263,14 +291,15 @@ class _LoginPageState extends State<LoginPage> {
             flex: 6,
             child: Container(
               width: double.infinity,
-              color: const Color(0xFFE8F5E9), // L-Khder l-mftou7
+              color: const Color(0xFFE8F5E9), 
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Félicitations,\nvous êtes connecté !",
+                  Text(
+                    // 🟢 كنستعملو سمية اليوزر باش نرحبو بيه (أو كنخليوها عامة يلا مكانش)
+                    "Félicitations ${_userName.split(' ').first},\nvous êtes connecté !",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.3),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.3),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -280,7 +309,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 32),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: mainColor, // L-Bouton Zre9
+                      backgroundColor: mainColor, 
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -288,7 +317,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     icon: const Icon(Icons.check_circle, size: 20),
                     label: const Text("Connexion réussie !", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                    onPressed: () {}, // Desactivé 7it a-rediriger auto
+                    onPressed: () {}, 
                   ),
                 ],
               ),
@@ -312,7 +341,12 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Text("Résidence Les Palmiers", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
+                      // 🟢 كنأفيشيو السمية دالاقامة الحقيقية اللي جات من الباكاند
+                      Text(
+                        _residenceName.isNotEmpty ? _residenceName : "Votre Résidence", 
+                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
@@ -393,26 +427,10 @@ class BuildingsBackground extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          Positioned(
-            bottom: 0,
-            left: 20,
-            child: _buildBuilding(60, 150, Colors.white.withOpacity(0.1)),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 90,
-            child: _buildBuilding(80, 220, Colors.white.withOpacity(0.15)),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 30,
-            child: _buildBuilding(70, 180, Colors.white.withOpacity(0.08)),
-          ),
-          Positioned(
-            bottom: 0,
-            right: -10,
-            child: _buildBuilding(50, 100, Colors.white.withOpacity(0.12)),
-          ),
+          Positioned(bottom: 0, left: 20, child: _buildBuilding(60, 150, Colors.white.withOpacity(0.1))),
+          Positioned(bottom: 0, left: 90, child: _buildBuilding(80, 220, Colors.white.withOpacity(0.15))),
+          Positioned(bottom: 0, right: 30, child: _buildBuilding(70, 180, Colors.white.withOpacity(0.08))),
+          Positioned(bottom: 0, right: -10, child: _buildBuilding(50, 100, Colors.white.withOpacity(0.12))),
         ],
       ),
     );

@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:syndic_app/pages/copro_main_layout.dart'; 
 // import 'package:syndic_app/pages/notifications_page.dart';
 import 'package:syndic_app/pages/profile_page.dart'; // 🟢 Ajouté pour le dropdown
 import 'package:syndic_app/pages/forgot_password_page.dart'; // 🟢 Ajouté pour le dropdown
 import 'package:syndic_app/pages/login_page.dart'; // 🟢 Ajouté pour le dropdown
-
 import 'package:syndic_app/pages/NotificationsScreen.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
+
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
 // ==========================================
@@ -221,7 +222,7 @@ class CustomHeader extends StatelessWidget {
 // ==========================================
 // DÉTAIL DE LA CHARGE
 // ==========================================
-class CoproChargeDetailPage extends StatelessWidget {
+class CoproChargeDetailPage extends StatefulWidget {
   final Map<String, dynamic> chargeData;
   final String residenceName;
   final String photoUrl;
@@ -234,9 +235,90 @@ class CoproChargeDetailPage extends StatelessWidget {
   });
 
   @override
+  State<CoproChargeDetailPage> createState() => _CoproChargeDetailPageState();
+}
+
+class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
+  bool _isDownloading = false;
+
+  // 🟢 الدالة ديال التحميل
+  Future<void> _telechargerAppelCharge() async {
+    setState(() {
+      _isDownloading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      final chargeId = widget.chargeData['id']; 
+
+      // 🔴 بـدّل هاد الرابط بالرابط الحقيقي ديال API اللي كيرجع الـ PDF في Laravel ديالك
+      final String apiUrl = "https://api.syndify.nomade-cloud.com/api/mobile/copro/charges/$chargeId/pdf";
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Accept": "application/pdf", // باش نقولو للسيرفر بغينا PDF
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // 1. كنجبدو المسار ديال التليفون فين غنسجلو الملف
+        final dir = await getApplicationDocumentsDirectory();
+        final file = File('${dir.path}/Appel_Charge_$chargeId.pdf');
+
+        // 2. كنسجلو البيانات (Bytes) فداك الملف
+        await file.writeAsBytes(response.bodyBytes);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Téléchargement réussi, ouverture..."), backgroundColor: Colors.green),
+          );
+        }
+
+        // 3. كنحلو الملف بالـ Viewer ديال التليفون
+        await OpenFilex.open(file.path);
+      } else {
+        // 🟢 كنجبدو الميساج الحقيقي اللي صيفط Laravel
+        String errorMessage = "Erreur lors du téléchargement du fichier.";
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage), // غيولي يكتب ليك "Le fichier PDF n'a pas encore été généré."
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur système : $e"), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Color mainBlue = const Color(0xFF1A5EAC);
-    final String status = chargeData['status'] ?? 'Inconnu';
+    final String status = widget.chargeData['status'] ?? 'Inconnu';
     final bool isUnpaid = status == "Impayé";
     final Color statusColor = isUnpaid ? const Color(0xFFD32F2F) : const Color(0xFF1B5E20);
 
@@ -246,19 +328,18 @@ class CoproChargeDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🟢 Utilisation dyal CustomHeader avec le nouveau dropdown inclus
             CustomHeader(
-              title: chargeData['title'] ?? 'Détail de la charge',
+              title: widget.chargeData['title'] ?? 'Détail de la charge',
               subtitle: "Informations et téléchargement",
-               showBackButton: true,
-                  residenceName:residenceName,
-                  photoUrl: photoUrl,
-                  onBackTap: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  }
-                ),
+              showBackButton: true,
+              residenceName: widget.residenceName,
+              photoUrl: widget.photoUrl,
+              onBackTap: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+            ),
             
             Expanded(
               child: Padding(
@@ -298,7 +379,7 @@ class CoproChargeDetailPage extends StatelessWidget {
                             ),
                             child: Center(
                               child: Text(
-                                "${chargeData['amount'] ?? 0}",
+                                "${widget.chargeData['amount'] ?? 0}",
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -312,7 +393,7 @@ class CoproChargeDetailPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text("Date d'émission :", style: TextStyle(fontWeight: FontWeight.w500)),
-                              Text("${chargeData['date_emission'] ?? 'N/A'}", style: const TextStyle(color: Colors.black54)),
+                              Text("${widget.chargeData['date_emission'] ?? 'N/A'}", style: const TextStyle(color: Colors.black54)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -320,7 +401,7 @@ class CoproChargeDetailPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text("Échéance :", style: TextStyle(fontWeight: FontWeight.w500)),
-                              Text("${chargeData['date_echeance'] ?? 'N/A'}", style: const TextStyle(color: Colors.black54)),
+                              Text("${widget.chargeData['date_echeance'] ?? 'N/A'}", style: const TextStyle(color: Colors.black54)),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -340,7 +421,7 @@ class CoproChargeDetailPage extends StatelessWidget {
 
                     const Spacer(),
 
-                    // Bouton Télécharger
+                    // 🟢 Bouton Télécharger Mofifié
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
@@ -351,16 +432,18 @@ class CoproChargeDetailPage extends StatelessWidget {
                           side: BorderSide(color: mainBlue.withOpacity(0.5)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        icon: const Icon(Icons.file_download_outlined),
-                        label: const Text(
-                          "Télécharger l'appel de charges",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        icon: _isDownloading
+                            ? const SizedBox(
+                                width: 20, 
+                                height: 20, 
+                                child: CircularProgressIndicator(strokeWidth: 2)
+                              )
+                            : const Icon(Icons.file_download_outlined),
+                        label: Text(
+                          _isDownloading ? "Téléchargement..." : "Télécharger l'appel de charges",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Téléchargement du PDF en cours...")),
-                          );
-                        },
+                        onPressed: _isDownloading ? null : _telechargerAppelCharge,
                       ),
                     ),
                     const SizedBox(height: 16),

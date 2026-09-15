@@ -322,14 +322,16 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
               CustomHeader(
                 title: "Mes charges",
                 subtitle: _lotInfo.isNotEmpty ? "$_residenceName • $_lotInfo" : _residenceName,
-                 showBackButton: true,
-                  residenceName: _residenceName,
-                  photoUrl: _photoUrl,
-                  onBackTap: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  }
+                residenceName: _residenceName,
+                photoUrl: _photoUrl,
+                showBackButton: widget.showBackButton,
+              onBackTap: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+           
+                 
                 ),
 
               // 2. CONTENU DE LA PAGE CHARGES

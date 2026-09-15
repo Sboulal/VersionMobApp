@@ -11,11 +11,14 @@ import 'package:syndic_app/pages/annonces_page.dart';
 import 'package:syndic_app/pages/charges_page.dart'; 
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
+import 'package:syndic_app/pages/NotificationsScreen.dart';
 // Décommente cette ligne si tu as déjà créé la page NotificationsScreen
 // import 'package:syndic_app/pages/notifications_screen.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final bool showBackButton; 
+  // 🟢 حيدنا required ودرنا false كقيمة افتراضية باش تخدم فـ Bottom Nav بلا مشاكل
+  const DashboardPage({super.key, this.showBackButton = false});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -71,30 +74,47 @@ class _DashboardPageState extends State<DashboardPage> {
           // Si le nombre de notifications non lues a augmenté
           if (newUnread > _unreadCount) {
             if (mounted) {
-              // 1. Afficher le Pop-up
+             // 1. Afficher le Pop-up
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Row(
-                    children: [
-                      Icon(Icons.notifications_active, color: Colors.white),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          "Vous avez une nouvelle notification !",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  // 🟢 غلفنا المحتوى بـ GestureDetector باش يولي كليكابل
+                  content: GestureDetector(
+                    onTap: () {
+                      // كنحيدو الـ SnackBar باش ميبقاش معلق
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      
+                      // كندوزو لصفحة الإشعارات
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen(
+                            role: 'syndic', // صيفطنا الرول
+                            showBackButton: true, // بينا السهم
+                          ),
                         ),
-                      ),
-                    ],
+                      ).then((_) => _fetchDashboardData()); // فاش كنرجعو، كنديرو تحديث للداشبورد
+                    },
+                    child: const Row(
+                      children: [
+                        Icon(Icons.notifications_active, color: Colors.white),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            "Vous avez une nouvelle notification !",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   behavior: SnackBarBehavior.floating,
                   backgroundColor: mainBlueLight,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
                   elevation: 8,
-                  duration: const Duration(seconds: 4),
+                  duration: const Duration(seconds: 5), // طولت الميساج شوية باش يلحق يكليكي
                 ),
               );
-              
               // 2. Mettre à jour l'UI (le badge rouge)
               setState(() {
                 _dashboardData?['unread_notifications'] = newUnread;
@@ -220,6 +240,21 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Row(
       children: [
+        // 🟢 السهم ديال الرجوع كيبان غير يلا كانت showBackButton صحيحة
+        if (widget.showBackButton)
+          GestureDetector(
+            onTap: () {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 12.0),
+              child: Icon(Icons.arrow_back_ios, color: Colors.black87, size: 22),
+            ),
+          ),
+
+        // الصورة ديال البروفايل (Dropdown)
         PopupMenuButton<String>(
           offset: const Offset(0, 50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -256,6 +291,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
         const SizedBox(width: 12),
+        
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,11 +301,19 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
         ),
+        
         // 🟢 ICONE DE NOTIFICATION AVEC LE BADGE ROUGE
         GestureDetector(
           onTap: () {
-             // 🟢 Mets ici la navigation vers ta page de notifications
-             // Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen(role: 'syndic'))).then((_) => _fetchDashboardData());
+             Navigator.push(
+               context, 
+               MaterialPageRoute(
+                 builder: (context) => const NotificationsScreen(
+                   role: 'syndic', 
+                   showBackButton: true
+                 )
+               )
+             ).then((_) => _fetchDashboardData());
           },
           child: Stack(
             clipBehavior: Clip.none,
@@ -283,7 +327,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 child: const Icon(Icons.notifications_none, color: Colors.black87, size: 22),
               ),
-              if (_unreadCount > 0) // 🟢 Afficher le point rouge seulement si > 0
+              if (_unreadCount > 0)
                 Positioned(
                   right: -2,
                   top: -2,

@@ -154,10 +154,16 @@ Future<void> _pickImage() async {
     }
   }
   
-  Future<void> _handleLogout() async {
+ Future<void> _handleLogout() async {
     try {
       await _authService.logout();
     } catch (_) {}
+    
+    // 🟢 مسح التصويرة والطوكن من الكاش باش ماتبقاش تبان التصويرة القديمة
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('photo_url');
+    await prefs.remove('auth_token'); 
+
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
@@ -165,7 +171,6 @@ Future<void> _pickImage() async {
       (route) => false,
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final bool isSyndic = _profil?['role'] == 'syndic';
@@ -299,20 +304,25 @@ Future<void> _pickImage() async {
 
     return Column(
       children: [
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            // 🟢 L'avatar affiche désormais l'image du serveur ou l'image locale choisie
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: mainBlue.withOpacity(0.1),
-              backgroundImage: _imageFile != null 
-                  ? FileImage(_imageFile!) as ImageProvider
-                  : (photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null),
-              child: (_imageFile == null && (photoUrl == null || photoUrl.isEmpty))
-                  ? Icon(isSyndic ? Icons.manage_accounts : Icons.person, color: mainBlue, size: 50)
-                  : null,
-            ),
+       Stack(
+  alignment: Alignment.bottomRight,
+  children: [
+  CircleAvatar(
+  radius: 50,
+  backgroundColor: mainBlue.withOpacity(0.1),
+  backgroundImage: _imageFile != null 
+      ? FileImage(_imageFile!) as ImageProvider
+      : (photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null),
+  
+  // 🟢 هاد السطر هو اللي غيحبس الكراش ديال 403 بالنسبة للتصاور القدام
+  onBackgroundImageError: (error, stackTrace) {
+    debugPrint("Erreur image (ancien lien 403 ignoré)");
+  },
+  
+  child: (_imageFile == null && (photoUrl == null || photoUrl.isEmpty))
+      ? Icon(isSyndic ? Icons.manage_accounts : Icons.person, color: mainBlue, size: 50)
+      : null,
+),
             GestureDetector(
               onTap: _pickImage,
               child: Container(

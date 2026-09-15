@@ -313,15 +313,18 @@ class _CoproDocumentsPageState extends State<CoproDocumentsPage> {
                 CustomHeader(
                   title: "Vos Documents",
                   subtitle: "Règlements, PV et factures",
-                  showBackButton: true,
+                  
                   residenceName: _residenceName,
                   photoUrl: _photoUrl,
+                  showBackButton: widget.showBackButton,
+              onBackTap: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+              
     
-                  onBackTap: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  }
+                  
                 ),
                 Expanded(
                   child: _isLoading

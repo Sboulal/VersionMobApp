@@ -351,15 +351,17 @@ class _CoproAnnoncesPageState extends State<CoproAnnoncesPage> {
                 CustomHeader(
                   title: "Tableau d'affichage",
                   subtitle: "Actualités de votre copropriété",
-                  showBackButton: true,
                   residenceName: _residenceName,
                   photoUrl: _photoUrl,
+                  showBackButton: widget.showBackButton,
+              onBackTap: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+                  
                
-                   onBackTap: () {
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  }
+                  
                 ),
 
                 // RESTE DU CONTENU

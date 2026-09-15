@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/models/NotificationModel.dart';
 
 class NotificationsScreen extends StatefulWidget {
+  final bool showBackButton;
   final String role;
-  const NotificationsScreen({super.key, required this.role});
+  const NotificationsScreen({super.key, required this.role, this.showBackButton = false});
 
   @override
   _NotificationsScreenState createState() => _NotificationsScreenState();
