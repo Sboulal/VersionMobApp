@@ -253,7 +253,7 @@ Future<void> _pickImage() async {
                             trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                             onTap: () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const CoproAnnoncesPage()),
+                              MaterialPageRoute(builder: (context) => const CoproAnnoncesPage(showBackButton: true)),
                             ),
                           ),
                           const SizedBox(height: 12),
