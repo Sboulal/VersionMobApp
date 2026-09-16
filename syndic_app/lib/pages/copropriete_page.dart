@@ -294,9 +294,12 @@ class _CoproprietePageState extends State<CoproprietePage> {
     );
   }
 
-  Widget _buildLotCard(dynamic lot) {
+ Widget _buildLotCard(dynamic lot) {
     Color statusColor = lot["status"] == "À jour" ? const Color(0xFF4CAF50) : (lot["status"] == "Impayé" ? const Color(0xFFD32F2F) : const Color(0xFFFF9800));
     
+    // Nvériifiw wach kayna la photo w machi khawya
+    bool hasPhoto = lot["photo"] != null && lot["photo"].toString().isNotEmpty;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -314,12 +317,33 @@ class _CoproprietePageState extends State<CoproprietePage> {
         ),
         child: Row(
           children: [
+            // ==============================================
+            // HNA TBDL L'CODE BACH Y'AFFICHI LA PHOTO
+            // ==============================================
             Container(
               width: 55,
               height: 55,
-              decoration: BoxDecoration(color: statusColor, borderRadius: BorderRadius.circular(12)),
-              child: Center(child: Text(lot["id"].toString(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
+              decoration: BoxDecoration(
+                color: hasPhoto ? Colors.grey.shade200 : statusColor,
+                borderRadius: BorderRadius.circular(12),
+                image: hasPhoto
+                    ? DecorationImage(
+                        image: NetworkImage(lot["photo"]),
+                        fit: BoxFit.cover, // Bach tswira tji m9adda f l'carré
+                      )
+                    : null, // Ila makaynach tswira, manderou walo f l'image
+              ),
+              child: !hasPhoto
+                  ? Center(
+                      child: Text(
+                        lot["id"].toString(),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    )
+                  : null, // Ila kayna tswira, makan'affichiwech nmra dyal l'lot fok mnha
             ),
+            // ==============================================
+            
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -339,7 +363,6 @@ class _CoproprietePageState extends State<CoproprietePage> {
                 ],
               ),
             ),
-            
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [

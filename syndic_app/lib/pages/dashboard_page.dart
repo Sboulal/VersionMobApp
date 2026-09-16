@@ -254,7 +254,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
 
-        // الصورة ديال البروفايل (Dropdown)
+      // الصورة ديال البروفايل (Dropdown)
         PopupMenuButton<String>(
           offset: const Offset(0, 50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -284,11 +284,22 @@ class _DashboardPageState extends State<DashboardPage> {
             const PopupMenuDivider(),
             _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
           ],
-          child: CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: NetworkImage(photoUrl),
+          // ==============================================
+          // 🟢 HNA BDLLNA L'CODE BACH NKEBRO TSWIRA
+          // ==============================================
+          child: Container(
+            padding: const EdgeInsets.all(2), // L'espace bin tswira w l'bordure
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2.5), // L'khat lbyed
+            ),
+            child: CircleAvatar(
+              radius: 28, // 🔥 Hna kberna tswira (kanet 24 redinaha 28)
+              backgroundColor: Colors.grey.shade200,
+              backgroundImage: NetworkImage(photoUrl),
+            ),
           ),
+          // ==============================================
         ),
         const SizedBox(width: 12),
         

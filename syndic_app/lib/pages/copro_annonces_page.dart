@@ -131,7 +131,7 @@ class CustomHeader extends StatelessWidget {
            ),
               const SizedBox(width: 12),
               
-              // ======================================================
+           // ======================================================
               // USER DROPDOWN (AVATAR)
               // ======================================================
               PopupMenuButton<String>(
@@ -141,30 +141,7 @@ class CustomHeader extends StatelessWidget {
                 ),
                 color: Colors.white,
                 elevation: 4,
-                onSelected: (value) async {
-                  if (value == 'profile') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const UnifiedProfilePage()),
-                    );
-                  } else if (value == 'password') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
-                    );
-                  } else if (value == 'logout') {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.remove('auth_token');
-                    
-                    if (context.mounted) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
-                        (route) => false,
-                      );
-                    }
-                  }
-                },
+                // ... (khlli l'code dyal onSelected kima howa) ...
                 itemBuilder: (BuildContext context) => [
                   _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
                   _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
@@ -172,12 +149,14 @@ class CustomHeader extends StatelessWidget {
                   _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
                 ],
                 child: Container(
+                  // 🟢 Nzidou padding sghir bach tban l'bordure mzyan
+                  padding: const EdgeInsets.all(2), 
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: Colors.white, width: 2), // L'khat lbyed li dayr b tswira
                   ),
                   child: CircleAvatar(
-                    radius: 14,
+                    radius: 22, // 🔥 HNA KBERNA TSWIRA (kanet 14, redinaha 22)
                     backgroundColor: Colors.white,
                     backgroundImage: photoUrl.isNotEmpty
                         ? NetworkImage(photoUrl)
