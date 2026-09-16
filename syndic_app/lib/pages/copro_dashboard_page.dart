@@ -13,16 +13,18 @@ import 'package:syndic_app/pages/login_page.dart';
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
+import 'package:syndic_app/pages/copro_main_layout.dart';
+import 'package:syndic_app/pages/main_layout.dart';
+
 // ==========================================
-// WIDGET RÉUTILISABLE : CUSTOM HEADER
+// WIDGET RÉUTILISABLE : CUSTOM HEADER (CORRIGÉ)
 // ==========================================
-class CustomHeader extends StatelessWidget {
+class CustomHeader extends StatefulWidget {
   final String title;
   final String subtitle;
   final String residenceName;
   final String photoUrl;
   final bool showBackButton;
-  
   final String userRole;
   final VoidCallback? onBackTap;
   final VoidCallback? onNotificationTap;
@@ -39,7 +41,32 @@ class CustomHeader extends StatelessWidget {
     this.onNotificationTap,
   });
 
-  // Fonction pour créer les items du menu déroulant
+  @override
+  State<CustomHeader> createState() => _CustomHeaderState();
+}
+
+class _CustomHeaderState extends State<CustomHeader> {
+  bool _isSyndic = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfSyndic();
+  }
+
+  // 🟢 Kanchoufou wach l'user 3ndo l'rôle 'syndic' f l'cache
+  Future<void> _checkIfSyndic() async {
+    final prefs = await SharedPreferences.getInstance();
+    final roles = prefs.getStringList('user_roles') ?? [];
+    if (roles.contains('syndic')) {
+      if (mounted) {
+        setState(() {
+          _isSyndic = true;
+        });
+      }
+    }
+  }
+
   PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
     final Color mainBlue = const Color(0xFF1A5EAC);
     final color = isDestructive ? Colors.redAccent : mainBlue;
@@ -50,14 +77,7 @@ class CustomHeader extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 12),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
-          ),
+          Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
         ],
       ),
     );
@@ -72,21 +92,14 @@ class CustomHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: mainBlue,
         image: DecorationImage(
-          image: const NetworkImage(
-            "https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop",
-          ),
+          image: const NetworkImage("https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop"),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            mainBlue.withOpacity(0.85),
-            BlendMode.srcOver,
-          ),
+          colorFilter: ColorFilter.mode(mainBlue.withOpacity(0.85), BlendMode.srcOver),
         ),
       ),
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 16,
-        bottom: 16,
-        left: 16,
-        right: 16,
+        bottom: 16, left: 16, right: 16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,114 +107,109 @@ class CustomHeader extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Bouton Retour
-              if (showBackButton && onBackTap != null) 
+              if (widget.showBackButton && widget.onBackTap != null) 
                 InkWell(
-                  onTap: onBackTap,
+                  onTap: widget.onBackTap,
                   child: const Padding(
                     padding: EdgeInsets.only(right: 16.0),
                     child: Icon(Icons.arrow_back, color: Colors.white, size: 26),
                   ),
                 ),
-              
               const Icon(Icons.apartment, color: Colors.white, size: 24),
               const SizedBox(width: 8),
-              
-              // Nom de la résidence
               Expanded(
                 child: Text(
-                  residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  widget.residenceName.isNotEmpty ? "Sindy | ${widget.residenceName}" : "Sindy",
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 8),
-              
-              // Bouton Notifications
               InkWell(
-             onTap: onNotificationTap ?? () {
-               // 🟢 S'il n'y a pas d'action définie, on ouvre la page par défaut
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                   builder: (context) => NotificationsScreen(role: userRole),
-                 ),
-               );
-             },
-             child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
-           ),
+                onTap: widget.onNotificationTap ?? () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationsScreen(role: widget.userRole)));
+                },
+                child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
+              ),
               const SizedBox(width: 12),
               
-            // ======================================================
+              // ======================================================
               // USER DROPDOWN (AVATAR)
               // ======================================================
               PopupMenuButton<String>(
                 offset: const Offset(0, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 color: Colors.white,
                 elevation: 4,
-                // ... (khlli l'code dyal onSelected kima howa) ...
+                
+                // 🟢 HNA KAN LMOCHKIL: ONSLECTED KANTA KHAWYA !
+                onSelected: (value) async {
+                  if (value == 'profile') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UnifiedProfilePage()),
+                    );
+                  } else if (value == 'espace_syndic') {
+                    // 🟢 YRJE3 L'ESPACE SYNDIC
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainLayout()),
+                      (route) => false,
+                    );
+                  } else if (value == 'password') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                    );
+                  } else if (value == 'logout') {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('auth_token');
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (route) => false,
+                      );
+                    }
+                  }
+                },
                 itemBuilder: (BuildContext context) => [
                   _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+                  
+                  // 🟢 KAYBAN GHIR ILA KAN _isSyndic = true (Bhal Nabil)
+                  if (_isSyndic)
+                    _buildPopupMenuItem('espace_syndic', Icons.admin_panel_settings, 'Espace Syndic'),
+                    
                   _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
                   const PopupMenuDivider(),
                   _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
                 ],
                 child: Container(
-                  // 🟢 Nzidou padding sghir bach tban l'bordure mzyan
-                  padding: const EdgeInsets.all(2), 
+                  padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2), // L'khat lbyed li dayr b tswira
+                    border: Border.all(color: Colors.white, width: 2.5),
                   ),
                   child: CircleAvatar(
-                    radius: 22, // 🔥 HNA KBERNA TSWIRA (kanet 14, redinaha 22)
+                    radius: 22,
                     backgroundColor: Colors.white,
-                    backgroundImage: photoUrl.isNotEmpty
-                        ? NetworkImage(photoUrl)
-                        : const NetworkImage(
-                            "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
-                          ),
+                    backgroundImage: widget.photoUrl.isNotEmpty
+                        ? NetworkImage(widget.photoUrl)
+                        : const NetworkImage("https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true"),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 20),
-          
-          // Titre de la page
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+          Text(widget.title, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
           const SizedBox(height: 3),
-          
-          // Sous-titre
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(widget.subtitle, style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 }
-
 
 class CoproDashboardPage extends StatefulWidget {
   const CoproDashboardPage({super.key});
@@ -848,23 +856,21 @@ class _CoproDashboardPageState
   // PROFILE MENU
   // ==========================================================
 
-  Future<void> _handleProfileAction(
-      String value) async {
-
+ Future<void> _handleProfileAction(String value) async {
     if (value == 'profile') {
-
       await Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) =>
-              const UnifiedProfilePage(),
-        ),
+        MaterialPageRoute(builder: (_) => const UnifiedProfilePage()),
       );
-
       if (mounted) {
         _fetchDashboardData();
       }
-
+    } else if (value == 'espace_copro') {
+      // 🟢 HNA FIN KAYTSOWWITCHI L'ESPACE RESIDENT (COPRO)
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CoproMainLayout()),
+      );
     } else if (value == 'password') {
 
       Navigator.push(

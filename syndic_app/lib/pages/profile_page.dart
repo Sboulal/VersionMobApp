@@ -47,7 +47,7 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
     try {
       final data = await _authService.getProfil();
       
-      // 🟢 Mettre à jour le Cache si l'API renvoie une photo
+      // Mettre à jour le Cache si l'API renvoie une photo
       final photo = data['photo_url'] ?? data['photo'];
       if (photo != null && photo.isNotEmpty) {
          final prefs = await SharedPreferences.getInstance();
@@ -68,15 +68,14 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
 
 Future<void> _pickImage() async {
     try {
-      // 🟢 1. COMPRESSION ROBUSTE (Réduit la taille et les dimensions pour éviter le crash Nginx)
       final XFile? pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 50, 
-        maxWidth: 800,  // <-- TRÈS IMPORTANT : Force l'image à être petite
-        maxHeight: 800, // <-- TRÈS IMPORTANT
+        maxWidth: 800,  
+        maxHeight: 800, 
       );
       
-      if (pickedFile == null) return; // Si l'utilisateur annule
+      if (pickedFile == null) return; 
 
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -110,7 +109,6 @@ Future<void> _pickImage() async {
 
         if (response.statusCode == 200 && data['success'] == true) {
           
-          // Sauvegarde l'URL localement
           if (data['photo_url'] != null) {
              await prefs.setString('photo_url', data['photo_url']);
           }
@@ -119,7 +117,7 @@ Future<void> _pickImage() async {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Photo mise à jour avec succès !"), backgroundColor: Colors.green),
             );
-            _loadProfil(); // Recharge le profil
+            _loadProfil(); 
           }
         } else {
           if (mounted) {
@@ -129,7 +127,6 @@ Future<void> _pickImage() async {
           }
         }
       } catch (e) {
-        // 🟢 2. DÉTECTEUR D'ERREUR PRÉCIS 
         if (mounted) {
           String serverResponse = response.body;
           if (serverResponse.length > 50) {
@@ -159,7 +156,6 @@ Future<void> _pickImage() async {
       await _authService.logout();
     } catch (_) {}
     
-    // 🟢 مسح التصويرة والطوكن من الكاش باش ماتبقاش تبان التصويرة القديمة
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('photo_url');
     await prefs.remove('auth_token'); 
@@ -171,6 +167,7 @@ Future<void> _pickImage() async {
       (route) => false,
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final bool isSyndic = _profil?['role'] == 'syndic';
@@ -185,13 +182,18 @@ Future<void> _pickImage() async {
           ? IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => isSyndic ? const MainLayout() : const CoproMainLayout(),
-                  ),
-                  (Route<dynamic> route) => false,
-                );
+                // 🟢 HNA SALA7NA L'NAVIGATION BACH TRJE3 L'NFS L'ESPACE MNIN JAT
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => isSyndic ? const MainLayout() : const CoproMainLayout(),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                }
               },
             )
           : null,
@@ -299,7 +301,6 @@ Future<void> _pickImage() async {
   // --- WIDGETS ---
 
   Widget _buildProfileHeader(bool isSyndic) {
-    // 🟢 Récupération de l'URL de l'image depuis l'API
     final String? photoUrl = _profil?['photo_url'] ?? _profil?['photo'];
 
     return Column(
@@ -314,7 +315,6 @@ Future<void> _pickImage() async {
       ? FileImage(_imageFile!) as ImageProvider
       : (photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null),
   
-  // 🟢 هاد السطر هو اللي غيحبس الكراش ديال 403 بالنسبة للتصاور القدام
   onBackgroundImageError: (error, stackTrace) {
     debugPrint("Erreur image (ancien lien 403 ignoré)");
   },
@@ -477,9 +477,7 @@ Future<void> _pickImage() async {
     );
   }
 
-
 Future<void> _supprimerCompte(BuildContext context) async {
-  // 1. Afficher une boîte de dialogue de confirmation
   bool? confirmer = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
@@ -504,7 +502,6 @@ Future<void> _supprimerCompte(BuildContext context) async {
 
   if (confirmer != true) return;
 
-  // 2. Appel API de suppression
   try {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
@@ -520,11 +517,9 @@ Future<void> _supprimerCompte(BuildContext context) async {
     final data = jsonDecode(response.body);
 
     if (response.statusCode == 200 && data['success'] == true) {
-      // Nettoyer les préférences locales
       await prefs.clear();
 
       if (context.mounted) {
-        // Rediriger vers la page Landing ou Login
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const LandingPage()),

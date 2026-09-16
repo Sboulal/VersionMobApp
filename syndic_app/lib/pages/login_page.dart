@@ -102,10 +102,13 @@ class _LoginPageState extends State<LoginPage> {
         
         await prefs.setString('auth_token', data['data']['token']); 
 
-        final String role = (data['data']['role'] ?? 'syndic').toString().toLowerCase();
-        await prefs.setString('user_role', role);
+        // 🟢 1. Kanjbdou ga3 les rôles w kansaivegardiwhom
+        List<dynamic> rawRoles = data['data']['roles'] ?? [data['data']['role'] ?? 'coproprietaire'];
+        List<String> userRoles = rawRoles.map((e) => e.toString().toLowerCase()).toList();
+        
+        await prefs.setStringList('user_roles', userRoles); // Savelna tableau dyal les rôles
+        await prefs.setString('user_role', userRoles.first); // Savelna rôle wa7d par défaut
 
-        // 🟢 كنجبدو السمية دالاقامة واليوزر من الـ API
         String fetchedResidence = data['data']['residence_name'] ?? 'Votre Résidence';
         String fetchedName = data['data']['user']['nom'] ?? '';
 
@@ -121,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
         
         if (mounted) {
           setState(() {
-            _residenceName = fetchedResidence; // 🟢 كنسجلو السمية باش تافيشا
+            _residenceName = fetchedResidence; 
             _userName = fetchedName;
             _isLoading = false;
             _isSuccess = true;
@@ -131,17 +134,20 @@ class _LoginPageState extends State<LoginPage> {
         await Future.delayed(const Duration(milliseconds: 1500));
         
         if (mounted) {
-          if (role == 'coproprietaire') {
-            Navigator.pushAndRemoveUntil(
-              context, 
-              MaterialPageRoute(builder: (context) => const CoproMainLayout()),
-              (Route<dynamic> route) => false, 
-            );
-          } else {
+          // 🟢 2. Redirection 3la 7sab les rôles !
+          if (userRoles.contains('syndic')) {
+            // Ila kan fih Syndic (B7al Nabil wla Syndic 3adi), ydik l'MainLayout (Syndic)
             Navigator.pushAndRemoveUntil(
               context, 
               MaterialPageRoute(builder: (context) => const MainLayout()),
               (Route<dynamic> route) => false,
+            );
+          } else if (userRoles.contains('coproprietaire')) {
+            // Ila kan Ghi copropriétaire, ydik l'CoproMainLayout
+            Navigator.pushAndRemoveUntil(
+              context, 
+              MaterialPageRoute(builder: (context) => const CoproMainLayout()),
+              (Route<dynamic> route) => false, 
             );
           }
         }

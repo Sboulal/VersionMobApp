@@ -12,6 +12,7 @@ import 'package:syndic_app/pages/charges_page.dart';
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
+import 'package:syndic_app/pages/copro_main_layout.dart';
 // Décommente cette ligne si tu as déjà créé la page NotificationsScreen
 // import 'package:syndic_app/pages/notifications_screen.dart';
 
@@ -264,6 +265,13 @@ class _DashboardPageState extends State<DashboardPage> {
             if (value == 'profile') {
               await Navigator.push(context, MaterialPageRoute(builder: (context) => const UnifiedProfilePage()));
               _fetchDashboardData(); 
+            } 
+            else if (value == 'espace_copro') {
+              // 🟢 HNA FIN KAYTSOWWITCHI L'ESPACE RESIDENT (COPRO)
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CoproMainLayout()),
+              );
             } else if (value == 'password') {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordPage()));
             } else if (value == 'logout') {
@@ -278,8 +286,12 @@ class _DashboardPageState extends State<DashboardPage> {
               }
             }
           },
-          itemBuilder: (BuildContext context) => [
+         itemBuilder: (BuildContext context) => [
             _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+            
+            // 🟢 ZID HADA: L'bouton bach ysowitchi l'Espace Copro
+            _buildPopupMenuItem('espace_copro', Icons.swap_horiz, 'Espace Résident'),
+            
             _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
             const PopupMenuDivider(),
             _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
