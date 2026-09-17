@@ -39,6 +39,27 @@ class _UnifiedProfilePageState extends State<UnifiedProfilePage> {
     _loadProfil();
   }
 
+InputDecoration _customInputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: mainBlue, width: 1.5),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
   Future<void> _loadProfil() async {
     setState(() {
       _isLoading = true;
@@ -553,31 +574,44 @@ Future<void> _supprimerCompte(BuildContext context) async {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text("Modifier mon mot de passe"),
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8),
+              contentPadding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 8),
+              actionsPadding: const EdgeInsets.only(bottom: 16, right: 20, left: 20),
+              title: const Text(
+                "Modifier mon mot de passe",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: ancienCtrl,
                     obscureText: true,
-                    decoration: const InputDecoration(labelText: "Ancien mot de passe"),
+                    decoration: _customInputDecoration("Ancien mot de passe"),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: nouveauCtrl,
                     obscureText: true,
-                    decoration: const InputDecoration(labelText: "Nouveau mot de passe"),
+                    decoration: _customInputDecoration("Nouveau mot de passe"),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: isSubmitting ? null : () => Navigator.pop(ctx),
-                  child: const Text("Annuler"),
+                  child: const Text("Annuler", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
                 ),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainBlue,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
                   onPressed: isSubmitting
                       ? null
                       : () async {
@@ -609,8 +643,8 @@ Future<void> _supprimerCompte(BuildContext context) async {
                           }
                         },
                   child: isSubmitting
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text("Valider", style: TextStyle(color: Colors.white)),
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text("Valider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -620,7 +654,7 @@ Future<void> _supprimerCompte(BuildContext context) async {
     );
   }
 
-  Future<void> _showEditProfileDialog() async {
+ Future<void> _showEditProfileDialog() async {
     final nomCtrl = TextEditingController(text: _profil?['nom'] ?? '');
     final telCtrl = TextEditingController(text: _profil?['telephone'] ?? '');
     bool isSubmitting = false;
@@ -631,30 +665,43 @@ Future<void> _supprimerCompte(BuildContext context) async {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text("Modifier mes informations"),
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent, // Enlève l'effet Material 3
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8),
+              contentPadding: const EdgeInsets.only(left: 24, right: 24, top: 12, bottom: 8),
+              actionsPadding: const EdgeInsets.only(bottom: 16, right: 20, left: 20),
+              title: const Text(
+                "Modifier mes informations",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: nomCtrl,
-                    decoration: const InputDecoration(labelText: "Nom complet"),
+                    decoration: _customInputDecoration("Nom complet"),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: telCtrl,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: "Téléphone"),
+                    decoration: _customInputDecoration("Téléphone"),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: isSubmitting ? null : () => Navigator.pop(ctx),
-                  child: const Text("Annuler"),
+                  child: const Text("Annuler", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
                 ),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mainBlue,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
                   onPressed: isSubmitting
                       ? null
                       : () async {
@@ -685,8 +732,8 @@ Future<void> _supprimerCompte(BuildContext context) async {
                           }
                         },
                   child: isSubmitting
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text("Valider", style: TextStyle(color: Colors.white)),
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text("Valider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],
             );

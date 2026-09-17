@@ -30,6 +30,7 @@ class _ChargesPageState extends State<ChargesPage> {
     _fetchCharges();
   }
 
+ 
   Future<void> _fetchCharges() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
@@ -187,6 +188,42 @@ class _CreateChargePageState extends State<CreateChargePage> {
   final TextEditingController _dateController = TextEditingController(text: "2026-10-31");
   bool _isSubmitting = false;
 
+ Future<void> _selectDate(BuildContext context) async {
+    // Essayer d'ouvrir le calendrier sur la date déjà écrite, sinon sur la date du jour
+    DateTime initialDate = DateTime.now();
+    try {
+      if (_dateController.text.isNotEmpty) {
+        initialDate = DateTime.parse(_dateController.text);
+      }
+    } catch (_) {}
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: mainBlue, // Couleur de l'entête
+              onPrimary: Colors.white, // Couleur du texte de l'entête
+              onSurface: Colors.black87, // Couleur des jours
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        // Formatage en YYYY-MM-DD
+        String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        _dateController.text = formattedDate;
+      });
+    }
+  }
 Future<void> _submitCharge() async {
     if (_amountController.text.isEmpty || _titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Veuillez remplir le montant et le titre.")));
@@ -304,7 +341,13 @@ Future<void> _submitCharge() async {
                     const SizedBox(height: 16),
                     _buildInput("Montant total à répartir (MAD)", _amountController, isNumber: true),
                     const SizedBox(height: 16),
-                    _buildInput("Date d'échéance (YYYY-MM-DD)", _dateController),
+                    _buildInput(
+  "Date d'échéance", 
+  _dateController, 
+  readOnly: true, 
+  onTap: () => _selectDate(context),
+  suffixIcon: Icon(Icons.calendar_month, color: mainBlue, size: 20),
+),
                   ],
                 ),
               ),
@@ -325,7 +368,7 @@ Future<void> _submitCharge() async {
     );
   }
 
-  Widget _buildInput(String label, TextEditingController controller, {bool isNumber = false}) {
+  Widget _buildInput(String label, TextEditingController controller, {bool isNumber = false, bool readOnly = false, VoidCallback? onTap, Widget? suffixIcon}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -334,8 +377,12 @@ Future<void> _submitCharge() async {
         TextField(
           controller: controller,
           keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          readOnly: readOnly, // Empêche le clavier de s'ouvrir si true
+          onTap: onTap,       // Déclenche l'action au clic
           decoration: InputDecoration(
-            filled: true, fillColor: Colors.white,
+            filled: true, 
+            fillColor: Colors.white,
+            suffixIcon: suffixIcon, // Ajoute l'icône à droite
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
           ),

@@ -179,25 +179,38 @@ class _CoproprietePageState extends State<CoproprietePage> {
     );
   }
 
-  // ==========================================================
-  // NOUVEAUX WIDGETS D'EN-TÊTE
-  // ==========================================================
-  Widget _buildTopHeader() {
+ Widget _buildTopHeader() {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (widget.isMainScreen) 
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black87),
-              onPressed: () {
+            GestureDetector(
+              onTap: () {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const MainLayout()), 
                   (Route<dynamic> route) => false,
                 );
               },
+              child: Container(
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade200, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+              ),
             ),
           const Icon(Icons.apartment, color: Colors.black87, size: 32),
           const SizedBox(width: 12),
