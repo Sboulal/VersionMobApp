@@ -1,81 +1,50 @@
-// Importing important packages require to connect
-// Flutter and Dart
 import 'package:flutter/material.dart';
-import 'dart:io'; // 🟢 هاد السطر ضروري باش يخدم HttpOverrides
+import 'dart:io'; 
 
-import 'package:syndic_app/pages/landing_page.dart';
+// 🟢 HNA TBDLNA L'IMPORT BACH NJIBOU LOGIN PAGE
+import 'package:syndic_app/pages/login_page.dart';
 
-
-// Main Function
 void main() async {
- 
-  // Giving command to runApp() to run the app.
-  HttpOverrides.global = MyHttpOverrides(); // 🟢 تخطي مشكل SSL
-  // The purpose of the runApp() function is to attach
-  // the given widget to the screen.
-
-  // Gérer les messages f l'arrière-plan
-
-
-  // Récupérer le Token et l'afficher dans la console
+  HttpOverrides.global = MyHttpOverrides(); 
   
   runApp(const MyApp());
 }
 
-
-
-
-// MyApp extends StatelessWidget and overrides its
-// build method.
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, 
-      // title of the application
       title: 'Syndify App',
-      
-      // theme of the widget
       theme: ThemeData(
         primarySwatch: Colors.lightGreen,
+        // (Optionnel) Ila bghiti tbadal naw3 l'khat f l'app kamla
+        // fontFamily: 'Montserrat', 
       ),
       
-      // Inner UI of the application
-      home: const LandingPage(), // 🟢 من الأحسن تزيدي const هنا
+      // 🔥 HADI HIYA L'ASTUCE LI GHAT-FIXI MOCHKIL L'IPHONE 🔥
+      builder: (context, child) {
+        final MediaQueryData data = MediaQuery.of(context);
+        return MediaQuery(
+          data: data.copyWith(
+            // Hna drna 1.15 ya3ni l'kht ghadi ykber b 15% f l'app kamla.
+            // Ila ba9i kayban lik sghir, redha 1.20 wla 1.25.
+            textScaler: const TextScaler.linear(1.15), 
+            
+            // ⚠️ NOTE: Ila knti kheddam b version 9dima chwiya dyal Flutter w 3tak erreur f textScaler, 
+            // mss7 textScaler w dir f blassetha had ster lta7t:
+            // textScaleFactor: 1.15,
+          ),
+          child: child!,
+        );
+      },
+      
+      home: const LoginPage(), 
     );
   }
 }
-
-// This class is similar to MyApp instead it
-// returns Scaffold Widget 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-      ),
-      
-      // Sets the content to the
-      // center of the application page
-      body: const Center(
-          // Sets the content of the Application
-          child: Text(
-        'Welcome to SyndifyApp!',
-      )),
-    );
-  }
-}
-
-// 🟢 Classe pour ignorer les erreurs de certificat SSL (En développement)
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

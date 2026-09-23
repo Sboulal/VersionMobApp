@@ -6,6 +6,9 @@ import 'package:syndic_app/pages/main_layout.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 
+// 🟢 Nzidou had l'import bach nbiyenou msg d'inscription
+import 'package:syndic_app/pages/landing_page.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -26,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
   String? _passwordError;
   String? _globalError;
 
-  // 🟢 زدنا هاد المتغيرات باش نسجلو فيهم معلومات اليوزر
   String _residenceName = "";
   String _userName = "";
   
@@ -102,12 +104,11 @@ class _LoginPageState extends State<LoginPage> {
         
         await prefs.setString('auth_token', data['data']['token']); 
 
-        // 🟢 1. Kanjbdou ga3 les rôles w kansaivegardiwhom
         List<dynamic> rawRoles = data['data']['roles'] ?? [data['data']['role'] ?? 'coproprietaire'];
         List<String> userRoles = rawRoles.map((e) => e.toString().toLowerCase()).toList();
         
-        await prefs.setStringList('user_roles', userRoles); // Savelna tableau dyal les rôles
-        await prefs.setString('user_role', userRoles.first); // Savelna rôle wa7d par défaut
+        await prefs.setStringList('user_roles', userRoles); 
+        await prefs.setString('user_role', userRoles.first); 
 
         String fetchedResidence = data['data']['residence_name'] ?? 'Votre Résidence';
         String fetchedName = data['data']['user']['nom'] ?? '';
@@ -127,6 +128,7 @@ class _LoginPageState extends State<LoginPage> {
             _residenceName = fetchedResidence; 
             _userName = fetchedName;
             _isLoading = false;
+            // 🟢 HADI HIYA LI KAT-AFFICHI L'ÉCRAN DE WELCOME "Connexion réussie"
             _isSuccess = true;
           });
         }
@@ -134,16 +136,13 @@ class _LoginPageState extends State<LoginPage> {
         await Future.delayed(const Duration(milliseconds: 1500));
         
         if (mounted) {
-          // 🟢 2. Redirection 3la 7sab les rôles !
           if (userRoles.contains('syndic')) {
-            // Ila kan fih Syndic (B7al Nabil wla Syndic 3adi), ydik l'MainLayout (Syndic)
             Navigator.pushAndRemoveUntil(
               context, 
               MaterialPageRoute(builder: (context) => const MainLayout()),
               (Route<dynamic> route) => false,
             );
           } else if (userRoles.contains('coproprietaire')) {
-            // Ila kan Ghi copropriétaire, ydik l'CoproMainLayout
             Navigator.pushAndRemoveUntil(
               context, 
               MaterialPageRoute(builder: (context) => const CoproMainLayout()),
@@ -169,6 +168,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 🟢 HNA KAYBAN L'ÉCRAN "WELCOME" ILA KAN LOGIN S7I7
     if (_isSuccess) {
       return _buildSuccessScreen();
     }
@@ -182,17 +182,7 @@ class _LoginPageState extends State<LoginPage> {
             child: BuildingsBackground(mainColor: mainColor, height: MediaQuery.of(context).size.height * 0.45),
           ),
           
-          Positioned(
-            top: 50, left: 16,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () {
-                if (Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                }
-              }
-            ),
-          ),
+          // ❌ HNA HIYEDNA L'BOUTON RETOUR HIT LOGIN WELLAT HIYA L-LEWLA D L'APP ❌
 
           Align(
             alignment: Alignment.bottomCenter,
@@ -209,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Text(
-                      'Bienvenue de nouveau !',
+                      'Bienvenue !',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1A5EAC)),
                     ),
@@ -279,6 +269,24 @@ class _LoginPageState extends State<LoginPage> {
                           ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
                           : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // 🟢 ZEDNA HADA BACH L'UTILISATEUR Y9DER YMCHI L'PAGE D'INSCRIPTION
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Pas encore de compte ? ", style: TextStyle(color: Colors.black54, fontSize: 14)),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterInfoPage()));
+                          },
+                          child: Text("S'inscrire", style: TextStyle(color: mainColor, fontWeight: FontWeight.bold, fontSize: 14)),
+                        )
+                      ],
+
+                      
+                    )
                   ],
                 ),
               ),
@@ -302,7 +310,6 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    // 🟢 كنستعملو سمية اليوزر باش نرحبو بيه (أو كنخليوها عامة يلا مكانش)
                     "Félicitations ${_userName.split(' ').first},\nvous êtes connecté !",
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.3),
@@ -347,7 +354,6 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // 🟢 كنأفيشيو السمية دالاقامة الحقيقية اللي جات من الباكاند
                       Text(
                         _residenceName.isNotEmpty ? _residenceName : "Votre Résidence", 
                         style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),

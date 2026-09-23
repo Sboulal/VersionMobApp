@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:syndic_app/pages/copro_charge_detail_page.dart';
-import 'package:syndic_app/pages/copro_main_layout.dart'; 
-// import 'package:syndic_app/pages/notifications_page.dart';
-import 'package:syndic_app/pages/profile_page.dart'; // 🟢 IMPORT AJOUTÉ
-import 'package:syndic_app/pages/forgot_password_page.dart'; // 🟢 IMPORT AJOUTÉ
-import 'package:syndic_app/pages/login_page.dart'; // 🟢 IMPORT AJOUTÉ
+import 'package:syndic_app/pages/profile_page.dart'; 
+import 'package:syndic_app/pages/forgot_password_page.dart'; 
+import 'package:syndic_app/pages/login_page.dart'; 
 import 'package:syndic_app/pages/NotificationsScreen.dart';
+
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
 // ==========================================
@@ -19,7 +16,6 @@ class CustomHeader extends StatelessWidget {
   final String residenceName;
   final String photoUrl;
   final bool showBackButton;
-  
   final String userRole;
   final VoidCallback? onBackTap;
   final VoidCallback? onNotificationTap;
@@ -36,26 +32,29 @@ class CustomHeader extends StatelessWidget {
     this.onNotificationTap,
   });
 
-  // Fonction pour créer les items du menu déroulant
-  PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
-    final Color mainBlue = const Color(0xFF1A5EAC);
-    final color = isDestructive ? Colors.redAccent : mainBlue;
-
-    return PopupMenuItem<String>(
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
-          ),
-        ],
+  PopupMenuButton<String> _buildPopupMenu(BuildContext context) {
+    return PopupMenuButton<String>(
+      offset: const Offset(0, 50),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white,
+      elevation: 4,
+      itemBuilder: (BuildContext context) => [
+        const PopupMenuItem(value: 'profile', child: Text('Profil')),
+        const PopupMenuItem(value: 'logout', child: Text('Déconnexion', style: TextStyle(color: Colors.red))),
+      ],
+      child: Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+        child: CircleAvatar(
+          radius: 22,
+          backgroundColor: Colors.white,
+          backgroundImage: photoUrl.isNotEmpty
+              ? NetworkImage(photoUrl)
+              : const NetworkImage("https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&bold=true"),
+        ),
       ),
     );
   }
@@ -69,14 +68,9 @@ class CustomHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: mainBlue,
         image: DecorationImage(
-          image: const NetworkImage(
-            "https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop",
-          ),
+          image: const NetworkImage("https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop"),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            mainBlue.withOpacity(0.85),
-            BlendMode.srcOver,
-          ),
+          colorFilter: ColorFilter.mode(mainBlue.withOpacity(0.85), BlendMode.srcOver),
         ),
       ),
       padding: EdgeInsets.only(
@@ -89,10 +83,8 @@ class CustomHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Bouton Retour
-              if (showBackButton && onBackTap != null) 
+              if (showBackButton && onBackTap != null)
                 InkWell(
                   onTap: onBackTap,
                   child: const Padding(
@@ -100,99 +92,30 @@ class CustomHeader extends StatelessWidget {
                     child: Icon(Icons.arrow_back, color: Colors.white, size: 26),
                   ),
                 ),
-              
               const Icon(Icons.apartment, color: Colors.white, size: 24),
               const SizedBox(width: 8),
-              
-              // Nom de la résidence
               Expanded(
                 child: Text(
                   residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
-              
-              // Bouton Notifications
               InkWell(
-             onTap: onNotificationTap ?? () {
-               // 🟢 S'il n'y a pas d'action définie, on ouvre la page par défaut
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                   builder: (context) => NotificationsScreen(role: userRole),
-                 ),
-               );
-             },
-             child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
-           ),
-              const SizedBox(width: 12),
-              
-             // ======================================================
-              // USER DROPDOWN (AVATAR)
-              // ======================================================
-              PopupMenuButton<String>(
-                offset: const Offset(0, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                color: Colors.white,
-                elevation: 4,
-                // ... (khlli l'code dyal onSelected kima howa) ...
-                itemBuilder: (BuildContext context) => [
-                  _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
-                  _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
-                  const PopupMenuDivider(),
-                  _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
-                ],
-                child: Container(
-                  // 🟢 Nzidou padding sghir bach tban l'bordure mzyan
-                  padding: const EdgeInsets.all(2), 
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2), // L'khat lbyed li dayr b tswira
-                  ),
-                  child: CircleAvatar(
-                    radius: 22, // 🔥 HNA KBERNA TSWIRA (kanet 14, redinaha 22)
-                    backgroundColor: Colors.white,
-                    backgroundImage: photoUrl.isNotEmpty
-                        ? NetworkImage(photoUrl)
-                        : const NetworkImage(
-                            "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
-                          ),
-                  ),
-                ),
+                onTap: onNotificationTap ?? () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationsScreen(role: userRole)));
+                },
+                child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
               ),
+              const SizedBox(width: 12),
+              _buildPopupMenu(context),
             ],
           ),
           const SizedBox(height: 20),
-          
-          // Titre de la page
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+          Text(title, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
           const SizedBox(height: 3),
-          
-          // Sous-titre
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.85),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -200,12 +123,11 @@ class CustomHeader extends StatelessWidget {
 }
 
 // ==========================================
-// 1. LISTE DES CHARGES
+// 1. LISTE DES APPELS DE FONDS SYNDIC
 // ==========================================
 class CoproChargesPage extends StatefulWidget {
-  final bool showBackButton; 
-  
-  const CoproChargesPage({super.key, this.showBackButton = false}); 
+  final bool showBackButton;
+  const CoproChargesPage({super.key, required this.showBackButton});
 
   @override
   State<CoproChargesPage> createState() => _CoproChargesPageState();
@@ -216,335 +138,415 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
   final Color bgLight = const Color(0xFFF4F6F9);
 
   bool _isLoading = true;
-  String _solde = "0,00 MAD";
-  double _rawSolde = 0;
-  List<dynamic> _chargesList = [];
-  
-  // 🟢 Données dynamiques initialisées vides (plus de fausses données)
-  String _residenceName = "Chargement..."; 
-  String _lotInfo = "";
-  String _photoUrl = "";
+  bool _isCreating = false; // Bach n-geriw chrgement dyal l'ajout
+  Map<String, dynamic>? _latestAppel;
+  List<dynamic> _historiqueAppels = [];
+  String _residenceName = "Résidence Les Jardins";
+
+  // Controllers l'formulaire dyal l'ajout
+  final TextEditingController _titreController = TextEditingController();
+  final TextEditingController _montantController = TextEditingController();
+  DateTime? _dateEcheance;
 
   @override
   void initState() {
     super.initState();
-    _fetchCharges();
+    _fetchChargesData();
   }
 
-  Future<void> _fetchCharges() async {
+  Future<void> _fetchChargesData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-
-    // Pré-remplissage avec le cache local pour éviter l'écran vide
+    
     setState(() {
-      _residenceName = prefs.getString('residence_name') ?? "Ma Résidence";
-      _lotInfo = prefs.getString('lot_info') ?? "";
-      _photoUrl = prefs.getString('photo_url') ?? "";
+      _residenceName = prefs.getString('residence_name') ?? "Résidence Les Jardins";
+      _isLoading = true; // Bach mni ndirou refresh tb9a tban loading
     });
 
     try {
       final response = await http.get(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/copro/mes-charges"),
-        headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges"), 
+        headers: {"Authorization": "Bearer $token"},
       );
       final data = jsonDecode(response.body);
-      
-      if (response.statusCode == 200 && data['success'] == true) {
+
+      if (response.statusCode == 200 && data['success']) {
         setState(() {
-          _solde = data['solde'] ?? "0,00 MAD";
-          _rawSolde = (data['raw_solde'] ?? 0).toDouble();
-          _chargesList = data['data'] ?? [];
-          
-          if (data['residence_name'] != null) {
-            _residenceName = data['residence_name'];
-          }
-          if (data['lot_info'] != null) {
-            _lotInfo = data['lot_info'];
-          }
-          if (data['user'] != null && data['user']['photo_url'] != null) {
-            _photoUrl = data['user']['photo_url'];
-          }
-          
+          _latestAppel = data['latest_appel'];
+          _historiqueAppels = data['appels'] ?? [];
           _isLoading = false;
         });
       } else {
         setState(() => _isLoading = false);
       }
     } catch (e) {
-      debugPrint("Charges error: $e");
       setState(() => _isLoading = false);
     }
   }
 
-  Color _getStatusColor(String status) {
-    if (status == "Payé") return const Color(0xFF1B5E20); 
-    if (status == "Impayé") return const Color(0xFFD32F2F); 
-    return Colors.orange.shade800; // Pour "Partiel"
+  // ==========================================
+  // FONCTION BACH TSIFET NOVEAU APPEL L'API
+  // ==========================================
+  Future<void> _ajouterAppelFonds() async {
+    if (_titreController.text.isEmpty || _montantController.text.isEmpty || _dateEcheance == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Veuillez remplir tous les champs"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    setState(() => _isCreating = true);
+    
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "title": _titreController.text,
+          "amount": double.parse(_montantController.text),
+          "due_date": "${_dateEcheance!.year}-${_dateEcheance!.month.toString().padLeft(2, '0')}-${_dateEcheance!.day.toString().padLeft(2, '0')}",
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['success']) {
+        if (mounted) {
+          Navigator.pop(context); // Katssed l'bottom sheet
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message']), backgroundColor: Colors.green),
+          );
+          // Kat-vidi l'inputs w katdir refresh l'données
+          _titreController.clear();
+          _montantController.clear();
+          _dateEcheance = null;
+          _fetchChargesData();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Erreur: ${data['message']}"), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Erreur de connexion"), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCreating = false);
+    }
+  }
+
+  // ==========================================
+  // L'MODAL BOTTOM SHEET L'AJOUT APPEL FONDS
+  // ==========================================
+  void _showAddAppelFondsModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Bach ytla3 fou9 l'clavier
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder( // StatefulBuilder bach n9der nbedel date dl'echeance
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 24,
+                right: 24,
+                top: 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 50,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "Nouvel Appel de Fonds",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Saisissez les informations pour générer un nouvel appel.",
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Input Titre
+                  TextField(
+                    controller: _titreController,
+                    decoration: InputDecoration(
+                      labelText: "Titre de l'appel",
+                      hintText: "Ex: Appel de charges T4 2026",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      prefixIcon: const Icon(Icons.title),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Input Montant Total
+                  TextField(
+                    controller: _montantController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: "Montant Global (MAD)",
+                      hintText: "Ex: 12000.00",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      prefixIcon: const Icon(Icons.attach_money),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Input Date
+                  InkWell(
+                    onTap: () async {
+                      DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2030),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: mainBlue, 
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        setModalState(() {
+                          _dateEcheance = picked;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.calendar_month, color: Colors.grey),
+                          const SizedBox(width: 12),
+                          Text(
+                            _dateEcheance == null 
+                                ? "Date d'échéance" 
+                                : "${_dateEcheance!.day.toString().padLeft(2, '0')}/${_dateEcheance!.month.toString().padLeft(2, '0')}/${_dateEcheance!.year}",
+                            style: TextStyle(
+                              color: _dateEcheance == null ? Colors.black54 : Colors.black87,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Bouton Valider
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isCreating ? null : _ajouterAppelFonds,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: mainBlue,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: _isCreating
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Text(
+                              "Générer l'appel de fonds",
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgLight,
-      body: Stack(
-        children: [
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _buildCitySkyline(), 
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🟢 Utilisation du composant CustomHeader
-              CustomHeader(
-                title: "Mes charges",
-                subtitle: _lotInfo.isNotEmpty ? "$_residenceName • $_lotInfo" : _residenceName,
-                residenceName: _residenceName,
-                photoUrl: _photoUrl,
-                showBackButton: widget.showBackButton,
-              onBackTap: () {
-                if (Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                }
-              },
-           
-                 
-                ),
-
-              // 2. CONTENU DE LA PAGE CHARGES
-              Expanded(
-                child: _isLoading
-                    ? Center(child: CircularProgressIndicator(color: mainBlue))
-                    : SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(16, 18, 16, 30),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Carte de Solde globale
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.grey.shade100),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.account_balance_wallet, color: Colors.blueGrey.shade400, size: 20),
-                                      const SizedBox(width: 8),
-                                      const Text("Solde de compte", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black54)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    _rawSolde > 0
-                                        ? _solde
-                                        : (_rawSolde < 0
-                                            ? "${_rawSolde.abs().toStringAsFixed(2)} MAD (Crédit)"
-                                            : "À jour (0.00 MAD)"),
-                                    style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: _rawSolde > 0
-                                          ? const Color(0xFFD32F2F)
-                                          : mainBlue,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            
-                            const SizedBox(height: 20),
-                            const Text(
-                              "Historique des charges",
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black54),
+      // 🟢 LE NOUVEAU BOUTON FLOATING ACTION BUTTON EN BAS A DROITE
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddAppelFondsModal,
+        backgroundColor: mainBlue,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text("Nouvel appel", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            CustomHeader(
+              title: "Appels de Fonds",
+              subtitle: "Gérez les cotisations et budgets",
+              residenceName: _residenceName,
+              photoUrl: "", // Remplace par ta variable si tu l'as
+              showBackButton: widget.showBackButton,
+              onBackTap: () => Navigator.pop(context),
+            ),
+            Expanded(
+              child: _isLoading 
+                  ? Center(child: CircularProgressIndicator(color: mainBlue))
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).copyWith(bottom: 80), // bottom: 80 bach matghtach bl'FAB
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_latestAppel != null) ...[
+                            Text(
+                              "Dernier Appel : ${_latestAppel!['title'] ?? 'Appel de fonds'}",
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
                             ),
                             const SizedBox(height: 12),
-
-                            // Liste des charges
-                            _chargesList.isEmpty
-                                ? Padding(
-                                    padding: const EdgeInsets.only(top: 40),
-                                    child: Center(
-                                      child: Text(
-                                        "Aucune charge enregistrée.",
-                                        style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 15),
-                                      ),
-                                    ),
-                                  )
-                                : ListView.builder(
-                                    padding: EdgeInsets.zero,
-                                    shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: _chargesList.length,
-                                    itemBuilder: (context, index) {
-                                      final charge = _chargesList[index];
-                                      final statusColor = _getStatusColor(charge['status'] ?? '');
-
-                                      return InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => CoproChargeDetailPage(
-                                                chargeData: charge,
-                                                residenceName: _residenceName,
-                                                photoUrl: _photoUrl,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: Container(
-                                          margin: const EdgeInsets.only(bottom: 12),
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(16),
-                                            border: Border.all(color: Colors.grey.shade100),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.03),
-                                                blurRadius: 10,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.all(12),
-                                                decoration: BoxDecoration(
-                                                  color: mainBlue.withOpacity(0.08),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Icon(Icons.receipt_long, color: mainBlue, size: 24),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      charge['title'] ?? 'Charge',
-                                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      "Émise le : ${charge['date_emission'] ?? 'N/A'}",
-                                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                                    ),
-                                                    Text(
-                                                      "Échéance : ${charge['date_echeance'] ?? 'N/A'}",
-                                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Column(
-                                                crossAxisAlignment: CrossAxisAlignment.end,
-                                                children: [
-                                                  Text(
-                                                    "${charge['amount'] ?? 0}",
-                                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                                    decoration: BoxDecoration(
-                                                      color: statusColor.withOpacity(0.1),
-                                                      borderRadius: BorderRadius.circular(6),
-                                                    ),
-                                                    child: Text(
-                                                      charge['status'] ?? '',
-                                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: statusColor),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
+                            _buildLatestChargeCard(),
+                            const SizedBox(height: 24),
                           ],
-                        ),
+
+                          const Text(
+                            "Historique des appels de fonds",
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildHistoriqueList(),
+                        ],
                       ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ==========================================================
-  // CITY SKYLINE
-  // ==========================================================
-  Widget _buildCitySkyline() {
-    final color = mainBlue.withOpacity(0.03);
-
-    return IgnorePointer(
-      child: SizedBox(
-        height: 220,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildBuilding(50, 120, color),
-            _buildBuilding(65, 180, color),
-            _buildBuilding(45, 140, color),
-            _buildBuilding(75, 210, color),
-            _buildBuilding(60, 160, color),
-            _buildBuilding(50, 100, color),
+                    ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBuilding(double width, double height, Color color) {
+  Widget _buildLatestChargeCard() {
+    final amount = _latestAppel!['amount'] ?? 0;
+    final lotsCount = _latestAppel!['lots_count'] ?? 0;
+    final payes = _latestAppel!['payes'] ?? 0;
+    final partiels = _latestAppel!['partiels'] ?? 0;
+    final impayes = _latestAppel!['impayes'] ?? 0;
+
     return Container(
-      width: width,
-      height: height,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(
-          (height / 25).floor(),
-          (index) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(width: 8, height: 10, color: Colors.white.withOpacity(0.4)),
-              Container(width: 8, height: 10, color: Colors.white.withOpacity(0.4)),
-              if (width > 55)
-                Container(width: 8, height: 10, color: Colors.white.withOpacity(0.4)),
+              Text(
+                "${double.parse(amount.toString()).toStringAsFixed(2)} MAD",
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
+                child: Text("$lotsCount Lots", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: 24),
+          _buildStatRow(Colors.green, "$payes Payés"),
+          const SizedBox(height: 8),
+          _buildStatRow(Colors.orange, "$partiels Partiellement Payés"),
+          const SizedBox(height: 8),
+          _buildStatRow(Colors.red, "$impayes Impayés"),
+          // 🛑 7yedt l'Bouton "Nouvel appel de fonds" mn Hna, w rdito Flotant (lfou9)
+        ],
       ),
+    );
+  }
+
+  Widget _buildStatRow(Color color, String text) {
+    return Row(
+      children: [
+        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 8),
+        Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+      ],
+    );
+  }
+
+  Widget _buildHistoriqueList() {
+    if (_historiqueAppels.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Aucun appel enregistré.")));
+
+    return Column(
+      children: _historiqueAppels.map((appel) {
+        String dateFormatted = appel['created_at'] != null ? appel['created_at'].toString().split(' ')[0] : "N/A";
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: mainBlue.withOpacity(0.1), shape: BoxShape.circle),
+                child: Icon(Icons.receipt_long, color: mainBlue, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(appel['title'] ?? 'Appel', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                    const SizedBox(height: 4),
+                    Text(dateFormatted, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Text("${double.parse((appel['amount'] ?? 0).toString()).toStringAsFixed(2)} MAD", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

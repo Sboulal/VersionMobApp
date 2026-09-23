@@ -5,6 +5,130 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/widgets/custom_header.dart'; 
 import 'package:syndic_app/pages/main_layout.dart'; 
 
+// ==========================================
+// WIDGET RÉUTILISABLE : CUSTOM HEADER (DESIGN ÉPURÉ / BLANC)
+// ==========================================
+class CustomHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String residenceName;
+  final String photoUrl;
+  final bool showBackButton;
+  
+  final String userRole;
+  final VoidCallback? onBackTap;
+  final VoidCallback? onNotificationTap;
+
+  const CustomHeader({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.residenceName,
+    required this.photoUrl,
+    this.showBackButton = false,
+    this.userRole = 'copro',
+    this.onBackTap,
+    this.onNotificationTap,
+  });
+
+  PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+    final color = isDestructive ? Colors.redAccent : mainBlue;
+
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 12),
+          Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+
+    return Container(
+      width: double.infinity,
+      // 🟢 7yedna l'fond zre9 w tswira, khelina l'fond transparent bach yakhod loun dyal l'ecran
+      color: Colors.transparent, 
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 16,
+        bottom: 16,
+        left: 20,
+        right: 20,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // ==========================================
+          // 🟢 PARTIE GAUCHE : Bouton retour, Icone, Textes
+          // ==========================================
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Bouton Retour rond (b7al f tswira dyalek)
+                if (showBackButton && onBackTap != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: GestureDetector(
+                      onTap: onBackTap,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
+                          ],
+                        ),
+                        child: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+                      ),
+                    ),
+                  ),
+                
+                // Icone de l'immeuble
+                const Padding(
+                  padding: EdgeInsets.only(top: 2.0),
+                  child: Icon(Icons.apartment, color: Colors.black87, size: 28),
+                ),
+                const SizedBox(width: 12),
+                
+                // Textes
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Sindy",
+                        style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        residenceName.isNotEmpty ? "$residenceName\n$title" : title,
+                        style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.4),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+      
+        ],
+      ),
+    );
+  }
+}
+
 class PaiementsPage extends StatefulWidget {
   final bool isMainScreen;
   const PaiementsPage({super.key, this.isMainScreen = true});
@@ -67,11 +191,13 @@ class _PaiementsPageState extends State<PaiementsPage> {
               padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
               child: CustomHeader(
                 title: "Sindy",
-                subtitle: "Résidence Les Jardins\nSuivi des Paiements",
+                subtitle: "Suivi des Paiements",
+                residenceName: "Résidence Les Jardins",
+                photoUrl: "",
                 showBackButton: true,
-                onBackPressed: widget.isMainScreen 
+                onBackTap: widget.isMainScreen 
                     ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainLayout()), (route) => false)
-                    : null,
+                    : () => Navigator.pop(context),
               ),
             ),
             Padding(
@@ -257,7 +383,13 @@ class _EnregistrerPaiementPageState extends State<EnregistrerPaiementPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CustomHeader(title: "Sindy", subtitle: "Enregistrer un paiement"),
+              const CustomHeader(
+                title: "Sindy",
+                subtitle: "Enregistrement d'un Paiement",
+                residenceName: "Résidence Les Jardins",
+                photoUrl: "",
+                showBackButton: true,
+              ),
               const SizedBox(height: 16),
               
               Container(

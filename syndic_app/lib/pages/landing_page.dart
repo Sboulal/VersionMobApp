@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syndic_app/pages/login_page.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LandingPage extends StatelessWidget {
   final Color mainColor = const Color(0xFF1A5EAC);
@@ -104,47 +106,100 @@ class LandingPage extends StatelessWidget {
 }
 
 // ==========================================
-// L-Page jdida dyal Message d'inscription
+// NOUVELLE PAGE: FORMULAIRE D'INSCRIPTION
 // ==========================================
-class RegisterInfoPage extends StatelessWidget {
-  final Color mainColor = const Color(0xFF1A5EAC);
-
+class RegisterInfoPage extends StatefulWidget {
   const RegisterInfoPage({super.key});
 
   @override
+  State<RegisterInfoPage> createState() => _RegisterInfoPageState();
+}
+
+class _RegisterInfoPageState extends State<RegisterInfoPage> {
+  final Color mainColor = const Color(0xFF1A5EAC);
+  
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  
+  bool _isLoading = false;
+  bool _isSuccess = false;
+
+  Future<void> _register() async {
+    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Veuillez remplir tous les champs obligatoires."), backgroundColor: Colors.redAccent));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 🟢 HNA SALA7NA L'URL BACH YMCHI L LA ROUTE SHI7A F API.PHP
+      final response = await http.post(
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/register"), 
+        headers: {"Content-Type": "application/json", "Accept": "application/json"},
+        body: jsonEncode({
+          'name': _nameController.text.trim(),
+          'tel': _phoneController.text.trim(),
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      // 200 wla 201 (Created)
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() => _isSuccess = true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? "Erreur lors de l'inscription"), backgroundColor: Colors.redAccent));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur de connexion au serveur."), backgroundColor: Colors.redAccent));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+  @override
   Widget build(BuildContext context) {
+    if (_isSuccess) {
+      return _buildSuccessScreen();
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: mainColor),
+        title: const Text("Demande d'inscription", style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: mainColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.admin_panel_settings_rounded, size: 80, color: mainColor),
+            Text(
+              "Rejoignez votre copropriété",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: mainColor),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Remplissez ce formulaire. Votre accès sera activé une fois validé par le syndic.",
+              style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
             const SizedBox(height: 32),
-            const Text(
-              "Inscription Gérée par l'Administration",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
+
+            _buildInput("Nom Complet *", _nameController, Icons.person_outline),
             const SizedBox(height: 16),
-            const Text(
-              "La création de compte sur Syndify est exclusivement réservée à l'administration de votre copropriété.\n\nVeuillez contacter votre syndic pour obtenir vos identifiants de connexion.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.6),
-            ),
+            _buildInput("Numéro de téléphone *", _phoneController, Icons.phone_outlined, isPhone: true),
+            const SizedBox(height: 16),
+            _buildInput("Email (Optionnel)", _emailController, Icons.email_outlined),
+            const SizedBox(height: 16),
+            _buildInput("Mot de passe *", _passwordController, Icons.lock_outline, isPassword: true),
+            
             const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
@@ -154,18 +209,77 @@ class RegisterInfoPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Retour à l'accueil", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                onPressed: _isLoading ? null : _register,
+                child: _isLoading 
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text("Créer mon compte", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
-            const Spacer(),
           ],
         ),
       ),
     );
   }
-}
 
+  Widget _buildSuccessScreen() {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(color: Colors.orange.shade50, shape: BoxShape.circle),
+              child: Icon(Icons.hourglass_top, size: 80, color: Colors.orange.shade400),
+            ),
+            const SizedBox(height: 32),
+            const Text("Demande Envoyée !", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
+            const SizedBox(height: 16),
+            const Text(
+              "Votre compte a été créé avec succès, mais il est en attente de validation.\n\nLe syndic doit valider votre identité avant que vous ne puissiez vous connecter.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.5),
+            ),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: mainColor, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                onPressed: () => Navigator.pop(context), // Retour à la page de Login
+                child: const Text("Retour à la connexion", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInput(String label, TextEditingController controller, IconData icon, {bool isPassword = false, bool isPhone = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: isPassword,
+          keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: Colors.black38),
+            filled: true,
+            fillColor: Colors.grey.shade50,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: mainColor, width: 1.5)),
+          ),
+        ),
+      ],
+    );
+  }
+}
 // ==========================================
 // L-Khalfiya (Background)
 // ==========================================

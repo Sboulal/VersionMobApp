@@ -13,8 +13,7 @@ import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
-// Décommente cette ligne si tu as déjà créé la page NotificationsScreen
-// import 'package:syndic_app/pages/notifications_screen.dart';
+
 
 class DashboardPage extends StatefulWidget {
   final bool showBackButton; 
@@ -221,8 +220,8 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ==========================================================
-  // HEADER AVEC DROPDOWN PROFIL ET BADGE NOTIFICATIONS
+// ==========================================================
+  // HEADER AVEC TEXTE À GAUCHE ET ICÔNES À DROITE (DESIGN FIXÉ)
   // ==========================================================
   Widget _buildHeader() {
     final prenom = _dashboardData?['utilisateur']?['prenom'] ?? "Syndic";
@@ -240,151 +239,163 @@ class _DashboardPageState extends State<DashboardPage> {
         : "https://ui-avatars.com/api/?name=${prenom[0]}&background=ffffff&color=1A5EAC&size=128&bold=true";
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+      crossAxisAlignment: CrossAxisAlignment.start, // 🟢 Darouriya bach les icones yb9aw lfoq ila kan text fih 2 stoura
       children: [
-        // 🟢 السهم ديال الرجوع كيبان غير يلا كانت showBackButton صحيحة
-        if (widget.showBackButton)
-          GestureDetector(
-            onTap: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Padding(
-              padding: EdgeInsets.only(right: 12.0),
-              child: Icon(Icons.arrow_back_ios, color: Colors.black87, size: 22),
-            ),
-          ),
-
-      // الصورة ديال البروفايل (Dropdown)
-        PopupMenuButton<String>(
-          offset: const Offset(0, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          color: Colors.white,
-          elevation: 4,
-          onSelected: (value) async {
-            if (value == 'profile') {
-              await Navigator.push(context, MaterialPageRoute(builder: (context) => const UnifiedProfilePage()));
-              _fetchDashboardData(); 
-            } 
-            else if (value == 'espace_copro') {
-              // 🟢 HNA FIN KAYTSOWWITCHI L'ESPACE RESIDENT (COPRO)
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CoproMainLayout()),
-              );
-            } else if (value == 'password') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordPage()));
-            } else if (value == 'logout') {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.remove('auth_token');
-              if (mounted) {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (route) => false,
-                );
-              }
-            }
-          },
-         itemBuilder: (BuildContext context) => [
-            _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
-            
-            // 🟢 ZID HADA: L'bouton bach ysowitchi l'Espace Copro
-            _buildPopupMenuItem('espace_copro', Icons.swap_horiz, 'Espace Résident'),
-            
-            _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
-            const PopupMenuDivider(),
-            _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
-          ],
-          // ==============================================
-          // 🟢 HNA BDLLNA L'CODE BACH NKEBRO TSWIRA
-          // ==============================================
-          child: Container(
-            padding: const EdgeInsets.all(2), // L'espace bin tswira w l'bordure
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2.5), // L'khat lbyed
-            ),
-            child: CircleAvatar(
-              radius: 28, // 🔥 Hna kberna tswira (kanet 24 redinaha 28)
-              backgroundColor: Colors.grey.shade200,
-              backgroundImage: NetworkImage(photoUrl),
-            ),
-          ),
-          // ==============================================
-        ),
-        const SizedBox(width: 12),
-        
+        // ==============================================
+        // 🟢 PARTIE GAUCHE: Textes (Nom & Résidence)
+        // ==============================================
         Expanded(
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Bonjour $prenom!", style: const TextStyle(color: Colors.black54, fontSize: 12)),
-              Text(coproNom, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 16), overflow: TextOverflow.ellipsis),
+              if (widget.showBackButton)
+                GestureDetector(
+                  onTap: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 12.0, top: 4.0), // Ajusté m3a l'ktaba
+                    child: Icon(Icons.arrow_back_ios, color: Colors.black87, size: 22),
+                  ),
+                ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Bonjour $prenom!", 
+                      style: const TextStyle(color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w500)
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      coproNom, 
+                      style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 20, height: 1.2), 
+                      maxLines: 3, 
+                      overflow: TextOverflow.ellipsis
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
         
-        // 🟢 ICONE DE NOTIFICATION AVEC LE BADGE ROUGE
-        GestureDetector(
-          onTap: () {
-             Navigator.push(
-               context, 
-               MaterialPageRoute(
-                 builder: (context) => const NotificationsScreen(
-                   role: 'syndic', 
-                   showBackButton: true
-                 )
-               )
-             ).then((_) => _fetchDashboardData());
-          },
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-                ),
-                child: const Icon(Icons.notifications_none, color: Colors.black87, size: 22),
-              ),
-              if (_unreadCount > 0)
-                Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
+        const SizedBox(width: 16),
+
+        // ==============================================
+        // 🟢 PARTIE DROITE: Cloche + Photo (Mêmes dimensions)
+        // ==============================================
+        Row(
+          mainAxisSize: MainAxisSize.min, 
+          children: [
+            // 1. ICONE DE NOTIFICATION
+            GestureDetector(
+              onTap: () {
+                 Navigator.push(
+                   context, 
+                   MaterialPageRoute(
+                     builder: (context) => const NotificationsScreen(
+                       role: 'syndic', 
+                       showBackButton: true
+                     )
+                   )
+                 ).then((_) => _fetchDashboardData());
+              },
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 44, // 🟢 3bar fixe bach yji cercle parfait
+                    height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.redAccent,
+                      color: Colors.white,
                       shape: BoxShape.circle,
-                      border: Border.all(color: bgLight, width: 1.5),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))], // Ombre khfifa b7al tswira
                     ),
-                    constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
-                    ),
-                    child: Center(
-                      child: Text(
-                        _unreadCount > 9 ? '9+' : '$_unreadCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                    child: const Icon(Icons.notifications_none, color: Colors.black87, size: 24),
+                  ),
+                  if (_unreadCount > 0)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: bgLight, width: 2), // 🟢 Bordure plus nette
                         ),
-                        textAlign: TextAlign.center,
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _unreadCount > 9 ? '9+' : '$_unreadCount',
+                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(width: 12), 
+
+            // 2. IMAGE DE PROFIL
+            PopupMenuButton<String>(
+              offset: const Offset(0, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              color: Colors.white,
+              elevation: 4,
+              onSelected: (value) async {
+                if (value == 'profile') {
+                  await Navigator.push(context, MaterialPageRoute(builder: (context) => const UnifiedProfilePage()));
+                  _fetchDashboardData(); 
+                } 
+                else if (value == 'espace_copro') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CoproMainLayout()));
+                } else if (value == 'password') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordPage()));
+                } else if (value == 'logout') {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('auth_token');
+                  if (mounted) {
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+                  }
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+                _buildPopupMenuItem('espace_copro', Icons.swap_horiz, 'Espace Résident'),
+                _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
+                const PopupMenuDivider(),
+                _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
+              ],
+              child: Container(
+                width: 44, // 🟢 Nafs l'3bar dyal l'cloche (44x44)
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2), // Bordure bayda r9i9a
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
-            ],
-          ),
-        )
+                child: CircleAvatar(
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: NetworkImage(photoUrl),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
-
   PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
     final color = isDestructive ? Colors.redAccent : mainBlueDark;
     return PopupMenuItem<String>(
@@ -455,7 +466,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildInnerActionBtn(Icons.add, "Appel de charge", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
+              _buildInnerActionBtn(Icons.add, "appel de fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
               _buildInnerActionBtn(Icons.send, "Paiement", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
               _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
               _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
@@ -513,15 +524,15 @@ class _DashboardPageState extends State<DashboardPage> {
             childAspectRatio: 1.5,
             children: [
               _buildLargeStatCard(
-                Icons.request_quote, const Color(0xFFE8EAF6), const Color(0xFF3F51B5), "Total des charges", _formatMontant(kpis['charges_appelees']),
+                Icons.request_quote, const Color(0xFFE8EAF6), const Color(0xFF3F51B5), "Appel de fonds", _formatMontant(kpis['charges_appelees']),
                 () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage())),
               ),
               _buildLargeStatCard(
-                Icons.savings, const Color(0xFFE8F5E9), const Color(0xFF4CAF50), "Total encaissé", _formatMontant(kpis['encaisse']),
+                Icons.savings, const Color(0xFFE8F5E9), const Color(0xFF4CAF50), "Encaissé", _formatMontant(kpis['encaisse']),
                 () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage())),
               ),
               _buildLargeStatCard(
-                Icons.warning_amber_rounded, const Color(0xFFFFEBEE), const Color(0xFFF44336), "Total des impayés", _formatMontant(kpis['impayes']),
+                Icons.warning_amber_rounded, const Color(0xFFFFEBEE), const Color(0xFFF44336), "Impayés", _formatMontant(kpis['impayes']),
                 () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage())),
               ),
               _buildLargeStatCard(

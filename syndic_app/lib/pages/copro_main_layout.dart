@@ -19,7 +19,7 @@ class _CoproMainLayoutState extends State<CoproMainLayout> {
   // 1. T7eydou les doublons hna bach yb9aw ghir 5 pages
   final List<Widget> _pages = [
     const CoproDashboardPage(), // Index 0: Accueil
-    const CoproChargesPage(),   // Index 1: Charges
+    const CoproChargesPage(showBackButton: false),   // Index 1: Charges
     const CoproDocumentsPage(), // Index 2: Documents
     const CoproAnnoncesPage(),  // Index 3: Annonces
     const UnifiedProfilePage(), // Index 4: Profil
@@ -40,7 +40,7 @@ class _CoproMainLayoutState extends State<CoproMainLayout> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Accueil"),       // Index 0
           BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: "Charges"), // Index 1
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Documents"),   // Index 2
+          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Assemblées"),   // Index 2
           BottomNavigationBarItem(icon: Icon(Icons.campaign), label: "Annonces"),  // Index 3
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),      // Index 4
         ],

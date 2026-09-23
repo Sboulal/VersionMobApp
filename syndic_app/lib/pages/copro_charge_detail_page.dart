@@ -419,7 +419,7 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                               )
                             : const Icon(Icons.file_download_outlined),
                         label: Text(
-                          _isDownloading ? "Téléchargement..." : "Télécharger l'appel de charges",
+                          _isDownloading ? "Téléchargement..." : "Télécharger l'appel de fonds",
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         onPressed: _isDownloading ? null : _telechargerAppelCharge,

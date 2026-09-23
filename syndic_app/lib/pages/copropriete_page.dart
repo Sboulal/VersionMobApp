@@ -310,8 +310,12 @@ class _CoproprietePageState extends State<CoproprietePage> {
  Widget _buildLotCard(dynamic lot) {
     Color statusColor = lot["status"] == "À jour" ? const Color(0xFF4CAF50) : (lot["status"] == "Impayé" ? const Color(0xFFD32F2F) : const Color(0xFFFF9800));
     
-    // Nvériifiw wach kayna la photo w machi khawya
+    // Vérifier si la photo existe
     bool hasPhoto = lot["photo"] != null && lot["photo"].toString().isNotEmpty;
+
+    // 🟢 Récupérer les données de contact
+    String phone = lot["telephone"]?.toString().trim() ?? "";
+    String email = lot["email"]?.toString().trim() ?? "";
 
     return GestureDetector(
       onTap: () {
@@ -322,77 +326,137 @@ class _CoproprietePageState extends State<CoproprietePage> {
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12.0),
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0), // Padding augmenté pour aérer
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade100), // Bordure légère
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start, // Alignement vers le haut car le contenu est plus long
           children: [
             // ==============================================
-            // HNA TBDL L'CODE BACH Y'AFFICHI LA PHOTO
+            // AVATAR / IMAGE DU LOT
             // ==============================================
             Container(
               width: 55,
               height: 55,
               decoration: BoxDecoration(
-                color: hasPhoto ? Colors.grey.shade200 : statusColor,
+                color: hasPhoto ? Colors.grey.shade200 : statusColor.withOpacity(0.1), // Fond plus clair si pas de photo
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: hasPhoto ? Colors.transparent : statusColor.withOpacity(0.3)),
                 image: hasPhoto
                     ? DecorationImage(
                         image: NetworkImage(lot["photo"]),
-                        fit: BoxFit.cover, // Bach tswira tji m9adda f l'carré
+                        fit: BoxFit.cover,
                       )
-                    : null, // Ila makaynach tswira, manderou walo f l'image
+                    : null,
               ),
               child: !hasPhoto
                   ? Center(
                       child: Text(
                         lot["id"].toString(),
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16), // Texte prend la couleur du statut
                       ),
                     )
-                  : null, // Ila kayna tswira, makan'affichiwech nmra dyal l'lot fok mnha
+                  : null,
             ),
-            // ==============================================
             
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
+            
+            // ==============================================
+            // INFORMATIONS DU COPROPRIÉTAIRE
+            // ==============================================
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(lot["owner"].toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
+                  // Nom du propriétaire
+                  Text(
+                    lot["owner"].toString(), 
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)
+                  ),
                   const SizedBox(height: 4),
-                  Text("${lot["floor"]} | ${lot["tantiemes"]} tantièmes", style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                  
+                  // Détails du lot (Étage, tantièmes)
+                  Text(
+                    "Lot ${lot["id"]} • ${lot["floor"]} • ${lot["tantiemes"]} tantièmes", 
+                    style: const TextStyle(color: Colors.black54, fontSize: 12, fontWeight: FontWeight.w500)
+                  ),
+                  
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      CircleAvatar(radius: 4, backgroundColor: statusColor),
-                      const SizedBox(width: 4),
-                      Text(lot["status"], style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                    ],
+
+                  // 🟢 TÉLÉPHONE (S'il existe)
+                  if (phone.isNotEmpty && phone != "null") ...[
+                    Row(
+                      children: [
+                        Icon(Icons.phone_outlined, size: 14, color: Colors.blueGrey.shade400),
+                        const SizedBox(width: 6),
+                        Text(phone, style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 13)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+
+                  // 🟢 EMAIL (S'il existe)
+                  if (email.isNotEmpty && email != "null") ...[
+                    Row(
+                      children: [
+                        Icon(Icons.email_outlined, size: 14, color: Colors.blueGrey.shade400),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            email, 
+                            style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 13), 
+                            overflow: TextOverflow.ellipsis
+                          )
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+
+                  const SizedBox(height: 6),
+                  
+                  // Statut (À jour / Impayé)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6)
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(radius: 3, backgroundColor: statusColor),
+                        const SizedBox(width: 6),
+                        Text(
+                          lot["status"], 
+                          style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11)
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () => _showEditLotModal(context, lot),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F4F8), 
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1)
-                    ),
-                    child: const Icon(Icons.edit, color: Color(0xFF94A3B8), size: 20),
-                  ),
+
+            // ==============================================
+            // BOUTON MODIFIER
+            // ==============================================
+            GestureDetector(
+              onTap: () => _showEditLotModal(context, lot),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50, 
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade200, width: 1)
                 ),
-              ],
-            )
+                child: const Icon(Icons.edit_outlined, color: Colors.black54, size: 18),
+              ),
+            ),
           ],
         ),
       ),
