@@ -13,17 +13,17 @@ import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
+import 'package:syndic_app/pages/documents_page.dart'; // 🟢 Page dyal les documents
+import 'package:syndic_app/pages/assemblees_page.dart'; // 🟢 Page dyal l-AG
 
 
 class DashboardPage extends StatefulWidget {
   final bool showBackButton; 
-  // 🟢 حيدنا required ودرنا false كقيمة افتراضية باش تخدم فـ Bottom Nav بلا مشاكل
   const DashboardPage({super.key, this.showBackButton = false});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
-
 class _DashboardPageState extends State<DashboardPage> {
   final Color bgLight = const Color(0xFFF7F9FC); 
   final Color mainBlueDark = const Color(0xFF003366);
@@ -38,6 +38,7 @@ class _DashboardPageState extends State<DashboardPage> {
   // 🟢 Variables pour les notifications
   Timer? _notifTimer;
   int _unreadCount = 0; 
+  final ScrollController _horizontalScrollController = ScrollController();
 
   @override
   void initState() {
@@ -49,6 +50,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void dispose() {
     _notifTimer?.cancel(); // 🟢 On arrête l'écouteur quand on quitte la page
+    _horizontalScrollController.dispose();
     super.dispose();
   }
 
@@ -187,7 +189,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return montant.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ');
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgLight,
@@ -208,7 +210,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       children: [
                         _buildHeader(),
                         const SizedBox(height: 24),
-                        _buildWalletCard(),
+                        _buildWalletCard(), // 🟢 L-karta z-zr9a ghadi tbqa hna
                         const SizedBox(height: 24),
                         _buildStatistiquesSection(),
                         const SizedBox(height: 24),
@@ -219,7 +221,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
 // ==========================================================
   // HEADER AVEC TEXTE À GAUCHE ET ICÔNES À DROITE (DESIGN FIXÉ)
   // ==========================================================
@@ -463,14 +464,43 @@ class _DashboardPageState extends State<DashboardPage> {
             style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 30),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildInnerActionBtn(Icons.add, "appel de fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
-              _buildInnerActionBtn(Icons.send, "Paiement", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
-              _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
-              _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
-            ],
+          
+          // 🟢 Hna ghadi nzidou l-Scroll Horizontal l-les boutons
+       // 🟢 Zidna Scrollbar hna bach yban l-khet dyal scroll
+          Scrollbar(
+            controller: _horizontalScrollController, // 🟢 Darouri ndiroh hna
+            thumbVisibility: true, // 🟢 Katkhli l-khet dima bayn (wla kayban ghir tqissih)
+            thickness: 3.0, // 🟢 Ghold dyal l-khet
+            radius: const Radius.circular(10),
+            trackVisibility: true, // 🟢 Kaybiyen l-khlfiya d l-khet
+            child: SingleChildScrollView(
+              controller: _horizontalScrollController, // 🟢 W darouri hta hna
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12.0), // 🟢 Espace sghir bach l-khet mayghattich l-ktaba d l-boutons
+                child: Row(
+                  children: [
+                    _buildInnerActionBtn(Icons.add, "Appel de fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
+                    const SizedBox(width: 20),
+                    _buildInnerActionBtn(Icons.send, "Paiement", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
+                    const SizedBox(width: 20),
+                    _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
+                    const SizedBox(width: 20),
+                    _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
+                    const SizedBox(width: 20),
+                    _buildInnerActionBtn(Icons.groups, "Assemblées", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssembleesPage()))),
+                    const SizedBox(width: 20),
+                    _buildInnerActionBtn(Icons.folder_open, "Documents", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsPage()))),
+                    
+                    // 🟢 (Astuce) Tqadri tzidi had l-icône sghira f l-kher katchir l-limn
+                    const SizedBox(width: 10),
+                    Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.5), size: 16),
+                    const SizedBox(width: 10),
+                  ],
+                ),
+              ),
+            ),
           )
         ],
       ),
