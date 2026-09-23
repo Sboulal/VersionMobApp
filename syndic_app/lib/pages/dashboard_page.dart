@@ -465,48 +465,82 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           const SizedBox(height: 30),
           
-          // 🟢 Hna ghadi nzidou l-Scroll Horizontal l-les boutons
-       // 🟢 Zidna Scrollbar hna bach yban l-khet dyal scroll
-          Scrollbar(
-            controller: _horizontalScrollController, // 🟢 Darouri ndiroh hna
-            thumbVisibility: true, // 🟢 Katkhli l-khet dima bayn (wla kayban ghir tqissih)
-            thickness: 3.0, // 🟢 Ghold dyal l-khet
-            radius: const Radius.circular(10),
-            trackVisibility: true, // 🟢 Kaybiyen l-khlfiya d l-khet
-            child: SingleChildScrollView(
-              controller: _horizontalScrollController, // 🟢 W darouri hta hna
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 12.0), // 🟢 Espace sghir bach l-khet mayghattich l-ktaba d l-boutons
-                child: Row(
-                  children: [
-                    _buildInnerActionBtn(Icons.add, "Appel de fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
-                    const SizedBox(width: 20),
-                    _buildInnerActionBtn(Icons.send, "Paiement", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
-                    const SizedBox(width: 20),
-                    _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
-                    const SizedBox(width: 20),
-                    _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
-                    const SizedBox(width: 20),
-                    _buildInnerActionBtn(Icons.groups, "Assemblées", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssembleesPage()))),
-                    const SizedBox(width: 20),
-                    _buildInnerActionBtn(Icons.folder_open, "Documents", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsPage()))),
-                    
-                    // 🟢 (Astuce) Tqadri tzidi had l-icône sghira f l-kher katchir l-limn
-                    const SizedBox(width: 10),
-                    Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.5), size: 16),
-                    const SizedBox(width: 10),
-                  ],
+      // 🟢 Flèches Khdamin (Clickables m3a Animation)
+          Row(
+            children: [
+              // ⬅️ Flèche dyal l-issar (Gauche)
+              GestureDetector(
+                onTap: () {
+                  if (_horizontalScrollController.hasClients) {
+                    final target = _horizontalScrollController.offset - 150.0; // rje3 b 150
+                    _horizontalScrollController.animateTo(
+                      target < 0 ? 0 : target,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  color: Colors.transparent, // bach ykon l-click sahel
+                  child: Icon(Icons.arrow_back_ios, color: Colors.white.withOpacity(0.8), size: 18),
                 ),
               ),
-            ),
+              
+              const SizedBox(width: 4),
+              
+              // 🟢 Zone dyal l-Boutons (Scrollable)
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _horizontalScrollController, // 🟢 Darouriiiiiiiii tkon hadi hna!
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: [
+                      _buildInnerActionBtn(Icons.add, "Appel de fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
+                      const SizedBox(width: 16),
+                      _buildInnerActionBtn(Icons.send, "Paiement", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
+                      const SizedBox(width: 16),
+                      _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
+                      const SizedBox(width: 16),
+                      _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
+                      const SizedBox(width: 16),
+                      _buildInnerActionBtn(Icons.groups, "Assemblées", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssembleesPage()))),
+                      const SizedBox(width: 16),
+                      _buildInnerActionBtn(Icons.folder_open, "Documents", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsPage()))),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(width: 4),
+              
+              // ➡️ Flèche dyal l-imin (Droite)
+              GestureDetector(
+                onTap: () {
+                  if (_horizontalScrollController.hasClients) {
+                    final maxScroll = _horizontalScrollController.position.maxScrollExtent;
+                    final target = _horizontalScrollController.offset + 150.0; // zid l-gddam b 150
+                    _horizontalScrollController.animateTo(
+                      target > maxScroll ? maxScroll : target,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  color: Colors.transparent, // bach ykon l-click sahel
+                  child: Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.8), size: 18),
+                ),
+              ),
+            ],
           )
         ],
       ),
     );
   }
-
+  
   Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,

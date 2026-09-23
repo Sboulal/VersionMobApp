@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/main_layout.dart'; 
 import 'package:syndic_app/pages/login_page.dart';
+import 'package:syndic_app/pages/syndic_validation_page.dart'; // Wla smitha kifma drtiha f l-fichier jdida
 
 class CoproprietePage extends StatefulWidget {
   final bool isMainScreen; 
@@ -94,7 +95,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
     );
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
     List<dynamic> filteredLots = allLots.where((lot) {
       bool matchesFilter = selectedFilter == "Tous" ||
@@ -113,7 +114,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🟢 L'en-tête blanc avec le logo et le titre (comme l'image)
+            // 🟢 L'en-tête blanc avec le logo et le titre
             _buildTopHeader(),
             
             // 🟢 La bannière image avec texte par-dessus
@@ -121,6 +122,37 @@ class _CoproprietePageState extends State<CoproprietePage> {
 
             const SizedBox(height: 16),
             
+            // 🟢 🟢 BOUTON DES VALIDATIONS EN ATTENTE 🟢 🟢
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Card(
+                color: Colors.orange.shade50, // Loun Limouni bach y-tir l-intibah
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.orange.shade200, width: 1),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.person_add_alt_1, color: Colors.orange, size: 28),
+                  title: const Text(
+                    "Demandes d'inscription", 
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87, fontSize: 14)
+                  ),
+                  subtitle: const Text("Gérez les résidents en attente", style: TextStyle(fontSize: 12)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.black54),
+                  onTap: () {
+                    // 🟢 Kat-ddih l-page dyal l-validation jdida li qaddina
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => const SyndicValidationPage())
+                    );
+                  },
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+
             // 🟢 Filtres
             SizedBox(
               height: 40,
@@ -178,7 +210,6 @@ class _CoproprietePageState extends State<CoproprietePage> {
       ),
     );
   }
-
  Widget _buildTopHeader() {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),

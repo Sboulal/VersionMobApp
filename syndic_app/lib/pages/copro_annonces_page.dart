@@ -262,8 +262,8 @@ class _CoproAnnoncesPageState extends State<CoproAnnoncesPage> {
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 && data['success'] == true) {
-        setState(() {
-          _annoncesList = data['data'];
+       setState(() {
+           _annoncesList = data['data'];
           
           // Récupération sécurisée des infos depuis l'API
           if (data['residence_name'] != null) {

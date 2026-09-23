@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'copro_dashboard_page.dart'; 
 import 'copro_charges_page.dart'; 
-import 'copro_documents_page.dart'; 
 import 'copro_annonces_page.dart'; 
 import 'profile_page.dart'; 
-
+import 'copro_assemblees_page.dart';
 class CoproMainLayout extends StatefulWidget {
   const CoproMainLayout({super.key});
 
@@ -20,7 +19,7 @@ class _CoproMainLayoutState extends State<CoproMainLayout> {
   final List<Widget> _pages = [
     const CoproDashboardPage(), // Index 0: Accueil
     const CoproChargesPage(showBackButton: false),   // Index 1: Charges
-    const CoproDocumentsPage(), // Index 2: Documents
+   const CoproAssembleesPage(), // Index 2: Documents
     const CoproAnnoncesPage(),  // Index 3: Annonces
     const UnifiedProfilePage(), // Index 4: Profil
   ];

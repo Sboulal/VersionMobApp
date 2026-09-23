@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syndic_app/pages/login_page.dart';
+import 'package:syndic_app/pages/syndic_register_page.dart'; // L-page dyal Syndic
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -18,10 +19,11 @@ class LandingPage extends StatelessWidget {
           BuildingsBackground(mainColor: mainColor, height: MediaQuery.of(context).size.height),
           
           SafeArea(
+            bottom: false, // 🟢 Darouriya bach l-karta l-bida t-lse9 l-te7t ga3
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Spacer(flex: 2),
+                const Spacer(flex: 1),
                 
                 // L-I9ona w l-ktaba f l-wst
                 Center(
@@ -34,64 +36,80 @@ class LandingPage extends StatelessWidget {
                     child: const Icon(Icons.apartment, size: 80, color: Colors.white),
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 24),
                 
                 const Text(
-                  "Bienvenue sur\nSyndify",
+                  "Syndify",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold, height: 1.2),
+                  style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: 1.5),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 40.0),
                   child: Text(
                     "Gérez votre copropriété en toute simplicité et transparence.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+                    style: TextStyle(color: Colors.white70, fontSize: 15, height: 1.5),
                   ),
                 ),
                 
-                const Spacer(flex: 3),
+                const Spacer(flex: 1),
                 
-                // L-boutonat l-ta7t b7al f design
+                // 🟢 HNA DRNA L-MENU MOBACHARA (DIRECT) F BLASET DIK L-KARTA SGHIRA
                 Container(
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
+                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 40), // Padding l-te7t bach yb3d 3la l-barre d tel
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                      topRight: Radius.circular(32),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-                          },
-                          child: const Text("Login", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        ),
+                      const Text(
+                        "Bienvenue, choisissez votre accès",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
-                      Expanded(
-                        child: Container(
-                          height: double.infinity,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(30),
-                              topRight: Radius.circular(30),
-                            ),
-                          ),
-                          child: TextButton(
-                            onPressed: () {
-                              // 🟢 Hna wllat kat-dih l-page dyal l-info
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterInfoPage()));
-                            },
-                            child: Text("Register", style: TextStyle(color: mainColor, fontSize: 18, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
+                      const SizedBox(height: 24),
+                      
+                      // 1. Bouton Login (Ila kan deja 3ndo compte)
+                      _buildDirectActionTile(
+                        context,
+                        icon: Icons.login,
+                        iconColor: mainColor,
+                        bgColor: mainColor.withOpacity(0.1),
+                        title: "Se connecter",
+                        subtitle: "J'ai déjà un compte",
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage())),
+                      ),
+                      
+                      const Divider(height: 24),
+                      
+                      // 2. Bouton Syndic
+                      _buildDirectActionTile(
+                        context,
+                        icon: Icons.domain,
+                        iconColor: Colors.green.shade600,
+                        bgColor: Colors.green.shade50,
+                        title: "Je suis un Syndic",
+                        subtitle: "Créer et gérer une résidence",
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SyndicRegisterPage())),
+                      ),
+                      
+                      const Divider(height: 24),
+                      
+                      // 3. Bouton Saken (Copropriétaire)
+                      _buildDirectActionTile(
+                        context,
+                        icon: Icons.person,
+                        iconColor: mainColor,
+                        bgColor: mainColor.withOpacity(0.1),
+                        title: "Je suis un Résident",
+                        subtitle: "Rejoindre avec un code",
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterInfoPage())),
                       ),
                     ],
                   ),
@@ -103,10 +121,33 @@ class LandingPage extends StatelessWidget {
       ),
     );
   }
+
+  // 🟢 Widget m9add bach n-dessiniw les boutons dyal l-menu
+  Widget _buildDirectActionTile(BuildContext context, {
+    required IconData icon, 
+    required Color iconColor, 
+    required Color bgColor, 
+    required String title, 
+    required String subtitle, 
+    required VoidCallback onTap
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: CircleAvatar(
+        radius: 24,
+        backgroundColor: bgColor,
+        child: Icon(icon, color: iconColor),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+      subtitle: Text(subtitle, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black54),
+      onTap: onTap,
+    );
+  }
 }
 
 // ==========================================
-// NOUVELLE PAGE: FORMULAIRE D'INSCRIPTION
+// FORMULAIRE D'INSCRIPTION (RÉSIDENT)
 // ==========================================
 class RegisterInfoPage extends StatefulWidget {
   const RegisterInfoPage({super.key});
@@ -122,12 +163,13 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _codeResidenceController = TextEditingController();
   
   bool _isLoading = false;
   bool _isSuccess = false;
 
   Future<void> _register() async {
-    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _passwordController.text.isEmpty || _codeResidenceController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Veuillez remplir tous les champs obligatoires."), backgroundColor: Colors.redAccent));
       return;
     }
@@ -135,21 +177,20 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
     setState(() => _isLoading = true);
 
     try {
-      // 🟢 HNA SALA7NA L'URL BACH YMCHI L LA ROUTE SHI7A F API.PHP
       final response = await http.post(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/register"), 
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/copro/register"), 
         headers: {"Content-Type": "application/json", "Accept": "application/json"},
         body: jsonEncode({
           'name': _nameController.text.trim(),
           'tel': _phoneController.text.trim(),
           'email': _emailController.text.trim(),
           'password': _passwordController.text,
+          'code_residence': _codeResidenceController.text.trim(),
         }),
       );
 
       final data = jsonDecode(response.body);
 
-      // 200 wla 201 (Created)
       if (response.statusCode == 200 || response.statusCode == 201) {
         setState(() => _isSuccess = true);
       } else {
@@ -161,6 +202,7 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
       setState(() => _isLoading = false);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     if (_isSuccess) {
@@ -192,6 +234,8 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
             ),
             const SizedBox(height: 32),
 
+            _buildInput("Code de la résidence *", _codeResidenceController, Icons.home_outlined),
+            const SizedBox(height: 16),
             _buildInput("Nom Complet *", _nameController, Icons.person_outline),
             const SizedBox(height: 16),
             _buildInput("Numéro de téléphone *", _phoneController, Icons.phone_outlined, isPhone: true),
@@ -247,8 +291,8 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: mainColor, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                onPressed: () => Navigator.pop(context), // Retour à la page de Login
-                child: const Text("Retour à la connexion", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                onPressed: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LandingPage()), (route) => false), // Retour à la page d'accueil
+                child: const Text("Retour à l'accueil", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -280,6 +324,7 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
     );
   }
 }
+
 // ==========================================
 // L-Khalfiya (Background)
 // ==========================================

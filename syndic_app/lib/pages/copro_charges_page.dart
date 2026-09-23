@@ -38,6 +38,18 @@ class CustomHeader extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Colors.white,
       elevation: 4,
+      // 🟢 ZIDNA Hadi bach l-menu ywlli khdam w y-dir l-action !
+      onSelected: (String value) async {
+        if (value == 'profile') {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const UnifiedProfilePage()));
+        } else if (value == 'logout') {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove('auth_token');
+          if (context.mounted) {
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+          }
+        }
+      },
       itemBuilder: (BuildContext context) => [
         const PopupMenuItem(value: 'profile', child: Text('Profil')),
         const PopupMenuItem(value: 'logout', child: Text('Déconnexion', style: TextStyle(color: Colors.red))),
@@ -123,7 +135,7 @@ class CustomHeader extends StatelessWidget {
 }
 
 // ==========================================
-// 1. LISTE DES APPELS DE FONDS SYNDIC
+// 1. LISTE DES CHARGES COPROPRIÉTAIRE (Corrigée)
 // ==========================================
 class CoproChargesPage extends StatefulWidget {
   final bool showBackButton;
@@ -138,286 +150,68 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
   final Color bgLight = const Color(0xFFF4F6F9);
 
   bool _isLoading = true;
-  bool _isCreating = false; // Bach n-geriw chrgement dyal l'ajout
-  Map<String, dynamic>? _latestAppel;
+  String _solde = "0,00 MAD";
   List<dynamic> _historiqueAppels = [];
-  String _residenceName = "Résidence Les Jardins";
-
-  // Controllers l'formulaire dyal l'ajout
-  final TextEditingController _titreController = TextEditingController();
-  final TextEditingController _montantController = TextEditingController();
-  DateTime? _dateEcheance;
+  
+  String _residenceName = "Ma Résidence";
+  String _photoUrl = "";
 
   @override
   void initState() {
     super.initState();
-    _fetchChargesData();
+    _fetchMesCharges();
   }
 
-  Future<void> _fetchChargesData() async {
+  Future<void> _fetchMesCharges() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
     
     setState(() {
-      _residenceName = prefs.getString('residence_name') ?? "Résidence Les Jardins";
-      _isLoading = true; // Bach mni ndirou refresh tb9a tban loading
+      _residenceName = prefs.getString('residence_name') ?? "Ma Résidence";
+      _photoUrl = prefs.getString('photo_url') ?? "";
+      _isLoading = true; 
     });
 
+    if (token == null) return;
+
     try {
+      // 🟢 API S7i7a dyal l-copropriétaire 
       final response = await http.get(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges"), 
-        headers: {"Authorization": "Bearer $token"},
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/copro/mes-charges"), 
+        headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
       );
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data['success']) {
-        setState(() {
-          _latestAppel = data['latest_appel'];
-          _historiqueAppels = data['appels'] ?? [];
-          _isLoading = false;
-        });
-      } else {
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  // ==========================================
-  // FONCTION BACH TSIFET NOVEAU APPEL L'API
-  // ==========================================
-  Future<void> _ajouterAppelFonds() async {
-    if (_titreController.text.isEmpty || _montantController.text.isEmpty || _dateEcheance == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez remplir tous les champs"), backgroundColor: Colors.red),
-      );
-      return;
-    }
-
-    setState(() => _isCreating = true);
-    
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
-
-    try {
-      final response = await http.post(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "title": _titreController.text,
-          "amount": double.parse(_montantController.text),
-          "due_date": "${_dateEcheance!.year}-${_dateEcheance!.month.toString().padLeft(2, '0')}-${_dateEcheance!.day.toString().padLeft(2, '0')}",
-        }),
-      );
-
+      
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['success']) {
         if (mounted) {
-          Navigator.pop(context); // Katssed l'bottom sheet
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message']), backgroundColor: Colors.green),
-          );
-          // Kat-vidi l'inputs w katdir refresh l'données
-          _titreController.clear();
-          _montantController.clear();
-          _dateEcheance = null;
-          _fetchChargesData();
+          setState(() {
+            _solde = data['solde'] ?? "0,00 MAD";
+            _historiqueAppels = data['data'] ?? [];
+            _isLoading = false;
+          });
         }
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Erreur: ${data['message']}"), backgroundColor: Colors.red),
-          );
-        }
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Erreur de connexion"), backgroundColor: Colors.red),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isCreating = false);
+      if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  // ==========================================
-  // L'MODAL BOTTOM SHEET L'AJOUT APPEL FONDS
-  // ==========================================
-  void _showAddAppelFondsModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Bach ytla3 fou9 l'clavier
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (BuildContext context) {
-        return StatefulBuilder( // StatefulBuilder bach n9der nbedel date dl'echeance
-          builder: (BuildContext context, StateSetter setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 24,
-                right: 24,
-                top: 24,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 50,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    "Nouvel Appel de Fonds",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Saisissez les informations pour générer un nouvel appel.",
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Input Titre
-                  TextField(
-                    controller: _titreController,
-                    decoration: InputDecoration(
-                      labelText: "Titre de l'appel",
-                      hintText: "Ex: Appel de charges T4 2026",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      prefixIcon: const Icon(Icons.title),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Input Montant Total
-                  TextField(
-                    controller: _montantController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: "Montant Global (MAD)",
-                      hintText: "Ex: 12000.00",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      prefixIcon: const Icon(Icons.attach_money),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Input Date
-                  InkWell(
-                    onTap: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2030),
-                        builder: (context, child) {
-                          return Theme(
-                            data: Theme.of(context).copyWith(
-                              colorScheme: ColorScheme.light(
-                                primary: mainBlue, 
-                              ),
-                            ),
-                            child: child!,
-                          );
-                        },
-                      );
-                      if (picked != null) {
-                        setModalState(() {
-                          _dateEcheance = picked;
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_month, color: Colors.grey),
-                          const SizedBox(width: 12),
-                          Text(
-                            _dateEcheance == null 
-                                ? "Date d'échéance" 
-                                : "${_dateEcheance!.day.toString().padLeft(2, '0')}/${_dateEcheance!.month.toString().padLeft(2, '0')}/${_dateEcheance!.year}",
-                            style: TextStyle(
-                              color: _dateEcheance == null ? Colors.black54 : Colors.black87,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // Bouton Valider
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isCreating ? null : _ajouterAppelFonds,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: mainBlue,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: _isCreating
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                            )
-                          : const Text(
-                              "Générer l'appel de fonds",
-                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgLight,
-      // 🟢 LE NOUVEAU BOUTON FLOATING ACTION BUTTON EN BAS A DROITE
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddAppelFondsModal,
-        backgroundColor: mainBlue,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text("Nouvel appel", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
+      // ❌ 7iydna FloatingActionButton li kan kiy-zid l'appel de fonds
       body: SafeArea(
         child: Column(
           children: [
             CustomHeader(
-              title: "Appels de Fonds",
-              subtitle: "Gérez les cotisations et budgets",
+              title: "Mes Charges",
+              subtitle: "Consultez l'état de vos cotisations",
               residenceName: _residenceName,
-              photoUrl: "", // Remplace par ta variable si tu l'as
+              photoUrl: _photoUrl, 
               showBackButton: widget.showBackButton,
               onBackTap: () => Navigator.pop(context),
             ),
@@ -425,22 +219,14 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
               child: _isLoading 
                   ? Center(child: CircularProgressIndicator(color: mainBlue))
                   : SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).copyWith(bottom: 80), // bottom: 80 bach matghtach bl'FAB
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).copyWith(bottom: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (_latestAppel != null) ...[
-                            Text(
-                              "Dernier Appel : ${_latestAppel!['title'] ?? 'Appel de fonds'}",
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildLatestChargeCard(),
-                            const SizedBox(height: 24),
-                          ],
-
+                          _buildSoldeCard(),
+                          const SizedBox(height: 24),
                           const Text(
-                            "Historique des appels de fonds",
+                            "Historique de mes charges",
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
                           ),
                           const SizedBox(height: 12),
@@ -455,13 +241,7 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
     );
   }
 
-  Widget _buildLatestChargeCard() {
-    final amount = _latestAppel!['amount'] ?? 0;
-    final lotsCount = _latestAppel!['lots_count'] ?? 0;
-    final payes = _latestAppel!['payes'] ?? 0;
-    final partiels = _latestAppel!['partiels'] ?? 0;
-    final impayes = _latestAppel!['impayes'] ?? 0;
-
+  Widget _buildSoldeCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -473,47 +253,32 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "${double.parse(amount.toString()).toStringAsFixed(2)} MAD",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
-                child: Text("$lotsCount Lots", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade700)),
-              ),
+              Icon(Icons.account_balance_wallet, color: mainBlue, size: 20),
+              const SizedBox(width: 8),
+              const Text("Mon Solde Actuel", style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
             ],
           ),
-          const SizedBox(height: 24),
-          _buildStatRow(Colors.green, "$payes Payés"),
-          const SizedBox(height: 8),
-          _buildStatRow(Colors.orange, "$partiels Partiellement Payés"),
-          const SizedBox(height: 8),
-          _buildStatRow(Colors.red, "$impayes Impayés"),
-          // 🛑 7yedt l'Bouton "Nouvel appel de fonds" mn Hna, w rdito Flotant (lfou9)
+          const SizedBox(height: 12),
+          Text(
+            _solde,
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: mainBlue),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatRow(Color color, String text) {
-    return Row(
-      children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
-        Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
-      ],
-    );
-  }
-
   Widget _buildHistoriqueList() {
-    if (_historiqueAppels.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Aucun appel enregistré.")));
+    if (_historiqueAppels.isEmpty) {
+      return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: Text("Aucune charge enregistrée.")));
+    }
 
     return Column(
       children: _historiqueAppels.map((appel) {
-        String dateFormatted = appel['created_at'] != null ? appel['created_at'].toString().split(' ')[0] : "N/A";
+        // Loun d'status 3la hsab wach khless wla la
+        Color statusColor = (appel['status'] == 'Impayé') ? Colors.red.shade600 : Colors.green.shade600;
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
@@ -534,15 +299,20 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(appel['title'] ?? 'Appel', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                    Text(appel['title'] ?? 'Appel de charge', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
                     const SizedBox(height: 4),
-                    Text(dateFormatted, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                    Text("Échéance: ${appel['date_echeance'] ?? 'N/A'}", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                   ],
                 ),
               ),
-              Text("${double.parse((appel['amount'] ?? 0).toString()).toStringAsFixed(2)} MAD", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(appel['amount'] ?? "0.00 MAD", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 4),
+                  Text(appel['status'] ?? "Impayé", style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                ],
+              ),
             ],
           ),
         );

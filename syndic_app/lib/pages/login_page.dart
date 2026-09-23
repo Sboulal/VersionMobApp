@@ -182,7 +182,23 @@ class _LoginPageState extends State<LoginPage> {
             child: BuildingsBackground(mainColor: mainColor, height: MediaQuery.of(context).size.height * 0.45),
           ),
           
-          // ❌ HNA HIYEDNA L'BOUTON RETOUR HIT LOGIN WELLAT HIYA L-LEWLA D L'APP ❌
+          // 🟢 ZIDNA BOUTON RETOUR HNA (FLÈCHE)
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 24),
+                  onPressed: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
 
           Align(
             alignment: Alignment.bottomCenter,
@@ -272,20 +288,19 @@ class _LoginPageState extends State<LoginPage> {
                     
                     const SizedBox(height: 24),
                     
-                    // 🟢 ZEDNA HADA BACH L'UTILISATEUR Y9DER YMCHI L'PAGE D'INSCRIPTION
+                    // Lien vers l'inscription
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text("Pas encore de compte ? ", style: TextStyle(color: Colors.black54, fontSize: 14)),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterInfoPage()));
+                            // On peut rediriger vers la LandingPage pour choisir le type de compte
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const LandingPage()));
                           },
                           child: Text("S'inscrire", style: TextStyle(color: mainColor, fontWeight: FontWeight.bold, fontSize: 14)),
                         )
                       ],
-
-                      
                     )
                   ],
                 ),

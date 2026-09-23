@@ -3,6 +3,7 @@ import 'dart:io';
 
 // 🟢 HNA TBDLNA L'IMPORT BACH NJIBOU LOGIN PAGE
 import 'package:syndic_app/pages/login_page.dart';
+import 'package:syndic_app/pages/landing_page.dart';
 
 void main() async {
   HttpOverrides.global = MyHttpOverrides(); 
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
         );
       },
       
-      home: const LoginPage(), 
+      home: const LandingPage(), 
     );
   }
 }

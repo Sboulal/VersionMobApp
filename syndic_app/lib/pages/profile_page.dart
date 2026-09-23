@@ -321,29 +321,40 @@ Future<void> _pickImage() async {
 
   // --- WIDGETS ---
 
+  // --- WIDGETS ---
+
   Widget _buildProfileHeader(bool isSyndic) {
     final String? photoUrl = _profil?['photo_url'] ?? _profil?['photo'];
 
+    // 🟢 N-7eddo l-ImageProvider 9bel bash n-t7ekmo fiha mzyan w n-tfadaw l-crash
+    ImageProvider? bgImage;
+    if (_imageFile != null) {
+      bgImage = FileImage(_imageFile!);
+    } else if (photoUrl != null && photoUrl.isNotEmpty) {
+      bgImage = NetworkImage(photoUrl);
+    }
+
     return Column(
       children: [
-       Stack(
-  alignment: Alignment.bottomRight,
-  children: [
-  CircleAvatar(
-  radius: 50,
-  backgroundColor: mainBlue.withOpacity(0.1),
-  backgroundImage: _imageFile != null 
-      ? FileImage(_imageFile!) as ImageProvider
-      : (photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null),
-  
-  onBackgroundImageError: (error, stackTrace) {
-    debugPrint("Erreur image (ancien lien 403 ignoré)");
-  },
-  
-  child: (_imageFile == null && (photoUrl == null || photoUrl.isEmpty))
-      ? Icon(isSyndic ? Icons.manage_accounts : Icons.person, color: mainBlue, size: 50)
-      : null,
-),
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: mainBlue.withOpacity(0.1),
+              backgroundImage: bgImage,
+              
+              // 🟢 L-FIX HNA: Ila kant bgImage null, ta onBackgroundImageError khassha tkon null
+              onBackgroundImageError: bgImage != null
+                  ? (error, stackTrace) {
+                      debugPrint("Erreur image (ancien lien ignoré)");
+                    }
+                  : null,
+                  
+              child: bgImage == null
+                  ? Icon(isSyndic ? Icons.manage_accounts : Icons.person, color: mainBlue, size: 50)
+                  : null,
+            ),
             GestureDetector(
               onTap: _pickImage,
               child: Container(
