@@ -15,6 +15,7 @@ import 'package:syndic_app/pages/NotificationsScreen.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:syndic_app/pages/documents_page.dart'; // 🟢 Page dyal les documents
 import 'package:syndic_app/pages/assemblees_page.dart'; // 🟢 Page dyal l-AG
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 🟢 ZIDNA HAD L'IMPORT DAROURI
 
 
 class DashboardPage extends StatefulWidget {
@@ -111,7 +112,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   behavior: SnackBarBehavior.floating,
                   backgroundColor: mainBlueLight,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                   margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
                   elevation: 8,
                   duration: const Duration(seconds: 5), // طولت الميساج شوية باش يلحق يكليكي
@@ -200,20 +201,20 @@ class _DashboardPageState extends State<DashboardPage> {
                 ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
-                      child: Text(_errorMessage, style: const TextStyle(color: Colors.red, fontSize: 16), textAlign: TextAlign.center),
+                      child: Text(_errorMessage, style:  TextStyle(color: Colors.red, fontSize: 16.sp), textAlign: TextAlign.center),
                     )
                   )
                 : SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                    padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildHeader(),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         _buildWalletCard(), // 🟢 L-karta z-zr9a ghadi tbqa hna
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         _buildStatistiquesSection(),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         _buildActivitesSection(),
                       ],
                     ),
@@ -268,12 +269,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     Text(
                       "Bonjour $prenom!", 
-                      style: const TextStyle(color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w500)
+                      style:  TextStyle(color: Colors.black54, fontSize: 14.sp, fontWeight: FontWeight.w500)
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       coproNom, 
-                      style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 20, height: 1.2), 
+                      style:  TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 20.sp, height: 1.2), 
                       maxLines: 3, 
                       overflow: TextOverflow.ellipsis
                     ),
@@ -284,7 +285,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
         
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
 
         // ==============================================
         // 🟢 PARTIE DROITE: Cloche + Photo (Mêmes dimensions)
@@ -346,12 +347,12 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
             
-            const SizedBox(width: 12), 
+            SizedBox(width: 12.w), 
 
             // 2. IMAGE DE PROFIL
             PopupMenuButton<String>(
               offset: const Offset(0, 50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
               color: Colors.white,
               elevation: 4,
               onSelected: (value) async {
@@ -404,7 +405,7 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
         ],
       ),
@@ -438,12 +439,12 @@ class _DashboardPageState extends State<DashboardPage> {
               Row(
                 children: [
                   Icon(Icons.account_balance_wallet, color: Colors.white.withOpacity(0.8), size: 20),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Text("Solde de la copropriété", style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14)),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -451,19 +452,19 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Row(
                   children: [
                     const Icon(Icons.domain, color: Colors.white, size: 14),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Text("$nbLots Lots", style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             "$solde MAD",
             style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 30),
+          SizedBox(height: 30),
           
       // 🟢 Flèches Khdamin (Clickables m3a Animation)
           Row(
@@ -481,13 +482,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   color: Colors.transparent, // bach ykon l-click sahel
                   child: Icon(Icons.arrow_back_ios, color: Colors.white.withOpacity(0.8), size: 18),
                 ),
               ),
               
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               
               // 🟢 Zone dyal l-Boutons (Scrollable)
               Expanded(
@@ -498,22 +499,22 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Row(
                     children: [
                       _buildInnerActionBtn(Icons.add, "Appel de fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       _buildInnerActionBtn(Icons.send, "Paiement", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       _buildInnerActionBtn(Icons.groups, "Assemblées", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssembleesPage()))),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       _buildInnerActionBtn(Icons.folder_open, "Documents", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsPage()))),
                     ],
                   ),
                 ),
               ),
               
-              const SizedBox(width: 4),
+              SizedBox(width: 4),
               
               // ➡️ Flèche dyal l-imin (Droite)
               GestureDetector(
@@ -529,7 +530,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   color: Colors.transparent, // bach ykon l-click sahel
                   child: Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.8), size: 18),
                 ),
@@ -554,7 +555,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             child: Icon(icon, color: Colors.white, size: 22),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             label,
             style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
@@ -577,8 +578,8 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Synthèse Financière", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-          const SizedBox(height: 20),
+           Text("Synthèse Financière", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+          SizedBox(height: 20),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -627,21 +628,21 @@ class _DashboardPageState extends State<DashboardPage> {
             Row(
               children: [
                 Icon(icon, color: iconColor, size: 20),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black54),
+                    style:  TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: Colors.black54),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               "$amount MAD",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: iconColor),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: iconColor),
             ),
           ],
         ),
@@ -665,7 +666,7 @@ class _DashboardPageState extends State<DashboardPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Dernières Activités", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+               Text("Dernières Activités", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
               GestureDetector(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()));
@@ -674,7 +675,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           if (activites.isEmpty)
             const Text("Aucune activité récente.", style: TextStyle(color: Colors.black54)),
           ...activites.map((act) {
@@ -698,17 +699,17 @@ class _DashboardPageState extends State<DashboardPage> {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
           child: Icon(icon, color: color, size: 20),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
-              Text(subtitle, style: const TextStyle(color: Colors.black54, fontSize: 12)),
+              Text(title, style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
+              Text(subtitle, style:  TextStyle(color: Colors.black54, fontSize: 12.sp)),
             ],
           ),
         ),
@@ -716,7 +717,7 @@ class _DashboardPageState extends State<DashboardPage> {
           amount,
           style: TextStyle(
             fontWeight: FontWeight.bold, 
-            fontSize: 14, 
+            fontSize: 14.sp, 
             color: amount.startsWith('+') ? Colors.green : (amount.startsWith('-') ? Colors.black87 : Colors.redAccent)
           ),
         ),

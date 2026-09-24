@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/widgets/custom_header.dart'; 
 import 'package:syndic_app/pages/main_layout.dart'; 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ==========================================
 // 1. LISTE DES ANNONCES (Vue d'ensemble)
@@ -88,7 +89,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
             ),
             
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 8.0.h),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Stack(
@@ -110,7 +111,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
 
             Expanded(
               child: _isLoading 
@@ -118,9 +119,9 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                 : annoncesList.isEmpty
                   ? const Center(child: Text("Aucune annonce pour le moment.", style: TextStyle(color: Colors.grey)))
                   : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 8.0.h),
                       itemCount: annoncesList.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, __) => SizedBox(height: 12.h),
                       itemBuilder: (context, index) {
                         final ann = annoncesList[index];
                         final aColor = _hexToColor(ann['colorHex']);
@@ -131,7 +132,7 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(_getIcon(ann['iconString']), color: aColor, size: 28),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12.w),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,14 +140,14 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(child: Text(ann["title"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87))),
-                                        Text(ann["date"], style: const TextStyle(color: Colors.black54, fontSize: 11)),
+                                        Expanded(child: Text(ann["title"], style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87))),
+                                        Text(ann["date"], style:  TextStyle(color: Colors.black54, fontSize: 11.sp)),
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(ann["category"], style: TextStyle(color: aColor, fontSize: 11, fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 8),
-                                    Text(ann["message"], style: const TextStyle(color: Colors.black54, fontSize: 13)),
+                                     SizedBox(height: 4.h),
+                                    Text(ann["category"], style: TextStyle(color: aColor, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                                     SizedBox(height: 8.h),
+                                    Text(ann["message"], style:  TextStyle(color: Colors.black54, fontSize: 13.sp)),
                                   ],
                                 ),
                               ),
@@ -163,9 +164,9 @@ class _AnnoncesPageState extends State<AnnoncesPage> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                   icon: const Icon(Icons.campaign, color: Colors.white),
-                  label: const Text("Créer une annonce", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  label:  Text("Créer une annonce", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const CreerAnnoncePage())).then((_) => _fetchAnnonces());
                   },
@@ -246,21 +247,21 @@ class _CreerAnnoncePageState extends State<CreerAnnoncePage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Center(child: Text("CONFIRMATION", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))),
+        title:  Center(child: Text("CONFIRMATION", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Confirmez-vous la création et la publication de l'annonce ?", textAlign: TextAlign.center, style: TextStyle(fontSize: 14)),
-            const SizedBox(height: 16),
+             Text("Confirmez-vous la création et la publication de l'annonce ?", textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp)),
+            SizedBox(height: 16.h),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.info, color: Colors.green, size: 16),
-                const SizedBox(width: 8),
+                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     _sendNotification ? "L'annonce sera visible. Une notification Push sera envoyée." : "L'annonce sera visible sans notification.", 
-                    style: const TextStyle(fontSize: 12, color: Colors.black54)
+                    style:  TextStyle(fontSize: 12.sp, color: Colors.black54)
                   ),
                 ),
               ],
@@ -302,7 +303,7 @@ class _CreerAnnoncePageState extends State<CreerAnnoncePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const CustomHeader(title: "Sindy", subtitle: "Créer une annonce", showBackButton: true),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
 
               Container(
                 padding: const EdgeInsets.all(16),
@@ -310,16 +311,16 @@ class _CreerAnnoncePageState extends State<CreerAnnoncePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("NOUVELLE ANNONCE", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    const SizedBox(height: 16),
+                     Text("NOUVELLE ANNONCE", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    SizedBox(height: 16.h),
                     
                     _buildInputLabel("Titre *"),
                     TextField(controller: _titleController, decoration: _inputDecoration("Ex: Travaux ascenseur")),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     _buildInputLabel("Catégorie"),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(color: bgLight, borderRadius: BorderRadius.circular(8)),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
@@ -330,7 +331,7 @@ class _CreerAnnoncePageState extends State<CreerAnnoncePage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     _buildInputLabel("Message *"),
                     TextField(
@@ -338,7 +339,7 @@ class _CreerAnnoncePageState extends State<CreerAnnoncePage> {
                       maxLines: 4,
                       decoration: _inputDecoration("Saisissez votre message ici..."),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                    _buildInputLabel("Date d'expiration"),
 TextField(
@@ -347,7 +348,7 @@ TextField(
   onTap: () => _selectDate(context), // 🟢 Ouvre le calendrier
   decoration: _inputDecoration("Choisir une date (Optionnel)", icon: Icons.calendar_today),
 ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     Row(
                       children: [
@@ -362,14 +363,14 @@ TextField(
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                   onPressed: _showConfirmation,
-                  child: const Text("PUBLIER", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  child:  Text("PUBLIER", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -382,7 +383,7 @@ TextField(
   Widget _buildInputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0),
-      child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
+      child: Text(label, style:  TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.black54)),
     );
   }
 
@@ -392,7 +393,7 @@ TextField(
       hintStyle: const TextStyle(color: Colors.black38, fontSize: 13),
       suffixIcon: icon != null ? Icon(icon, color: Colors.black54, size: 18) : null,
       filled: true, fillColor: bgLight,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
     );
   }

@@ -5,6 +5,7 @@ import 'package:syndic_app/pages/login_page.dart';
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/notifications_page.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppBanner extends StatelessWidget {
   final String firstName;
@@ -76,14 +77,14 @@ class AppBanner extends StatelessWidget {
                 size: 24,
               ),
 
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
 
               Expanded(
                 child: Text(
                   "Sindy | $residenceName",
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
@@ -96,7 +97,7 @@ class AppBanner extends StatelessWidget {
               // ==================================================
 
               if (showNotifications) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
 
                 InkWell(
                   borderRadius: BorderRadius.circular(30),
@@ -119,7 +120,7 @@ class AppBanner extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
               ],
 
               // ==================================================
@@ -130,7 +131,7 @@ class AppBanner extends StatelessWidget {
                 offset: const Offset(0, 50),
 
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
 
                 color: Colors.white,
@@ -238,7 +239,7 @@ class AppBanner extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           // ======================================================
           // GREETING
@@ -246,20 +247,20 @@ class AppBanner extends StatelessWidget {
 
           Text(
             "Bonjour, $firstName",
-            style: const TextStyle(
+            style:  TextStyle(
               color: Colors.white,
-              fontSize: 23,
+              fontSize: 23.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
 
-          const SizedBox(height: 3),
+           SizedBox(height: 3.h),
 
           Text(
             "$residenceName • $lotInfo",
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -292,14 +293,14 @@ class AppBanner extends StatelessWidget {
             size: 20,
           ),
 
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
 
           Text(
             text,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
         ],

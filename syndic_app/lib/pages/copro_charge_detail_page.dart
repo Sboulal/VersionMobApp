@@ -10,6 +10,7 @@ import 'package:syndic_app/pages/NotificationsScreen.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
@@ -46,13 +47,13 @@ class CustomHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(
             text,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
         ],
@@ -102,22 +103,22 @@ class CustomHeader extends StatelessWidget {
                 ),
               
               const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Nom de la résidence
               Expanded(
                 child: Text(
                   residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Bouton Notifications
               InkWell(
@@ -132,7 +133,7 @@ class CustomHeader extends StatelessWidget {
              },
              child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
            ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               
              // ======================================================
               // USER DROPDOWN (AVATAR)
@@ -140,7 +141,7 @@ class CustomHeader extends StatelessWidget {
               PopupMenuButton<String>(
                 offset: const Offset(0, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 color: Colors.white,
                 elevation: 4,
@@ -171,7 +172,7 @@ class CustomHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           
           // Titre de la page
           Text(
@@ -182,7 +183,7 @@ class CustomHeader extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: 3),
           
           // Sous-titre
           Text(
@@ -326,7 +327,7 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
 
                     // Carte de Détail (Montant et Dates)
                     Container(
@@ -348,7 +349,7 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text("Montant", style: TextStyle(color: Colors.black54, fontSize: 14)),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -367,7 +368,7 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -375,7 +376,7 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                               Text("${widget.chargeData['date_emission'] ?? 'N/A'}", style: const TextStyle(color: Colors.black54)),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -383,14 +384,14 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                               Text("${widget.chargeData['date_echeance'] ?? 'N/A'}", style: const TextStyle(color: Colors.black54)),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Row(
                             children: [
                               Icon(Icons.circle, size: 12, color: statusColor),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Text(
                                 status,
-                                style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16),
+                                style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16.sp),
                               ),
                             ],
                           ),
@@ -407,12 +408,12 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: mainBlue,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: 16.h),
                           side: BorderSide(color: mainBlue.withOpacity(0.5)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                         ),
                         icon: _isDownloading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20, 
                                 height: 20, 
                                 child: CircularProgressIndicator(strokeWidth: 2)
@@ -425,7 +426,7 @@ class _CoproChargeDetailPageState extends State<CoproChargeDetailPage> {
                         onPressed: _isDownloading ? null : _telechargerAppelCharge,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                   ],
                 ),
               ),

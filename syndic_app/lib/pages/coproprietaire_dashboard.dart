@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syndic_app/widgets/custom_header.dart'; 
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CoproprietaireDashboard extends StatelessWidget {
   const CoproprietaireDashboard({super.key});
 
@@ -14,7 +14,7 @@ class CoproprietaireDashboard extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: mainBlue,
         elevation: 0,
-        title: const Text("ACCUEIL", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
+        title: Text("ACCUEIL", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
@@ -37,7 +37,7 @@ class CoproprietaireDashboard extends StatelessWidget {
                     backgroundImage: NetworkImage('https://cdn-icons-png.flaticon.com/512/3135/3135715.png'),
                     backgroundColor: Colors.white,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded( // 🟢 Ajout de Expanded
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,11 +59,11 @@ class CoproprietaireDashboard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+               SizedBox(height: 24.h),
 
               // 2. Situation : Votre solde
-              const Text("Situation", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-              const SizedBox(height: 12),
+               Text("Situation", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+               SizedBox(height: 12.h),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -79,24 +79,24 @@ class CoproprietaireDashboard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Votre solde", style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
+                         Text("Votre solde", style: TextStyle(fontSize: 14.sp, color: Colors.black54, fontWeight: FontWeight.w600)),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
                           child: Text("À payer", style: TextStyle(color: Colors.red.shade700, fontSize: 11, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                     SizedBox(height: 8.h),
                     Text("2 500 MAD", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.red.shade700)),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // 3. Prochaine charge
-              const Text("Prochaine charge", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-              const SizedBox(height: 12),
+               Text("Prochaine charge", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+              SizedBox(height: 12.h),
               _buildInfoCard(
                 icon: Icons.receipt_long,
                 iconColor: Colors.orange,
@@ -104,11 +104,11 @@ class CoproprietaireDashboard extends StatelessWidget {
                 amount: "2 500 MAD",
                 subtitle: "Échéance : 30/09/2026",
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // 4. Dernier paiement
-              const Text("Dernier paiement", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-              const SizedBox(height: 12),
+              Text("Dernier paiement", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+              SizedBox(height: 12.h),
               _buildInfoCard(
                 icon: Icons.check_circle,
                 iconColor: Colors.green,
@@ -116,11 +116,11 @@ class CoproprietaireDashboard extends StatelessWidget {
                 amount: "2 500 MAD",
                 subtitle: "Virement",
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // 5. Dernières annonces
-              const Text("Dernières annonces", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-              const SizedBox(height: 12),
+              Text("Dernières annonces", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+              SizedBox(height: 12.h),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -133,19 +133,19 @@ class CoproprietaireDashboard extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12.r)),
                       child: const Icon(Icons.campaign, color: Colors.blue, size: 24),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text("Travaux ascenseur", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                          SizedBox(height: 4),
+                        children:  [
+                          Text("Travaux ascenseur", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
+                          SizedBox(height: 4.h),
                           Text(
                             "L'ascenseur sera indisponible mardi de 9h à 14h. Les copropriétaires reçoivent une notification.",
-                            style: TextStyle(color: Colors.black54, fontSize: 12, height: 1.4),
+                            style: TextStyle(color: Colors.black54, fontSize: 12.sp, height: 1.4.h),
                           ),
                         ],
                       ),
@@ -153,7 +153,7 @@ class CoproprietaireDashboard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               // 6. Bouton : Voir toutes les charges
               SizedBox(
@@ -161,17 +161,17 @@ class CoproprietaireDashboard extends StatelessWidget {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mainBlue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                     elevation: 0,
                   ),
                   onPressed: () {
                     // Navigation vers la liste des charges
                   },
-                  child: const Text("Voir toutes les charges", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  child:  Text("Voir toutes les charges", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
             ],
           ),
         ),
@@ -193,21 +193,21 @@ class CoproprietaireDashboard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12.r)),
             child: Icon(icon, color: iconColor, size: 24),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                const SizedBox(height: 4),
-                Text(subtitle, style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                Text(title, style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
+                SizedBox(height: 4),
+                Text(subtitle, style:  TextStyle(color: Colors.black54, fontSize: 12.sp)),
               ],
             ),
           ),
-          Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
+          Text(amount, style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp, color: Colors.black87)),
         ],
       ),
     );

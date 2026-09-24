@@ -15,6 +15,7 @@ import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:syndic_app/pages/main_layout.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER (CORRIGÉ)
@@ -76,7 +77,7 @@ class _CustomHeaderState extends State<CustomHeader> {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
         ],
       ),
@@ -116,29 +117,29 @@ class _CustomHeaderState extends State<CustomHeader> {
                   ),
                 ),
               const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   widget.residenceName.isNotEmpty ? "Sindy | ${widget.residenceName}" : "Sindy",
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style:  TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
                   maxLines: 1, overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               InkWell(
                 onTap: widget.onNotificationTap ?? () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationsScreen(role: widget.userRole)));
                 },
                 child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               
               // ======================================================
               // USER DROPDOWN (AVATAR)
               // ======================================================
               PopupMenuButton<String>(
                 offset: const Offset(0, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 color: Colors.white,
                 elevation: 4,
                 
@@ -201,9 +202,9 @@ class _CustomHeaderState extends State<CustomHeader> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Text(widget.title, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 3),
+          SizedBox(height: 3),
           Text(widget.subtitle, style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
@@ -567,7 +568,7 @@ class _CoproDashboardPageState
               color: Colors.blueGrey.shade200,
             ),
 
-            const SizedBox(height: 18),
+            SizedBox(height: 18),
 
             Text(
               _errorMessage.isNotEmpty
@@ -583,7 +584,7 @@ class _CoproDashboardPageState
               ),
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
 
             Text(
               'Tirez vers le bas pour réessayer.',
@@ -673,7 +674,7 @@ class _CoproDashboardPageState
                 size: 24,
               ),
 
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
 
               Expanded(
                 child: Text(
@@ -690,16 +691,16 @@ class _CoproDashboardPageState
                       TextOverflow.ellipsis,
 
                   style:
-                      const TextStyle(
+                       TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight:
                         FontWeight.bold,
                   ),
                 ),
               ),
 
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
 
               // Notification
               InkWell(
@@ -727,7 +728,7 @@ class _CoproDashboardPageState
                 ),
               ),
 
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
 
               // Profile dropdown
               PopupMenuButton<String>(
@@ -812,7 +813,7 @@ class _CoproDashboardPageState
             ],
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           Text(
             'Bonjour, $firstName',
@@ -824,7 +825,7 @@ class _CoproDashboardPageState
             ),
           ),
 
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
 
           Text(
 
@@ -933,7 +934,7 @@ class _CoproDashboardPageState
             size: 20,
           ),
 
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
 
           Text(
             text,
@@ -941,7 +942,7 @@ class _CoproDashboardPageState
               color: color,
               fontWeight:
                   FontWeight.w500,
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
         ],
@@ -1014,7 +1015,7 @@ class _CoproDashboardPageState
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             Row(
 
@@ -1042,7 +1043,7 @@ class _CoproDashboardPageState
                   ),
                 ),
 
-                const SizedBox(
+                SizedBox(
                     width: 12),
 
                 Expanded(
@@ -1067,7 +1068,7 @@ class _CoproDashboardPageState
               ],
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             Text(
               'Vos services',
@@ -1080,7 +1081,7 @@ class _CoproDashboardPageState
               ),
             ),
 
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
 
             GridView.count(
 
@@ -1300,8 +1301,8 @@ class _CoproDashboardPageState
 
           Container(
 
-            width: 38,
-            height: 38,
+            width: 38.w,
+            height: 38.h,
 
             decoration:
                 BoxDecoration(
@@ -1319,7 +1320,7 @@ class _CoproDashboardPageState
             ),
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           Text(
             title,
@@ -1333,7 +1334,7 @@ class _CoproDashboardPageState
             ),
           ),
 
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
 
           Text(
             value,
@@ -1341,7 +1342,7 @@ class _CoproDashboardPageState
             overflow:
                 TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 17,
+              fontSize: 17.sp,
               fontWeight:
                   FontWeight.bold,
               color: valueColor,
@@ -1418,8 +1419,8 @@ class _CoproDashboardPageState
 
             Container(
 
-              width: 50,
-              height: 50,
+              width: 50.w,
+              height: 50.h,
 
               decoration:
                   BoxDecoration(
@@ -1440,13 +1441,13 @@ class _CoproDashboardPageState
               ),
             ),
 
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
 
             Text(
               title,
               style:
-                  const TextStyle(
-                fontSize: 14,
+                   TextStyle(
+                fontSize: 14.sp,
                 fontWeight:
                     FontWeight.bold,
                 color:
@@ -1454,7 +1455,7 @@ class _CoproDashboardPageState
               ),
             ),
 
-            const SizedBox(height: 5),
+             SizedBox(height: 5.h),
 
             Text(
               subtitle,

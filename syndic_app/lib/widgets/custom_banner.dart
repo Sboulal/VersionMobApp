@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomBanner extends StatelessWidget {
   final String residenceName;
@@ -46,20 +47,20 @@ class CustomBanner extends StatelessWidget {
                     }
                   },
                 ),
-              if (!showBackButton) const SizedBox(width: 8), // espace ila makanch l'flèche
+              if (!showBackButton) SizedBox(width: 8), // espace ila makanch l'flèche
               
               const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 "Sindy | $residenceName",
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                style:  TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           Row(
             children: [
               const Icon(Icons.notifications_none, color: Colors.white, size: 26),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,

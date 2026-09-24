@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:syndic_app/models/NotificationModel.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NotificationsScreen extends StatefulWidget {
   final bool showBackButton;
@@ -147,12 +149,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4.h),
                             Text(notif.message),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4.h),
                             Text(
                               notif.dateHumaine,
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              style:  TextStyle(fontSize: 12.sp, color: Colors.grey),
                             ),
                           ],
                         ),

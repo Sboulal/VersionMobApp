@@ -6,6 +6,7 @@ import 'package:syndic_app/widgets/custom_header.dart';
 import 'package:syndic_app/pages/main_layout.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart';
 import 'package:syndic_app/widgets/custom_header.dart'; // 🟢 ZID HADI
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 🟢 ZIDNA HAD L'IMPORT DAROURI
 
 
 // ==========================================
@@ -43,8 +44,8 @@ class CustomHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
-          Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
+          SizedBox(width: 12.w),
+          Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14.sp)),
         ],
       ),
     );
@@ -59,10 +60,10 @@ class CustomHeader extends StatelessWidget {
       // 🟢 7yedna l'fond zre9 w tswira, khelina l'fond transparent bach yakhod loun dyal l'ecran
       color: Colors.transparent, 
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        bottom: 16,
-        left: 20,
-        right: 20,
+        top: MediaQuery.of(context).padding.top + 16.h,
+        bottom: 16.h,
+        left: 20.w,
+        right: 20.w,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +101,7 @@ class CustomHeader extends StatelessWidget {
                   padding: EdgeInsets.only(top: 2.0),
                   child: Icon(Icons.apartment, color: Colors.black87, size: 28),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 
                 // Textes
                 Expanded(
@@ -109,12 +110,12 @@ class CustomHeader extends StatelessWidget {
                     children: [
                       Text(
                         "Sindy",
-                        style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: mainBlue, fontSize: 18.sp, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2),
                       Text(
                         residenceName.isNotEmpty ? "$residenceName\n$title" : title,
-                        style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.4),
+                        style:  TextStyle(color: Colors.black54, fontSize: 13.sp, height: 1.4),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -240,10 +241,10 @@ class _AssembleesPageState extends State<AssembleesPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 12.0.h),
                                     decoration: BoxDecoration(
                                       color: isPasses ? Colors.grey.shade100 : mainBlue.withOpacity(0.05),
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                      borderRadius:  BorderRadius.vertical(top: Radius.circular(16.r)),
                                     ),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -251,7 +252,7 @@ class _AssembleesPageState extends State<AssembleesPage> {
                                         Row(
                                           children: [
                                             Icon(isPasses ? Icons.history : Icons.event_available, color: isPasses ? Colors.grey : mainBlue, size: 20),
-                                            const SizedBox(width: 8),
+                                            SizedBox(width: 8),
                                             Text(
                                               isPasses ? "Terminée" : "À venir",
                                               style: TextStyle(fontWeight: FontWeight.bold, color: isPasses ? Colors.grey.shade700 : mainBlue),
@@ -268,27 +269,27 @@ class _AssembleesPageState extends State<AssembleesPage> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(ag['titre'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                                        const SizedBox(height: 12),
+                                        Text(ag['titre'], style:  TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                        SizedBox(height: 12),
                                         
                                         Row(
                                           children: [
                                             const Icon(Icons.access_time, size: 16, color: Colors.black54),
-                                            const SizedBox(width: 6),
+                                            SizedBox(width: 6),
                                             Text(ag['heure'], style: const TextStyle(color: Colors.black54, fontSize: 13)),
-                                            const SizedBox(width: 16),
+                                            SizedBox(width: 16),
                                             const Icon(Icons.location_on_outlined, size: 16, color: Colors.black54),
-                                            const SizedBox(width: 6),
+                                            SizedBox(width: 6),
                                             Expanded(child: Text(ag['lieu'], style: const TextStyle(color: Colors.black54, fontSize: 13), overflow: TextOverflow.ellipsis)),
                                           ],
                                         ),
                                         
                                         const Divider(height: 24),
                                         const Text("Ordre du jour :", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                                        const SizedBox(height: 4),
+                                        SizedBox(height: 4),
                                         Text(ag['ordre_jour'], style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.4)),
 
-                                        const SizedBox(height: 16),
+                                        SizedBox(height: 16.h),
 
                                         if (isPasses && ag['pv_url'] != null)
                                           SizedBox(
@@ -340,9 +341,9 @@ class _AssembleesPageState extends State<AssembleesPage> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text("Planifier une AG", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  label:  Text("Planifier une AG", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
                   onPressed: () async {
                     // 🟢 SOLUTION 2 : Ntsnnaw rjou3 o n-actualisiw
                     final result = await Navigator.push(
@@ -503,7 +504,7 @@ class _CreateAssembleePageState extends State<CreateAssembleePage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        title: const Text("Planifier une AG", style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
+        title:  Text("Planifier une AG", style: TextStyle(color: Colors.black87, fontSize: 16.sp, fontWeight: FontWeight.bold)),
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black87), onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
@@ -514,60 +515,60 @@ class _CreateAssembleePageState extends State<CreateAssembleePage> {
             
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.blue.shade100)),
+              decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: Colors.blue.shade100)),
               child: Row(
                 children: [
                   Icon(Icons.info_outline, color: mainBlue),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   const Expanded(child: Text("La Loi 18-00 exige l'envoi des convocations 15 jours avant la date de l'AG.", style: TextStyle(fontSize: 12, color: Colors.black87))),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             _buildInput("Titre de l'assemblée", _titreController),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             
             Row(
               children: [
                 Expanded(
                   child: _buildInput("Date", _dateController, readOnly: true, onTap: () => _selectDate(context), suffixIcon: Icons.calendar_month),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: _buildInput("Heure", _heureController, readOnly: true, onTap: () => _selectTime(context), suffixIcon: Icons.access_time),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             _buildInput("Lieu (Ex: Garage, Appt Syndic...)", _lieuController),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             _buildInput("Ordre du jour (Points à débattre)", _ordreJourController, maxLines: 4, hint: "- Bilan financier\n- Choix du concierge\n- ..."),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             Container(
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: Colors.grey.shade200)),
               child: SwitchListTile(
                 activeColor: mainBlue,
-                title: const Text("Envoyer une Convocation (Push)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                subtitle: const Text("Les copropriétaires recevront une alerte sur leur téléphone.", style: TextStyle(fontSize: 12)),
+                title:  Text("Envoyer une Convocation (Push)", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                subtitle:  Text("Les copropriétaires recevront une alerte sur leur téléphone.", style: TextStyle(fontSize: 12.sp)),
                 value: _sendNotification,
                 onChanged: (val) => setState(() => _sendNotification = val),
               ),
             ),
             
-            const SizedBox(height: 40),
+             SizedBox(height: 40.h),
 
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                 onPressed: _isSubmitting ? null : _submitAG,
                 child: _isSubmitting 
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Text("PLANIFIER ET CONVOQUER", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  ?  SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  :  Text("PLANIFIER ET CONVOQUER", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -580,8 +581,8 @@ class _CreateAssembleePageState extends State<CreateAssembleePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black54)),
-        const SizedBox(height: 8),
+        Text(label, style:  TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black54)),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           readOnly: readOnly,
@@ -592,10 +593,10 @@ class _CreateAssembleePageState extends State<CreateAssembleePage> {
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.black26),
             suffixIcon: suffixIcon != null ? Icon(suffixIcon, color: Colors.black45) : null,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: mainBlue)),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 14.0.h),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: Colors.grey.shade300)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: Colors.grey.shade300)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: mainBlue)),
           ),
         ),
       ],

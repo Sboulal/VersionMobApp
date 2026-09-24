@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -96,7 +97,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: isRead ? Colors.white : Colors.blue.shade50.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(color: Colors.grey.shade200),
                         boxShadow: [
                           BoxShadow(
@@ -107,7 +108,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         ],
                       ),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                         leading: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -120,7 +121,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           notif['title'] ?? '',
                           style: TextStyle(
                             fontWeight: isRead ? FontWeight.w600 : FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             color: Colors.black87,
                           ),
                         ),
@@ -137,7 +138,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   height: 1.3,
                                 ),
                               ),
-                              const SizedBox(height: 6),
+                              SizedBox(height: 6),
                               Text(
                                 notif['date'] ?? '',
                                 style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
@@ -158,12 +159,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.notifications_off_outlined, size: 60, color: Colors.blueGrey.shade200),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Text(
             "Aucune notification",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade400),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             "Vous êtes à jour !",
             style: TextStyle(color: Colors.blueGrey.shade300),

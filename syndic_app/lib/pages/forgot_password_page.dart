@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -132,7 +132,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           Positioned(
             top: 0, left: 0, right: 0,
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.45,
+              height: 0.45.sh,
               color: isSuccess ? successTextGreen : mainColor,
               // child: BuildingsBackground(...), 
             ),
@@ -154,65 +154,65 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               height: MediaQuery.of(context).size.height * (_currentStep == 2 ? 0.75 : 0.65),
               decoration: BoxDecoration(
                 color: isSuccess ? successGreen : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(40.r)),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Icon(Icons.apartment, color: isSuccess ? successTextGreen : mainColor, size: 40),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       'Sindy',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isSuccess ? successTextGreen : mainColor),
                     ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: 30),
 
                     // --- STEP 1 ---
                     if (_currentStep == 1) ...[
-                      const Text(
+                       Text(
                         "Pour réinitialiser votre mot de passe, entrez votre email.",
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                        style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
                       _buildTextField(label: "Email", hint: "Saisissez votre email", controller: _emailController),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30),
                       _buildButton(label: "RECEVOIR LE CODE", onPressed: _sendCode, color: mainColor),
                     ],
 
                     // --- STEP 2 ---
                     if (_currentStep == 2) ...[
-                      const Text("Code de vérification", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                      const SizedBox(height: 8),
+                      Text("Code de vérification", style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.black54)),
+                      SizedBox(height: 8),
                       TextField(
                         controller: _codeController, // 🟢 ضفنا الكنترولر هنا باش نقراو الكود
                         textAlign: TextAlign.center,
                         maxLength: 5,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 24),
+                        style:TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, letterSpacing: 24),
                         decoration: InputDecoration(
                           counterText: "",
                           hintText: "•••••",
                           filled: true,
                           fillColor: bgGrey,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
                         ),
                       ),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: _sendCode, // 🟢 يعاود يصيفط الكود
-                          child: Text("Renvoyer le code", style: TextStyle(fontSize: 12, color: mainColor, fontWeight: FontWeight.bold)),
+                          child: Text("Renvoyer le code", style: TextStyle(fontSize: 12.sp, color: mainColor, fontWeight: FontWeight.bold)),
                         )
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       _buildTextField(label: "Nouveau mot de passe", hint: "Votre nouveau mot de passe", controller: _newPwdController, isPwd: true),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       _buildTextField(label: "Confirmation du mot de passe", hint: "Confirmez le mot de passe", controller: _confirmPwdController, isPwd: true),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30),
                       _buildButton(label: "RÉINITIALISER MON MOT DE PASSE", onPressed: _resetPassword, color: mainColor),
                     ],
 
@@ -230,13 +230,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      SizedBox(height: 30),
                       const Text(
                         "Félicitations,\nvotre mot de passe a\nété mis à jour.",
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
-                      const SizedBox(height: 40),
+                      SizedBox(height: 40),
                       _buildButton(
                         label: "SE CONNECTER À VOTRE ESPACE", 
                         onPressed: () => Navigator.pop(context), 
@@ -258,7 +258,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: isPwd,
@@ -268,7 +268,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             suffixIcon: isPwd ? const Icon(Icons.visibility_off, color: Colors.black26) : null,
             filled: true,
             fillColor: _currentStep == 3 ? Colors.white.withOpacity(0.5) : bgGrey,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
           ),
         ),
       ],
@@ -280,13 +280,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
         elevation: 0,
       ),
       onPressed: _isLoading ? null : onPressed,
       child: _isLoading 
-        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-        : Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+        ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+        : Text(label, style:  TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
 }

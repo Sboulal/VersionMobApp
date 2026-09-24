@@ -6,6 +6,7 @@ import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart'; 
 import 'package:syndic_app/pages/login_page.dart'; 
 import 'package:syndic_app/pages/NotificationsScreen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
@@ -35,7 +36,7 @@ class CustomHeader extends StatelessWidget {
   PopupMenuButton<String> _buildPopupMenu(BuildContext context) {
     return PopupMenuButton<String>(
       offset: const Offset(0, 50),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       color: Colors.white,
       elevation: 4,
       // 🟢 ZIDNA Hadi bach l-menu ywlli khdam w y-dir l-action !
@@ -105,11 +106,11 @@ class CustomHeader extends StatelessWidget {
                   ),
                 ),
               const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style:  TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -120,13 +121,13 @@ class CustomHeader extends StatelessWidget {
                 },
                 child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               _buildPopupMenu(context),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Text(title, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 3),
+          SizedBox(height: 3),
           Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
@@ -219,17 +220,17 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
               child: _isLoading 
                   ? Center(child: CircularProgressIndicator(color: mainBlue))
                   : SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).copyWith(bottom: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16).copyWith(bottom: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildSoldeCard(),
-                          const SizedBox(height: 24),
-                          const Text(
+                          SizedBox(height: 24),
+                           Text(
                             "Historique de mes charges",
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
+                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.black87),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
                           _buildHistoriqueList(),
                         ],
                       ),
@@ -255,14 +256,14 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
           Row(
             children: [
               Icon(Icons.account_balance_wallet, color: mainBlue, size: 20),
-              const SizedBox(width: 8),
-              const Text("Mon Solde Actuel", style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
+               SizedBox(width: 8.w),
+               Text("Mon Solde Actuel", style: TextStyle(fontSize: 14.sp, color: Colors.black54, fontWeight: FontWeight.w600)),
             ],
           ),
-          const SizedBox(height: 12),
+           SizedBox(height: 12.h),
           Text(
             _solde,
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: mainBlue),
+            style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.bold, color: mainBlue),
           ),
         ],
       ),
@@ -284,7 +285,7 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
           ),
           child: Row(
@@ -294,23 +295,23 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
                 decoration: BoxDecoration(color: mainBlue.withOpacity(0.1), shape: BoxShape.circle),
                 child: Icon(Icons.receipt_long, color: mainBlue, size: 24),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(appel['title'] ?? 'Appel de charge', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                    const SizedBox(height: 4),
-                    Text("Échéance: ${appel['date_echeance'] ?? 'N/A'}", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                    Text(appel['title'] ?? 'Appel de charge', style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
+                     SizedBox(height: 4.h),
+                    Text("Échéance: ${appel['date_echeance'] ?? 'N/A'}", style: TextStyle(color: Colors.grey.shade600, fontSize: 12.sp)),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(appel['amount'] ?? "0.00 MAD", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  const SizedBox(height: 4),
-                  Text(appel['status'] ?? "Impayé", style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                  Text(appel['amount'] ?? "0.00 MAD", style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                   SizedBox(height: 4.h),
+                  Text(appel['status'] ?? "Impayé", style: TextStyle(color: statusColor, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                 ],
               ),
             ],

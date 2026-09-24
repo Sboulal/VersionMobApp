@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SyndicValidationPage extends StatefulWidget {
   const SyndicValidationPage({super.key});
@@ -122,21 +123,21 @@ class _SyndicValidationPageState extends State<SyndicValidationPage> {
               backgroundImage: hasPhoto ? NetworkImage(user['photo']) : null,
               child: !hasPhoto ? Icon(Icons.person, color: mainBlue) : null,
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user['nom'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 4),
+                  Text(user['nom'], style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp)),
+                  SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.phone, size: 12, color: Colors.black54),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text(user['tel'] ?? "Non renseigné", style: const TextStyle(color: Colors.black54, fontSize: 12)),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text("Inscrit le: ${user['date_demande']}", style: TextStyle(color: Colors.orange.shade700, fontSize: 11)),
                 ],
               ),
@@ -145,7 +146,7 @@ class _SyndicValidationPageState extends State<SyndicValidationPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               // 🟢 Hna darna toString() bach ntfadaw l-machakil
               onPressed: () => _validerUser(user['id'], user['nom'].toString()),
@@ -163,7 +164,7 @@ class _SyndicValidationPageState extends State<SyndicValidationPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.check_circle_outline, size: 80, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           const Text("Aucune demande en attente", style: TextStyle(fontSize: 18, color: Colors.black54, fontWeight: FontWeight.bold)),
         ],
       ),

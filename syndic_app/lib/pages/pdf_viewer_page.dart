@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfUrl;
@@ -61,7 +62,7 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
       appBar: AppBar(
         title: Text(
           widget.documentName, 
-          style: const TextStyle(fontSize: 16),
+          style:  TextStyle(fontSize: 16.sp),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -85,13 +86,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.error_outline, color: Colors.red, size: 50),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                         Text(
                           _errorMessage ?? "Impossible de charger le PDF en interne.",
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24.h),
                         ElevatedButton.icon(
                           onPressed: _openExternal,
                           icon: const Icon(Icons.download),

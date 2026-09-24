@@ -9,6 +9,7 @@ import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart'; 
 import 'package:syndic_app/pages/login_page.dart'; 
 import 'package:syndic_app/pages/NotificationsScreen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
 // ==========================================
@@ -44,13 +45,13 @@ class CustomHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(
             text,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
         ],
@@ -100,22 +101,22 @@ class CustomHeader extends StatelessWidget {
                 ),
               
               const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Nom de la résidence
               Expanded(
                 child: Text(
                   residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Bouton Notifications
               InkWell(
@@ -130,7 +131,7 @@ class CustomHeader extends StatelessWidget {
              },
              child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
            ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               
             // ======================================================
               // USER DROPDOWN (AVATAR)
@@ -138,7 +139,7 @@ class CustomHeader extends StatelessWidget {
               PopupMenuButton<String>(
                 offset: const Offset(0, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 color: Colors.white,
                 elevation: 4,
@@ -169,7 +170,7 @@ class CustomHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           
           // Titre de la page
           Text(
@@ -180,7 +181,7 @@ class CustomHeader extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: 3),
           
           // Sous-titre
           Text(
@@ -338,7 +339,7 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   itemCount: _paiementsList.length,
                   itemBuilder: (context, index) {
                     final p = _paiementsList[index];
@@ -378,22 +379,22 @@ class _CoproPaiementsPageState extends State<CoproPaiementsPage> {
                             child: Icon(Icons.credit_card,
                                 color: modeColor, size: 24),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(infoLine,
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                        fontSize: 14.sp,
                                         color: Colors.black87)),
                                 if (refText.isNotEmpty) ...[
-                                  const SizedBox(height: 4),
+                                   SizedBox(height: 4.h),
                                   Text(refText,
-                                      style: const TextStyle(
+                                      style:  TextStyle(
                                           color: Colors.black54,
-                                          fontSize: 12,
+                                          fontSize: 12.sp,
                                           fontStyle: FontStyle.italic)),
                                 ]
                               ],

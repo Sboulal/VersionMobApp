@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart'; // 🟢 Ajout indispensable pour ouvrir la facture
 import 'package:syndic_app/widgets/custom_header.dart';
 import 'package:syndic_app/pages/main_layout.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER (DESIGN ÉPURÉ / BLANC)
@@ -44,7 +45,7 @@ class CustomHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
         ],
       ),
@@ -101,7 +102,7 @@ class CustomHeader extends StatelessWidget {
                   padding: EdgeInsets.only(top: 2.0),
                   child: Icon(Icons.apartment, color: Colors.black87, size: 28),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 
                 // Textes
                 Expanded(
@@ -112,7 +113,7 @@ class CustomHeader extends StatelessWidget {
                         "Sindy",
                         style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2),
                       Text(
                         residenceName.isNotEmpty ? "$residenceName\n$title" : title,
                         style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.4),
@@ -218,7 +219,7 @@ class _DepensesPageState extends State<DepensesPage> {
             ),
             
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Stack(
@@ -248,10 +249,10 @@ class _DepensesPageState extends State<DepensesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Dépenses", style: TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  const Text("Total du mois :", style: TextStyle(fontSize: 14, color: Colors.black87)),
-                  const SizedBox(height: 4),
+                   Text("Dépenses", style: TextStyle(fontSize: 14.sp, color: Colors.black54, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text("Total du mois :", style: TextStyle(fontSize: 14.sp, color: Colors.black87)),
+                  SizedBox(height: 4),
                   Text("$_totalMois MAD", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: mainBlue)),
                 ],
               ),
@@ -263,7 +264,7 @@ class _DepensesPageState extends State<DepensesPage> {
                 : depensesList.isEmpty
                   ? const Center(child: Text("Aucune dépense enregistrée.", style: TextStyle(color: Colors.grey)))
                   : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                       itemCount: depensesList.length,
                       separatorBuilder: (_, __) => const Divider(height: 24),
                       itemBuilder: (context, index) {
@@ -274,28 +275,28 @@ class _DepensesPageState extends State<DepensesPage> {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(color: dColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                              decoration: BoxDecoration(color: dColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12.r)),
                               child: Icon(_getIcon(dep['iconString']), color: dColor, size: 24),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(dep["date"], style: const TextStyle(color: Colors.black54, fontSize: 12)),
-                                  const SizedBox(height: 4),
-                                  Text(dep["title"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                                  Text(dep["category"], style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                                  Text(dep["date"], style:  TextStyle(color: Colors.black54, fontSize: 12.sp)),
+                                  SizedBox(height: 4),
+                                  Text(dep["title"], style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
+                                  Text(dep["category"], style:  TextStyle(color: Colors.black54, fontSize: 12.sp)),
                                 ],
                               ),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text(dep["amount"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                                Text(dep["amount"], style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
                                 // 🟢 BOUTON VOIR FACTURE POUR APPLE
                                 if (dep["document_url"] != null) ...[
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4),
                                   InkWell(
                                     onTap: () async {
                                       final url = Uri.parse(dep["document_url"]);
@@ -326,9 +327,9 @@ class _DepensesPageState extends State<DepensesPage> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text("Ajouter une dépense", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  label:  Text("Ajouter une dépense", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const AjouterDepensePage())).then((_) => _fetchDepenses());
                   },
@@ -461,12 +462,12 @@ Future<void> _pickPDF() async {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Center(child: Text("CONFIRMATION", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))),
+        title:  Center(child: Text("CONFIRMATION", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text("Confirmez-vous l'ajout de la dépense de ${_amountController.text} MAD (${_titleController.text}) ?", textAlign: TextAlign.center, style: const TextStyle(fontSize: 14)),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -522,7 +523,7 @@ Future<void> _pickPDF() async {
                   onBackTap: () => Navigator.pop(context),
                 )
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               
               Container(
                 padding: const EdgeInsets.all(16),
@@ -530,12 +531,12 @@ Future<void> _pickPDF() async {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("NOUVELLE DÉPENSE", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    const SizedBox(height: 16),
+                     Text("NOUVELLE DÉPENSE", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    SizedBox(height: 16.h),
                     
                     _buildInputLabel("Description / Titre"),
                     _buildTextField("Ex: Réparation Ascenseur", _titleController, null),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     Row(
                       children: [
@@ -543,14 +544,14 @@ Future<void> _pickPDF() async {
                           _buildInputLabel("Catégorie"), 
                           _buildDropdown(_selectedCategory, (v) => setState(() => _selectedCategory = v!))
                         ])),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           _buildInputLabel("Montant (MAD)"), 
                           _buildTextField("Ex: 3500", _amountController, null, isNum: true)
                         ])),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     Row(
                       children: [
@@ -558,17 +559,17 @@ Future<void> _pickPDF() async {
                           _buildInputLabel("Fournisseur (Opt)"), 
                           _buildTextField("Ex: Otis", _fournisseurController, null)
                         ])),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           _buildInputLabel("Référence (Opt)"), 
                           _buildTextField("REF-9082", _refController, null)
                         ])),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     const Text("Pièce justificative (Facture)", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     
                     if (_selectedFile != null)
                       Container(
@@ -577,7 +578,7 @@ Future<void> _pickPDF() async {
                         child: Row(
                           children: [
                             const Icon(Icons.check_circle, color: Colors.green),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12.w),
                             Expanded(child: Text(_selectedFileName ?? "Fichier sélectionné", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.redAccent),
@@ -590,24 +591,24 @@ Future<void> _pickPDF() async {
                       Row(
                         children: [
                           Expanded(child: _buildUploadButton("Prendre photo", Icons.camera_alt, Colors.grey.shade100, Colors.black54, () => _pickImage(ImageSource.camera))),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Expanded(child: _buildUploadButton("Galerie", Icons.photo_library, Colors.grey.shade100, Colors.black54, () => _pickImage(ImageSource.gallery))),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       _buildUploadButton("Importer PDF", Icons.picture_as_pdf, Colors.blue.shade50, mainBlue, _pickPDF),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                   onPressed: _showConfirmation,
-                  child: const Text("ENREGISTRER DÉPENSE", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  child:  Text("ENREGISTRER DÉPENSE", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -632,7 +633,7 @@ Future<void> _pickPDF() async {
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.black54, fontSize: 13),
         suffixIcon: icon != null ? Icon(icon, color: Colors.black54, size: 20) : null,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
@@ -643,7 +644,7 @@ Future<void> _pickPDF() async {
 
   Widget _buildDropdown(String value, Function(String?) onChanged) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
       decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

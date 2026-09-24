@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/main_layout.dart'; 
 import 'package:syndic_app/pages/login_page.dart';
 import 'package:syndic_app/pages/syndic_validation_page.dart'; // Wla smitha kifma drtiha f l-fichier jdida
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CoproprietePage extends StatefulWidget {
   final bool isMainScreen; 
@@ -120,16 +121,16 @@ class _CoproprietePageState extends State<CoproprietePage> {
             // 🟢 La bannière image avec texte par-dessus
             _buildImageBanner(),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             
             // 🟢 🟢 BOUTON DES VALIDATIONS EN ATTENTE 🟢 🟢
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Card(
                 color: Colors.orange.shade50, // Loun Limouni bach y-tir l-intibah
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   side: BorderSide(color: Colors.orange.shade200, width: 1),
                 ),
                 child: ListTile(
@@ -151,37 +152,37 @@ class _CoproprietePageState extends State<CoproprietePage> {
               ),
             ),
             
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // 🟢 Filtres
             SizedBox(
               height: 40,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 itemCount: filters.length,
                 itemBuilder: (context, index) => _buildFilterChip(filters[index]),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             
             // 🟢 Barre de recherche
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), 
+              padding: EdgeInsets.symmetric(horizontal: 16.0), 
               child: _buildSearchBar()
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             
             // 🟢 Liste des lots
             Expanded(
               child: _isLoading 
                   ? Center(child: CircularProgressIndicator(color: mainBlue))
                   : _errorMessage.isNotEmpty
-                      ? Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red)))
+                      ? Center(child: Text(_errorMessage, style:  TextStyle(color: Colors.red)))
                       : filteredLots.isEmpty
-                          ? const Center(child: Text("Aucun lot enregistré", style: TextStyle(color: Colors.black54, fontSize: 16)))
+                          ?  Center(child: Text("Aucun lot enregistré", style: TextStyle(color: Colors.black54, fontSize: 16.sp)))
                           : ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              padding: EdgeInsets.symmetric(horizontal: 16.0),
                               itemCount: filteredLots.length,
                               itemBuilder: (context, index) => _buildLotCard(filteredLots[index]),
                             ),
@@ -196,11 +197,11 @@ class _CoproprietePageState extends State<CoproprietePage> {
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mainBlue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                   ),
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text("Ajouter un lot", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  label:  Text("Ajouter un lot", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
                   onPressed: () => _showAddLotModal(context),
                 ),
               ),
@@ -244,7 +245,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
               ),
             ),
           const Icon(Icons.apartment, color: Colors.black87, size: 32),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,7 +286,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
             "Copropriété",
             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             "Gérez les lots et les copropriétaires de la résidence",
             style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
@@ -304,7 +305,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
       onTap: () => setState(() => selectedFilter = label),
       child: Container(
         margin: const EdgeInsets.only(right: 8.0),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
           color: isSelected ? mainBlue : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
@@ -333,7 +334,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
       ),
     );
   }
@@ -375,7 +376,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
               height: 55,
               decoration: BoxDecoration(
                 color: hasPhoto ? Colors.grey.shade200 : statusColor.withOpacity(0.1), // Fond plus clair si pas de photo
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: hasPhoto ? Colors.transparent : statusColor.withOpacity(0.3)),
                 image: hasPhoto
                     ? DecorationImage(
@@ -388,13 +389,13 @@ class _CoproprietePageState extends State<CoproprietePage> {
                   ? Center(
                       child: Text(
                         lot["id"].toString(),
-                        style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16), // Texte prend la couleur du statut
+                        style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16.sp), // Texte prend la couleur du statut
                       ),
                     )
                   : null,
             ),
             
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
             
             // ==============================================
             // INFORMATIONS DU COPROPRIÉTAIRE
@@ -408,7 +409,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
                     lot["owner"].toString(), 
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   
                   // Détails du lot (Étage, tantièmes)
                   Text(
@@ -416,18 +417,18 @@ class _CoproprietePageState extends State<CoproprietePage> {
                     style: const TextStyle(color: Colors.black54, fontSize: 12, fontWeight: FontWeight.w500)
                   ),
                   
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
 
                   // 🟢 TÉLÉPHONE (S'il existe)
                   if (phone.isNotEmpty && phone != "null") ...[
                     Row(
                       children: [
                         Icon(Icons.phone_outlined, size: 14, color: Colors.blueGrey.shade400),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6),
                         Text(phone, style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 13)),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                   ],
 
                   // 🟢 EMAIL (S'il existe)
@@ -435,7 +436,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
                     Row(
                       children: [
                         Icon(Icons.email_outlined, size: 14, color: Colors.blueGrey.shade400),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             email, 
@@ -445,14 +446,14 @@ class _CoproprietePageState extends State<CoproprietePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                   ],
 
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   
                   // Statut (À jour / Impayé)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6)
@@ -461,7 +462,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircleAvatar(radius: 3, backgroundColor: statusColor),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6),
                         Text(
                           lot["status"], 
                           style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11)
@@ -569,9 +570,9 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildSimpleInput("Nom & Prénom", nameCtrl),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildSimpleInput("Téléphone", phoneCtrl, isNumber: true),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildSimpleInput("Email", emailCtrl),
             ],
           ),
@@ -679,7 +680,7 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
                   Row(
                     children: [
                       Expanded(child: _buildInputBlock("Numéro du lot", _numeroController)),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(child: _buildDropdownBlock("Type", _selectedType, _typeOptions, (newValue) {
                         setState(() {
                           _selectedType = newValue!;
@@ -687,15 +688,15 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
                       })),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   _buildInputBlock("Étage", _etageController),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   GestureDetector(
                     onTap: _showOwnerDialog,
                     child: Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade300)),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.r), border: Border.all(color: Colors.grey.shade300)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -706,35 +707,35 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
                               Icon(Icons.edit, size: 16, color: widget.mainBlue),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(_ownerName.isEmpty ? "Appuyez pour saisir..." : _ownerName, style: TextStyle(fontSize: 16, color: _ownerName.isEmpty ? Colors.grey : Colors.black87, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 8),
+                          Text(_ownerName.isEmpty ? "Appuyez pour saisir..." : _ownerName, style: TextStyle(fontSize: 16.sp, color: _ownerName.isEmpty ? Colors.grey : Colors.black87, fontWeight: FontWeight.bold)),
                           if (_ownerPhone.isNotEmpty) Text(_ownerPhone, style: const TextStyle(color: Colors.black54)),
                           if (_ownerEmail.isNotEmpty) Text(_ownerEmail, style: const TextStyle(color: Colors.black54)),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   Row(
                     children: [
                       Expanded(child: _buildInputBlock("Tantièmes", _tantiemesController, isNumber: true)),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(child: _buildInputBlock("Surface (m²)", _surfaceController, isNumber: true)),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   _buildInputBlock("Notes éventuelles", _notesController, maxLines: 3),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
 
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: widget.mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: ElevatedButton.styleFrom(backgroundColor: widget.mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                       onPressed: _isSubmitting ? null : _submitLot,
                       child: _isSubmitting 
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : Text(_isEditMode ? "Mettre à jour" : "Enregistrer", style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : Text(_isEditMode ? "Mettre à jour" : "Enregistrer", style:  TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -751,14 +752,14 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         TextField(
           controller: controller,
           keyboardType: isNumber ? TextInputType.number : TextInputType.text,
           maxLines: maxLines,
           decoration: InputDecoration(
             filled: true, fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: widget.mainBlue)),
           ),
@@ -772,7 +773,7 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         DropdownButtonFormField<String>(
           value: value,
           icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade600),
@@ -787,7 +788,7 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: widget.mainBlue)),
           ),
@@ -803,7 +804,7 @@ class _AddLotFormModalState extends State<_AddLotFormModal> {
       decoration: InputDecoration(
         labelText: hint,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       ),
     );
   }
@@ -857,28 +858,28 @@ class LotDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("LOT ${lot['id']}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    const SizedBox(height: 8),
-                    Text(lot["owner"].toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                    const SizedBox(height: 4),
-                    Text("${lot["floor"]} | ${lot["tantiemes"]} tantièmes", style: const TextStyle(color: Colors.black54, fontSize: 14)),
-                    const SizedBox(height: 8),
+                    Text("LOT ${lot['id']}", style:  TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    SizedBox(height: 8),
+                    Text(lot["owner"].toString(), style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
+                    SizedBox(height: 4),
+                    Text("${lot["floor"]} | ${lot["tantiemes"]} tantièmes", style: TextStyle(color: Colors.black54, fontSize: 14.sp)),
+                    SizedBox(height: 8),
                     Row(
                       children: [
                         CircleAvatar(radius: 4, backgroundColor: statusColor),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6),
                         Text(lot["status"], style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 14)),
                       ],
                     ),
                     const Divider(height: 32, color: Colors.black12),
                     
-                    const Text("Historical payments", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    const SizedBox(height: 12),
+                     Text("Historical payments", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    SizedBox(height: 12.h),
                     _buildPaymentRow("Paiement de lot", "15 000 MAD"),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
             ],
           ),
         ),
@@ -890,8 +891,8 @@ class LotDetailPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(color: Colors.black54, fontSize: 14)),
-        Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+        Text(title, style:  TextStyle(color: Colors.black54, fontSize: 14.sp)),
+        Text(amount, style:   TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
       ],
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart'; // 🟢 Mohima bash n-copiw l-code (Clip
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/main_layout.dart'; // 🟢 Dashboard dyal Syndic
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SyndicRegisterPage extends StatefulWidget {
   const SyndicRegisterPage({super.key});
@@ -83,44 +84,44 @@ class _SyndicRegisterPageState extends State<SyndicRegisterPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: mainColor),
-        title: const Text("Créer une Résidence", style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
+        title:  Text("Créer une Résidence", style: TextStyle(color: Colors.black87, fontSize: 16.sp, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+        padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 20.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text("Devenir Syndic", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: mainColor)),
-            const SizedBox(height: 8),
-            const Text("Créez votre résidence en quelques clics pour commencer à la gérer.", style: TextStyle(fontSize: 14, color: Colors.black54)),
-            const SizedBox(height: 32),
+            Text("Devenir Syndic", style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: mainColor)),
+            SizedBox(height: 8),
+             Text("Créez votre résidence en quelques clics pour commencer à la gérer.", style: TextStyle(fontSize: 14.sp, color: Colors.black54)),
+            SizedBox(height: 32),
 
             // 🟢 L'Input d l-i9ama darouri l-Syndic
             _buildInput("Nom de la Résidence *", _residenceNameController, Icons.domain),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             _buildInput("Votre Nom Complet *", _nameController, Icons.person_outline),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildInput("Numéro de téléphone *", _phoneController, Icons.phone_outlined, isPhone: true),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildInput("Email (Optionnel)", _emailController, Icons.email_outlined),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildInput("Mot de passe *", _passwordController, Icons.lock_outline, isPassword: true),
             
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: mainColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 ),
                 onPressed: _isLoading ? null : _registerSyndic,
                 child: _isLoading 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text("Créer ma résidence", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    :  Text("Créer ma résidence", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -148,15 +149,15 @@ class _SyndicRegisterPageState extends State<SyndicRegisterPage> {
                 child: Icon(Icons.check_circle, size: 80, color: Colors.green.shade500),
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             const Text("Résidence Créée !", textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             const Text(
               "Félicitations, votre espace syndic est prêt. Partagez le code ci-dessous avec les résidents pour qu'ils puissent rejoindre l'application.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.5),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
 
             // 🟢 La zone li fiha L-Code m3a bouton dyal Copy
             Container(
@@ -169,7 +170,7 @@ class _SyndicRegisterPageState extends State<SyndicRegisterPage> {
               child: Column(
                 children: [
                   const Text("VOTRE CODE RÉSIDENCE :", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -177,7 +178,7 @@ class _SyndicRegisterPageState extends State<SyndicRegisterPage> {
                         _generatedCode,
                         style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: mainColor, letterSpacing: 2),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       IconButton(
                         onPressed: () {
                           // 🟢 Hadi katsauvegardi l-code f l-press-papier (Copier)
@@ -193,14 +194,14 @@ class _SyndicRegisterPageState extends State<SyndicRegisterPage> {
               ),
             ),
 
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: mainColor, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+              style: ElevatedButton.styleFrom(backgroundColor: mainColor, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
               onPressed: () {
                 // 🟢 L-Syndic kaydkhol direct l-Dashboard dyalo 7it deja 3tih l-token
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainLayout()), (route) => false);
               },
-              child: const Text("Accéder à mon tableau de bord", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              child:  Text("Accéder à mon tableau de bord", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -213,7 +214,7 @@ class _SyndicRegisterPageState extends State<SyndicRegisterPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: isPassword,
@@ -222,9 +223,9 @@ class _SyndicRegisterPageState extends State<SyndicRegisterPage> {
             prefixIcon: Icon(icon, color: Colors.black38),
             filled: true,
             fillColor: Colors.grey.shade50,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: mainColor, width: 1.5)),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: Colors.grey.shade300)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: mainColor, width: 1.5)),
           ),
         ),
       ],

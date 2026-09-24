@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomHeader extends StatelessWidget {
   final String title;
@@ -36,10 +36,10 @@ class CustomHeader extends StatelessWidget {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
-          if (showBackButton) const SizedBox(width: 8),
+          if (showBackButton) SizedBox(width: 8),
 
           const Icon(Icons.apartment, color: Colors.black87, size: 36),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

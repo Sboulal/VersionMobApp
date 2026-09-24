@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/main_layout.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'pdf_viewer_page.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 🟢 ZIDNA HAD L'IMPORT DAROURI
 
 
 
@@ -87,7 +88,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
             // 🟢 La bannière image avec texte
             _buildImageBanner(),
             
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             Expanded(
               child: _isLoading 
@@ -95,7 +96,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                 : _groupedDocuments.isEmpty
                   ? const Center(child: Text("Aucun document trouvé.", style: TextStyle(color: Colors.grey)))
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
                       itemCount: _groupedDocuments.length,
                       itemBuilder: (context, index) {
                         final group = _groupedDocuments[index];
@@ -106,14 +107,14 @@ class _DocumentsPageState extends State<DocumentsPage> {
                           child: ExpansionTile(
                             initiallyExpanded: files.isNotEmpty,
                             leading: const Icon(Icons.folder, color: Color(0xFFFFC107), size: 32),
-                            title: Text(group['category'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                            title: Text(group['category'], style:  TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
                             children: files.isEmpty
                                 ? [const Padding(padding: EdgeInsets.all(16.0), child: Text("Dossier vide", style: TextStyle(color: Colors.grey)))]
                                 : files.map((file) => Container(
                                     margin: const EdgeInsets.only(bottom: 8.0, left: 16.0, right: 16.0),
                                     decoration: BoxDecoration(
                                       color: Colors.white, 
-                                      borderRadius: BorderRadius.circular(12), 
+                                      borderRadius: BorderRadius.circular(12.r), 
                                       border: Border.all(color: Colors.grey.shade200)
                                     ),
                                     child: ListTile(
@@ -146,11 +147,11 @@ class _DocumentsPageState extends State<DocumentsPage> {
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mainBlue, 
-                    padding: const EdgeInsets.symmetric(vertical: 16), 
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                    padding: EdgeInsets.symmetric(vertical: 16.h), 
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))
                   ),
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text("Ajouter un document", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  label:  Text("Ajouter un document", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const AjouterDocumentPage())).then((_) => _fetchDocuments());
                   },
@@ -184,7 +185,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
               },
             ),
           const Icon(Icons.apartment, color: Colors.black87, size: 32),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +227,7 @@ Widget _buildImageBanner() {
             "Documents",
             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             "Consultez et gérez les documents de la résidence",
             style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
@@ -342,23 +343,23 @@ class _AjouterDocumentPageState extends State<AjouterDocumentPage> {
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade300)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("NOUVEAU DOCUMENT", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-                      const SizedBox(height: 16),
+                       Text("NOUVEAU DOCUMENT", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                      SizedBox(height: 16.h),
 
                       _buildInputLabel("Nom du document *"),
                       _buildTextField("Ex: PV d'AG 2026", _nomController, null),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
 
                       _buildInputLabel("Catégorie"),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(color: bgLight, borderRadius: BorderRadius.circular(8)),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
@@ -369,11 +370,11 @@ class _AjouterDocumentPageState extends State<AjouterDocumentPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
 
                       _buildInputLabel("Description éventuelle"),
                       _buildTextField("Saisissez une courte description...", _descController, null, maxLines: 3),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
 
                       _buildInputLabel("Fichier à publier *"),
                       _pickedFile != null
@@ -383,7 +384,7 @@ class _AjouterDocumentPageState extends State<AjouterDocumentPage> {
                               child: Row(
                                 children: [
                                   const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8),
                                   Expanded(child: Text(_pickedFile!.path.split('/').last, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13))),
                                   IconButton(icon: const Icon(Icons.close, size: 18, color: Colors.black45), onPressed: () => setState(() => _pickedFile = null)),
                                 ],
@@ -402,20 +403,20 @@ class _AjouterDocumentPageState extends State<AjouterDocumentPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                     onPressed: _isPublishing ? null : _publishDocument,
-                    child: _isPublishing ? const CircularProgressIndicator(color: Colors.white) : const Text("Publier", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                    child: _isPublishing ? const CircularProgressIndicator(color: Colors.white) :  Text("Publier", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
             ],
           ),
         ),
@@ -439,7 +440,7 @@ class _AjouterDocumentPageState extends State<AjouterDocumentPage> {
         hintStyle: const TextStyle(color: Colors.black38, fontSize: 13),
         suffixIcon: icon != null ? Icon(icon, color: Colors.black54, size: 18) : null,
         filled: true, fillColor: bgLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
       ),
     );

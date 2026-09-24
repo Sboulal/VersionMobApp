@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/widgets/custom_header.dart'; 
 import 'package:syndic_app/pages/main_layout.dart'; 
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER (DESIGN ÉPURÉ / BLANC)
 // ==========================================
@@ -40,7 +40,7 @@ class CustomHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
         ],
       ),
@@ -97,7 +97,7 @@ class CustomHeader extends StatelessWidget {
                   padding: EdgeInsets.only(top: 2.0),
                   child: Icon(Icons.apartment, color: Colors.black87, size: 28),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 
                 // Textes
                 Expanded(
@@ -108,7 +108,7 @@ class CustomHeader extends StatelessWidget {
                         "Sindy",
                         style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2.h),
                       Text(
                         residenceName.isNotEmpty ? "$residenceName\n$title" : title,
                         style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.4),
@@ -230,7 +230,7 @@ class _PaiementsPageState extends State<PaiementsPage> {
                 : paiementsList.isEmpty
                   ? const Center(child: Text("Aucun paiement trouvé.", style: TextStyle(color: Colors.grey)))
                   : ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
                       itemCount: paiementsList.length,
                       separatorBuilder: (_, __) => const Divider(height: 24),
                       itemBuilder: (context, index) {
@@ -243,19 +243,19 @@ class _PaiementsPageState extends State<PaiementsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(p["date"], style: const TextStyle(color: Colors.black54, fontSize: 12)),
-                                const SizedBox(height: 4),
-                                Text("${p["owner"]} (${p["lot"]})", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+                                SizedBox(height: 4),
+                                Text("${p["owner"]} (${p["lot"]})", style:  TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
                               ],
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text(p["amount"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                                const SizedBox(height: 4),
+                                Text(p["amount"], style:TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: Colors.black87)),
+                                SizedBox(height: 4),
                                 Row(
                                   children: [
                                     CircleAvatar(radius: 4, backgroundColor: modeColor),
-                                    const SizedBox(width: 4),
+                                    SizedBox(width: 4),
                                     Text(p["mode"], style: TextStyle(color: modeColor, fontWeight: FontWeight.bold, fontSize: 12)),
                                   ],
                                 )
@@ -272,9 +272,9 @@ class _PaiementsPageState extends State<PaiementsPage> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text("Enregistrer un paiement", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  label:  Text("Enregistrer un paiement", style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const EnregistrerPaiementPage())).then((_) => _fetchPaiements());
                   },
@@ -390,7 +390,7 @@ class _EnregistrerPaiementPageState extends State<EnregistrerPaiementPage> {
                 photoUrl: "",
                 showBackButton: true,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               
               Container(
                 padding: const EdgeInsets.all(16),
@@ -399,11 +399,11 @@ class _EnregistrerPaiementPageState extends State<EnregistrerPaiementPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text("Copropriétaire / Lot", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     _isLoadingOwners 
                       ? const LinearProgressIndicator() 
                       : Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          padding: EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
@@ -419,17 +419,17 @@ class _EnregistrerPaiementPageState extends State<EnregistrerPaiementPage> {
                             ),
                           ),
                         ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     const Text("Montant (MAD)", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                    const SizedBox(height: 6),
-                    TextField(controller: _amountController, keyboardType: TextInputType.number, decoration: InputDecoration(hintText: "Ex: 2500", border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12))),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 6),
+                    TextField(controller: _amountController, keyboardType: TextInputType.number, decoration: InputDecoration(hintText: "Ex: 2500", border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h))),
+                    SizedBox(height: 16.h),
 
                     const Text("Mode de paiement", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
@@ -440,20 +440,20 @@ class _EnregistrerPaiementPageState extends State<EnregistrerPaiementPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     const Text("Référence (Optionnel)", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                    const SizedBox(height: 6),
-                    TextField(controller: _refController, decoration: InputDecoration(hintText: "Ex: Chèque N°12345", border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12))),
+                    SizedBox(height: 6),
+                    TextField(controller: _refController, decoration: InputDecoration(hintText: "Ex: Chèque N°12345", border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h))),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                   onPressed: _isSubmitting ? null : _submitPaiement,
                   child: _isSubmitting ? const CircularProgressIndicator(color: Colors.white) : const Text("ENREGISTRER LE PAIEMENT", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),

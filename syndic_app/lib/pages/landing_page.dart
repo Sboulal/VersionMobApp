@@ -3,7 +3,7 @@ import 'package:syndic_app/pages/login_page.dart';
 import 'package:syndic_app/pages/syndic_register_page.dart'; // L-page dyal Syndic
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // 🟢 ZIDNA HAD L'IMPORT DAROURI
 class LandingPage extends StatelessWidget {
   final Color mainColor = const Color(0xFF1A5EAC);
 
@@ -36,14 +36,14 @@ class LandingPage extends StatelessWidget {
                     child: const Icon(Icons.apartment, size: 80, color: Colors.white),
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 
                 const Text(
                   "Syndify",
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: 1.5),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 40.0),
@@ -73,7 +73,7 @@ class LandingPage extends StatelessWidget {
                         "Bienvenue, choisissez votre accès",
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       
                       // 1. Bouton Login (Ila kan deja 3ndo compte)
                       _buildDirectActionTile(
@@ -215,48 +215,48 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: mainColor),
-        title: const Text("Demande d'inscription", style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold)),
+        title:  Text("Demande d'inscription", style: TextStyle(color: Colors.black87, fontSize: 16.sp, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
+        padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               "Rejoignez votre copropriété",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: mainColor),
+              style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: mainColor),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8.h),
+             Text(
               "Remplissez ce formulaire. Votre accès sera activé une fois validé par le syndic.",
-              style: TextStyle(fontSize: 14, color: Colors.black54),
+              style: TextStyle(fontSize: 14.sp, color: Colors.black54),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
 
             _buildInput("Code de la résidence *", _codeResidenceController, Icons.home_outlined),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildInput("Nom Complet *", _nameController, Icons.person_outline),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildInput("Numéro de téléphone *", _phoneController, Icons.phone_outlined, isPhone: true),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildInput("Email (Optionnel)", _emailController, Icons.email_outlined),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildInput("Mot de passe *", _passwordController, Icons.lock_outline, isPassword: true),
             
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: mainColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 ),
                 onPressed: _isLoading ? null : _register,
                 child: _isLoading 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text("Créer mon compte", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    :  Text("Créer mon compte", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -278,21 +278,21 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
               decoration: BoxDecoration(color: Colors.orange.shade50, shape: BoxShape.circle),
               child: Icon(Icons.hourglass_top, size: 80, color: Colors.orange.shade400),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             const Text("Demande Envoyée !", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             const Text(
               "Votre compte a été créé avec succès, mais il est en attente de validation.\n\nLe syndic doit valider votre identité avant que vous ne puissiez vous connecter.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.5),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: mainColor, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                style: ElevatedButton.styleFrom(backgroundColor: mainColor, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                 onPressed: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LandingPage()), (route) => false), // Retour à la page d'accueil
-                child: const Text("Retour à l'accueil", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                child:  Text("Retour à l'accueil", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -306,7 +306,7 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: isPassword,
@@ -315,9 +315,9 @@ class _RegisterInfoPageState extends State<RegisterInfoPage> {
             prefixIcon: Icon(icon, color: Colors.black38),
             filled: true,
             fillColor: Colors.grey.shade50,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: mainColor, width: 1.5)),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: Colors.grey.shade300)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: mainColor, width: 1.5)),
           ),
         ),
       ],

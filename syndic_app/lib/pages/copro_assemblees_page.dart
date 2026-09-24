@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/NotificationsScreen.dart'; // 🟢 Hna t-7etti l-import dyal NotificationsScreen
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
@@ -41,13 +41,13 @@ class CustomHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(
             text,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
         ],
@@ -97,22 +97,22 @@ class CustomHeader extends StatelessWidget {
                 ),
               
               const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Nom de la résidence
               Expanded(
                 child: Text(
                   residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Bouton Notifications
               InkWell(
@@ -127,7 +127,7 @@ class CustomHeader extends StatelessWidget {
              },
              child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
            ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               
            // ======================================================
               // USER DROPDOWN (AVATAR)
@@ -135,7 +135,7 @@ class CustomHeader extends StatelessWidget {
               PopupMenuButton<String>(
                 offset: const Offset(0, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 color: Colors.white,
                 elevation: 4,
@@ -166,7 +166,7 @@ class CustomHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           
           // Titre de la page
           Text(
@@ -177,7 +177,7 @@ class CustomHeader extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: 3),
           
           // Sous-titre
           Text(
@@ -315,8 +315,8 @@ class _CoproAssembleesPageState extends State<CoproAssembleesPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.event_busy, size: 80, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
-          const Text("Aucune assemblée générale planifiée.", style: TextStyle(color: Colors.black54, fontSize: 16)),
+          SizedBox(height: 16.h),
+           Text("Aucune assemblée générale planifiée.", style: TextStyle(color: Colors.black54, fontSize: 16.sp)),
         ],
       ),
     );
@@ -343,14 +343,14 @@ class _CoproAssembleesPageState extends State<CoproAssembleesPage> {
                 Expanded(
                   child: Text(
                     ag['title'] ?? "Assemblée Générale Ordinaire",
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style:  TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: isCloturee ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
                     isCloturee ? "Clôturée" : "À venir",
@@ -363,23 +363,23 @@ class _CoproAssembleesPageState extends State<CoproAssembleesPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Row(
               children: [
                 const Icon(Icons.calendar_today, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Text(ag['date_time'] ?? "Date non fixée", style: const TextStyle(fontSize: 14, color: Colors.black87)),
+                 SizedBox(width: 8.w),
+                Text(ag['date_time'] ?? "Date non fixée", style:  TextStyle(fontSize: 14.sp, color: Colors.black87)),
               ],
             ),
-            const SizedBox(height: 8),
+             SizedBox(height: 8.h),
             Row(
               children: [
                 const Icon(Icons.location_on_outlined, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Text(ag['location'] ?? "Lieu non précisé", style: const TextStyle(fontSize: 14, color: Colors.black87)),
+                 SizedBox(width: 8.w),
+                Text(ag['location'] ?? "Lieu non précisé", style:  TextStyle(fontSize: 14.sp, color: Colors.black87)),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

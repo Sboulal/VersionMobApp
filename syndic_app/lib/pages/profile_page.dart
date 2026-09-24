@@ -10,6 +10,7 @@ import 'package:syndic_app/pages/copro_annonces_page.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/landing_page.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UnifiedProfilePage extends StatefulWidget {
   final bool isMainScreen;
@@ -45,17 +46,17 @@ InputDecoration _customInputDecoration(String label) {
       labelStyle: const TextStyle(color: Colors.grey, fontSize: 14),
       filled: true,
       fillColor: Colors.grey.shade100,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         borderSide: BorderSide(color: mainBlue, width: 1.5),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         borderSide: BorderSide.none,
       ),
     );
@@ -234,15 +235,15 @@ Future<void> _pickImage() async {
                     onRefresh: _loadProfil,
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           _buildProfileHeader(isSyndic),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
 
                           _buildStatsCards(),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24),
 
                           const Align(
                             alignment: Alignment.centerLeft,
@@ -251,7 +252,7 @@ Future<void> _pickImage() async {
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
 
                           _buildSettingTile(
                             icon: Icons.person_outline,
@@ -259,7 +260,7 @@ Future<void> _pickImage() async {
                             subtitle: "Modifier mon nom et téléphone",
                             onTap: _showEditProfileDialog,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
 
                           _buildSettingTile(
                             icon: Icons.lock_outline,
@@ -267,7 +268,7 @@ Future<void> _pickImage() async {
                             subtitle: "Changer mon mot de passe",
                             onTap: _showChangePasswordDialog,
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
 
                           _buildSettingTile(
                             icon: Icons.campaign_outlined,
@@ -279,7 +280,7 @@ Future<void> _pickImage() async {
                               MaterialPageRoute(builder: (context) => const CoproAnnoncesPage(showBackButton: true)),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12),
 
                           _buildSettingTile(
                             icon: Icons.notifications_none,
@@ -293,7 +294,7 @@ Future<void> _pickImage() async {
                             ),
                             onTap: () {},
                           ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             _buildSettingTile(
                               icon: Icons.person_remove_alt_1_outlined,
                               title: "Supprimer mon compte",
@@ -301,7 +302,7 @@ Future<void> _pickImage() async {
                               iconColor: redColor,
                               onTap: () => _supprimerCompte(context),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
 
                           _buildSettingTile(
                             icon: Icons.logout,
@@ -310,7 +311,7 @@ Future<void> _pickImage() async {
                             iconColor: redColor,
                             onTap: _handleLogout,
                           ),
-                          const SizedBox(height: 30),
+                          SizedBox(height: 30),
                         ],
                       ),
                     ),
@@ -369,22 +370,22 @@ Future<void> _pickImage() async {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Text(
           _profil?['nom'] ?? 'Utilisateur',
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+          style:  TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: Colors.black87),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           _profil?['email'] ?? '',
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
+          style:  TextStyle(fontSize: 14.sp, color: Colors.grey),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildBadge(isSyndic ? "Syndic" : "Copropriétaire", mainBlue),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             _buildBadge(
               isSyndic ? (_profil?['copropriete'] ?? 'N/A') : (_profil?['lot'] ?? 'N/A'),
               Colors.green,
@@ -397,7 +398,7 @@ Future<void> _pickImage() async {
 
   Widget _buildBadge(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
@@ -417,13 +418,13 @@ Future<void> _pickImage() async {
           _profil?['solde_formate']?.replaceAll(' MAD', '') ?? "0", 
           mainBlue
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         _buildStatCard(
           "Prochaine", 
           _profil?['prochaine_charge'] ?? "-", 
           Colors.orange
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         _buildStatCard(
           "Impayé", 
           _profil?['dernier_impaye'] ?? "-", 
@@ -448,11 +449,11 @@ Future<void> _pickImage() async {
           children: [
             Text(
               value,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: color),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               title,
               style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
@@ -491,13 +492,13 @@ Future<void> _pickImage() async {
               ),
               child: Icon(icon, color: effectiveColor, size: 24),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
@@ -603,7 +604,7 @@ Future<void> _supprimerCompte(BuildContext context) async {
                     obscureText: true,
                     decoration: _customInputDecoration("Ancien mot de passe"),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   TextField(
                     controller: nouveauCtrl,
                     obscureText: true,
@@ -620,8 +621,8 @@ Future<void> _supprimerCompte(BuildContext context) async {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mainBlue,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                   onPressed: isSubmitting
                       ? null
@@ -654,7 +655,7 @@ Future<void> _supprimerCompte(BuildContext context) async {
                           }
                         },
                   child: isSubmitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Text("Valider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],
@@ -693,7 +694,7 @@ Future<void> _supprimerCompte(BuildContext context) async {
                     controller: nomCtrl,
                     decoration: _customInputDecoration("Nom complet"),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   TextField(
                     controller: telCtrl,
                     keyboardType: TextInputType.phone,
@@ -710,8 +711,8 @@ Future<void> _supprimerCompte(BuildContext context) async {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mainBlue,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                   onPressed: isSubmitting
                       ? null
@@ -743,7 +744,7 @@ Future<void> _supprimerCompte(BuildContext context) async {
                           }
                         },
                   child: isSubmitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Text("Valider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],

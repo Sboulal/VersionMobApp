@@ -7,6 +7,7 @@ import 'package:syndic_app/pages/NotificationsScreen.dart';
 import 'package:syndic_app/pages/profile_page.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
 import 'package:syndic_app/pages/login_page.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER
@@ -44,13 +45,13 @@ class CustomHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Text(
             text,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
         ],
@@ -100,22 +101,22 @@ class CustomHeader extends StatelessWidget {
                 ),
               
               const Icon(Icons.apartment, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Nom de la résidence
               Expanded(
                 child: Text(
                   residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               
               // Bouton Notifications
               InkWell(
@@ -130,7 +131,7 @@ class CustomHeader extends StatelessWidget {
              },
              child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
            ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               
             // ======================================================
               // USER DROPDOWN (AVATAR)
@@ -138,7 +139,7 @@ class CustomHeader extends StatelessWidget {
               PopupMenuButton<String>(
                 offset: const Offset(0, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 color: Colors.white,
                 elevation: 4,
@@ -169,18 +170,18 @@ class CustomHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           
           // Titre de la page
           Text(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               color: Colors.white,
               fontSize: 23,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: 3),
           
           // Sous-titre
           Text(
@@ -333,7 +334,7 @@ class _CoproDocumentsPageState extends State<CoproDocumentsPage> {
           child: _groupedDocuments.isEmpty
               ? Center(child: Text("Aucun document disponible.", style: TextStyle(color: Colors.blueGrey.shade400)))
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
                   itemCount: _groupedDocuments.length,
                   itemBuilder: (context, index) {
                     final group = _groupedDocuments[index];
@@ -348,7 +349,7 @@ class _CoproDocumentsPageState extends State<CoproDocumentsPage> {
                         leading: Icon(Icons.folder_open_rounded, color: Colors.amber.shade600, size: 28),
                         title: Text(
                           group['category'],
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                          style:  TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87),
                         ),
                         children: files.isEmpty
                             ? [
@@ -366,10 +367,10 @@ class _CoproDocumentsPageState extends State<CoproDocumentsPage> {
                                   onTap: () => _openFile(file['url'], file['name']),
                                   child: Container(
                                     margin: const EdgeInsets.only(left: 24.0, right: 8.0, bottom: 12.0),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(12.r),
                                       border: Border.all(color: Colors.grey.shade100),
                                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 4))],
                                     ),
@@ -380,13 +381,13 @@ class _CoproDocumentsPageState extends State<CoproDocumentsPage> {
                                           decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
                                           child: Icon(Icons.picture_as_pdf, color: Colors.red.shade400, size: 24),
                                         ),
-                                        const SizedBox(width: 12),
+                                        SizedBox(width: 12.w),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(file['name'], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black87)),
-                                              const SizedBox(height: 4),
+                                              SizedBox(height: 4),
                                               Text("${file['date']} • ${file['size']}", style: const TextStyle(color: Colors.black54, fontSize: 11)),
                                             ],
                                           ),

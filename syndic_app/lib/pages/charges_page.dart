@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/widgets/custom_header.dart'; 
-import 'package:syndic_app/pages/main_layout.dart'; 
+import 'package:syndic_app/pages/main_layout.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 
 // ==========================================
@@ -83,7 +84,7 @@ class _ChargesPageState extends State<ChargesPage> {
                     ? () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const MainLayout()), (route) => false)
                     : null,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
 
               // 🟢 Banner Image
               ClipRRect(
@@ -106,12 +107,12 @@ class _ChargesPageState extends State<ChargesPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // 🟢 Le Dernier Appel (Mise en avant)
               if (latestAppel != null) ...[
-                Text("Dernier Appel : ${latestAppel!['title']}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                const SizedBox(height: 12),
+                Text("Dernier Appel : ${latestAppel!['title']}", style:  TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                SizedBox(height: 12),
                 GestureDetector(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChargeDetailsPage(appelId: latestAppel!['id']))),
                   child: Container(
@@ -128,25 +129,25 @@ class _ChargesPageState extends State<ChargesPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("${latestAppel!['amount']} MAD", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
+                            Text("${latestAppel!['amount']} MAD", style:  TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: EdgeInsets.symmetric(horizontal: 10.0.w, vertical: 4.0.h),
                               decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
                               child: Text("${latestAppel!['lots_count']} Lots", style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black54)),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         _buildStatusRow(Colors.green, "${latestAppel!['payes']} Payés"),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         _buildStatusRow(Colors.orange, "${latestAppel!['partiels']} Partiellement Payés"),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         _buildStatusRow(Colors.red, "${latestAppel!['impayes']} Impayés"),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                             icon: const Icon(Icons.add, color: Colors.white, size: 20),
                             label: const Text("Nouvel appel de fond", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateChargePage())).then((_) => _fetchCharges()),
@@ -159,9 +160,9 @@ class _ChargesPageState extends State<ChargesPage> {
                 
                 // 🟢 NOUVEAU : Affichage de l'historique des appels
                 if (historique.isNotEmpty) ...[
-                  const SizedBox(height: 32),
-                  const Text("Historique des appels", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 32),
+                   Text("Historique des appels", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  SizedBox(height: 12),
                   ...historique.map((appel) => _buildHistoriqueCard(appel)).toList(),
                 ],
 
@@ -173,11 +174,11 @@ class _ChargesPageState extends State<ChargesPage> {
                     child: Text("Aucun appel de fonds trouvé.", style: TextStyle(color: Colors.grey)),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                    style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                     icon: const Icon(Icons.add, color: Colors.white, size: 20),
                     label: const Text("Créer le premier appel", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateChargePage())).then((_) => _fetchCharges()),
@@ -195,8 +196,8 @@ class _ChargesPageState extends State<ChargesPage> {
     return Row(
       children: [
         CircleAvatar(radius: 5, backgroundColor: color),
-        const SizedBox(width: 10),
-        Text(label, style: const TextStyle(fontSize: 14, color: Colors.black87, fontWeight: FontWeight.w500)),
+        SizedBox(width: 10),
+        Text(label, style:  TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -213,7 +214,7 @@ class _ChargesPageState extends State<ChargesPage> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6, offset: const Offset(0, 2))],
         ),
@@ -224,19 +225,19 @@ class _ChargesPageState extends State<ChargesPage> {
               decoration: BoxDecoration(color: mainBlue.withOpacity(0.1), shape: BoxShape.circle),
               child: Icon(Icons.receipt_long, color: mainBlue, size: 24),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(appel['title'] ?? 'appel de fond', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(appel['due_date'] ?? '', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 ],
               ),
             ),
             Text("${appel['amount']} MAD", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
           ],
         ),
@@ -353,16 +354,16 @@ class _CreateChargePageState extends State<CreateChargePage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Center(child: Text("CONFIRMATION", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))),
+        title:  Center(child: Text("CONFIRMATION", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold))),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Confirmez-vous la création de l'appel de fonds ?", textAlign: TextAlign.center, style: TextStyle(fontSize: 14)),
-            const SizedBox(height: 16),
+             Text("Confirmez-vous la création de l'appel de fonds ?", textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp)),
+            SizedBox(height: 16.h),
             Row(
               children: [
                 const Icon(Icons.info, color: Colors.green, size: 18),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     _selectedMode == 'forfait' 
@@ -410,7 +411,7 @@ class _CreateChargePageState extends State<CreateChargePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const CustomHeader(title: "Sindy", subtitle: "Nouvel appel de fonds"),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
 
               Container(
                 padding: const EdgeInsets.all(16),
@@ -419,10 +420,10 @@ class _CreateChargePageState extends State<CreateChargePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildModeSelector(), // 🟢 NOUVEAU SÉLECTEUR DE MODE
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
                     
                     _buildInput("Titre / Description", _titleController),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     
                     // 🟢 TEXTE DYNAMIQUE SELON LE MODE
                     _buildInput(
@@ -430,7 +431,7 @@ class _CreateChargePageState extends State<CreateChargePage> {
                       _amountController, 
                       isNumber: true
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     
                     _buildInput(
                       "Date d'échéance", 
@@ -442,12 +443,12 @@ class _CreateChargePageState extends State<CreateChargePage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
                   onPressed: _showConfirmation,
                   child: const Text("CRÉER L'APPEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
@@ -465,7 +466,7 @@ class _CreateChargePageState extends State<CreateChargePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text("Méthode de calcul", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -482,7 +483,7 @@ class _CreateChargePageState extends State<CreateChargePage> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: GestureDetector(
                 onTap: () => setState(() => _selectedMode = 'tantiemes'),
@@ -499,7 +500,7 @@ class _CreateChargePageState extends State<CreateChargePage> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           _selectedMode == 'forfait' 
             ? "💡 Idéal Maroc: Chaque résident paiera exactement le montant saisi." 
@@ -515,7 +516,7 @@ class _CreateChargePageState extends State<CreateChargePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         TextField(
           controller: controller,
           keyboardType: isNumber ? TextInputType.number : TextInputType.text,
@@ -525,7 +526,7 @@ class _CreateChargePageState extends State<CreateChargePage> {
             filled: true, 
             fillColor: Colors.grey.shade50,
             suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: mainBlue, width: 1.5)),
@@ -603,7 +604,7 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const CustomHeader(title: "Sindy", subtitle: "Détail appel de fonds"),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
 
               Container(
                 padding: const EdgeInsets.all(16),
@@ -615,18 +616,18 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', height: 120, width: double.infinity, fit: BoxFit.cover),
                     ),
-                    const SizedBox(height: 16),
-                    Text(appelDetails!['title'] ?? 'Appel', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 16.h),
+                    Text(appelDetails!['title'] ?? 'Appel', style:  TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
                     const Text("Montant total :", style: TextStyle(fontSize: 12, color: Colors.black54)),
                     Text("${appelDetails!['amount']} MAD", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
-              const Text("RÉSUMÉ FINANCIER", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-              const SizedBox(height: 12),
+               Text("RÉSUMÉ FINANCIER", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+               SizedBox(height: 12.h),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
@@ -635,15 +636,15 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
                     _buildSummaryRow("Total appelé :", "${appelDetails!['amount']} MAD", Colors.black87),
                     const Divider(height: 24),
                     _buildSummaryRow("Lots payés :", "$payes", Colors.green, isDot: true),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     _buildSummaryRow("Lots impayés :", "$impayes", Colors.red, isDot: true),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
-              const Text("LISTE DES COPROPRIÉTAIRES", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
-              const SizedBox(height: 12),
+               Text("LISTE DES COPROPRIÉTAIRES", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+               SizedBox(height: 12.h),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
@@ -681,8 +682,8 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
         Row(
           children: [
             if (isDot) CircleAvatar(radius: 4, backgroundColor: color),
-            if (isDot) const SizedBox(width: 6),
-            Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+            if (isDot) SizedBox(width: 6),
+            Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: color)),
           ],
         ),
       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Bannière commune à toutes les pages copropriétaire.
 ///
@@ -80,14 +81,14 @@ class CoproPageBanner extends StatelessWidget {
                   size: 24,
                 ),
 
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
 
                 Expanded(
                   child: Text(
                     'Sindy | $residenceName',
-                    style: const TextStyle(
+                    style:  TextStyle(
                       color: Colors.white,
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 1,
@@ -95,7 +96,7 @@ class CoproPageBanner extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
 
                 const Icon(
                   Icons.notifications_none,
@@ -103,7 +104,7 @@ class CoproPageBanner extends StatelessWidget {
                   size: 26,
                 ),
 
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
 
                 Container(
                   width: 32,
@@ -132,7 +133,7 @@ class CoproPageBanner extends StatelessWidget {
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style:  TextStyle(
                 color: Colors.white,
                 fontSize: 21,
                 fontWeight: FontWeight.w800,
@@ -140,7 +141,7 @@ class CoproPageBanner extends StatelessWidget {
             ),
 
             if (subtitle != null && subtitle!.isNotEmpty) ...[
-              const SizedBox(height: 3),
+              SizedBox(height: 3),
               Text(
                 subtitle!,
                 maxLines: 1,

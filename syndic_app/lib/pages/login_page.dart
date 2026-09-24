@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/pages/main_layout.dart';
 import 'package:syndic_app/pages/copro_main_layout.dart';
 import 'package:syndic_app/pages/forgot_password_page.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // 🟢 Nzidou had l'import bach nbiyenou msg d'inscription
 import 'package:syndic_app/pages/landing_page.dart';
@@ -179,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           Positioned(
             top: 0, left: 0, right: 0,
-            child: BuildingsBackground(mainColor: mainColor, height: MediaQuery.of(context).size.height * 0.45),
+            child: BuildingsBackground(mainColor: mainColor, height: 0.45.sh),
           ),
           
           // 🟢 ZIDNA BOUTON RETOUR HNA (FLÈCHE)
@@ -210,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -219,11 +220,11 @@ class _LoginPageState extends State<LoginPage> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1A5EAC)),
                     ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: 30),
 
                     if (_globalError != null) ...[
                       Text(_globalError!, style: const TextStyle(color: Colors.redAccent, fontSize: 14), textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                     ],
 
                     _buildTextField(
@@ -233,7 +234,7 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: false,
                       errorText: _emailError,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
 
                     _buildTextField(
                       label: 'Password',
@@ -243,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                       errorText: _passwordError,
                       isPassword: true,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -259,7 +260,7 @@ class _LoginPageState extends State<LoginPage> {
                                 onChanged: (value) => setState(() => _rememberMe = value ?? false),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                             const Text('Remember me', style: TextStyle(color: Colors.black54, fontSize: 13)),
                           ],
                         ),
@@ -270,23 +271,23 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: 30),
 
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: mainColor,
                         foregroundColor: Colors.white, 
                         padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                         elevation: 0,
                       ),
                       onPressed: _isLoading ? null : _login,
                       child: _isLoading
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                          : const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          :  Text('Login', style: TextStyle(fontSize: 16.sp.sp, fontWeight: FontWeight.bold)),
                     ),
                     
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     
                     // Lien vers l'inscription
                     Row(
@@ -329,17 +330,17 @@ class _LoginPageState extends State<LoginPage> {
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87, height: 1.3),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
+                  SizedBox(height: 16.h),
+                   Text(
                     "Redirection...",
-                    style: TextStyle(fontSize: 16, color: Colors.black54),
+                    style: TextStyle(fontSize: 16.sp.sp, color: Colors.black54),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: mainColor, 
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       elevation: 0,
                     ),
@@ -368,10 +369,10 @@ class _LoginPageState extends State<LoginPage> {
                           Text("Sindy", style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         _residenceName.isNotEmpty ? _residenceName : "Votre Résidence", 
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                        style:  TextStyle(color: Colors.white, fontSize: 16.sp.sp, fontWeight: FontWeight.w500),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -397,7 +398,7 @@ class _LoginPageState extends State<LoginPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black54)),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextFormField(
           controller: controller,
           obscureText: obscureText,
@@ -413,13 +414,13 @@ class _LoginPageState extends State<LoginPage> {
                 : (errorText != null ? const Icon(Icons.error, color: Colors.redAccent, size: 20) : null),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 16.0.h),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: errorText != null ? Colors.redAccent : Colors.grey.shade300, width: 1), 
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(color: errorText != null ? Colors.redAccent : mainColor, width: 1.5),
             ),
           ),

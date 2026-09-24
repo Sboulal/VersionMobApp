@@ -9,6 +9,7 @@ import 'package:syndic_app/pages/copropriete_page.dart';
 import 'package:syndic_app/pages/documents_page.dart';
 import 'package:syndic_app/pages/charges_page.dart'; 
 import 'package:syndic_app/pages/assemblees_page.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -119,11 +120,11 @@ class _MainLayoutState extends State<MainLayout> {
                       decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   const Text("Nouvel Appel de Fonds", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text("Remplissez les détails pour générer l'appel.", style: TextStyle(color: Colors.grey.shade600)),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   
                   // 🟢 Input Titre
                   TextField(
@@ -131,11 +132,11 @@ class _MainLayoutState extends State<MainLayout> {
                     decoration: InputDecoration(
                       labelText: "Titre de l'appel",
                       hintText: "Ex: Appel de fonds T4 2026",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
                       prefixIcon: const Icon(Icons.title),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   
                   // 🟢 Input Montant Total
                   TextField(
@@ -144,11 +145,11 @@ class _MainLayoutState extends State<MainLayout> {
                     decoration: InputDecoration(
                       labelText: "Montant Global (MAD)",
                       hintText: "Ex: 12000.00",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
                       prefixIcon: const Icon(Icons.attach_money),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   
                   // 🟢 Input Date
                   InkWell(
@@ -174,29 +175,29 @@ class _MainLayoutState extends State<MainLayout> {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade400),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Row(
                         children: [
                           const Icon(Icons.calendar_month, color: Colors.grey),
-                          const SizedBox(width: 12),
+                           SizedBox(width: 12),
                           Text(
                             _dateEcheance == null 
                                 ? "Date d'échéance" 
                                 : "${_dateEcheance!.day.toString().padLeft(2, '0')}/${_dateEcheance!.month.toString().padLeft(2, '0')}/${_dateEcheance!.year}",
                             style: TextStyle(
                               color: _dateEcheance == null ? Colors.black54 : Colors.black87,
-                              fontSize: 16,
+                              fontSize: 16.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   
                   // 🟢 Bouton Valider
                   SizedBox(
@@ -205,21 +206,21 @@ class _MainLayoutState extends State<MainLayout> {
                       onPressed: _isCreating ? null : () => _ajouterAppelFonds(setModalState, modalContext),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF003366),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                       ),
                       child: _isCreating
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24, height: 24,
                               child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                             )
-                          : const Text(
+                          :  Text(
                               "Générer l'appel de fonds",
-                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
                             ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                 ],
               ),
             );
