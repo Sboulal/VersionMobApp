@@ -686,14 +686,14 @@ Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
     );
   }
   
-  Widget _buildStatistiquesSection() {
+ Widget _buildStatistiquesSection() {
     final kpis = _dashboardData?['kpis'] ?? {};
     
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
@@ -704,10 +704,11 @@ Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisSpacing: 16.w,
+            mainAxisSpacing: 16.h,
             physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 1.5,
+            // 🟢 HNA L-7EL 1: Bdalna l-aspect ratio mn 1.5 l 1.35 bash n-3tiwhom t-toul kber chwiya
+            childAspectRatio: 1.35, 
             children: [
               _buildLargeStatCard(
                 Icons.request_quote, const Color(0xFFE8EAF6), const Color(0xFF3F51B5), "Appel de fonds", _formatMontant(kpis['charges_appelees']),
@@ -731,15 +732,14 @@ Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
       ),
     );
   }
-
-  Widget _buildLargeStatCard(IconData icon, Color bgColor, Color iconColor, String title, String amount, VoidCallback onTap) {
+ Widget _buildLargeStatCard(IconData icon, Color bgColor, Color iconColor, String title, String amount, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: bgColor.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: bgColor, width: 2),
         ),
         child: Column(
@@ -748,12 +748,12 @@ Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
           children: [
             Row(
               children: [
-                Icon(icon, color: iconColor, size: 20),
+                Icon(icon, color: iconColor, size: 20.sp),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     title,
-                    style:  TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: Colors.black54),
+                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: Colors.black54),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -761,16 +761,20 @@ Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
               ],
             ),
             SizedBox(height: 8.h),
-            Text(
-              "$amount MAD",
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: iconColor),
+            // 🟢 HNA L-7EL 2: Zidna FittedBox bash l-montant y-sghar rassou ila kan kbir bzaf (bla ma ydir overflow)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "$amount MAD",
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: iconColor),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
   Widget _buildActivitesSection() {
     List<dynamic> activites = _dashboardData?['dernieres_activites'] ?? [];
 
