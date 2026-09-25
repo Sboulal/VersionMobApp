@@ -92,17 +92,18 @@ class _CoproprietePageState extends State<CoproprietePage> {
 @override
   Widget build(BuildContext context) {
     List<dynamic> filteredLots = allLots.where((lot) {
-      // Logic d-l-filtre m9add m3a Smiya jdida "En retard"
+      String status = lot["status"]?.toString() ?? "À jour";
+      
+      // 🟢 Hna 9addina l-logic bach y-9ra "Impayé" wla "En retard"
       bool matchesFilter = selectedFilter == "Tous" ||
-          (selectedFilter == "En retard" && lot["status"] == "Impayé") ||
-          lot["status"] == selectedFilter;
+          (selectedFilter == "En retard" && (status == "Impayé" || status == "En retard")) ||
+          status == selectedFilter;
 
       bool matchesSearch = lot["owner"].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
           lot["id"].toString().toLowerCase().contains(searchQuery.toLowerCase());
 
       return matchesFilter && matchesSearch;
     }).toList();
-
     return Scaffold(
       backgroundColor: bgLight,
       body: SafeArea(
