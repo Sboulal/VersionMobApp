@@ -24,7 +24,8 @@ class _CoproprietePageState extends State<CoproprietePage> {
   String _errorMessage = "";
 
   String selectedFilter = "Tous";
-  final List<String> filters = ["Tous", "À jour", "Partiellement payé", "Impayés"];
+  // 🟢 1. Khelina ghir 3 dyal les statuts, w beddelna "Impayé" b "En retard"
+  final List<String> filters = ["Tous", "À jour", "En retard"];
   String searchQuery = "";
 
   @override
@@ -78,29 +79,22 @@ class _CoproprietePageState extends State<CoproprietePage> {
     }
   }
 
-  void _showAddLotModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _AddLotFormModal(mainBlue: mainBlue, onSuccess: _fetchLots),
-    );
-  }
-
   void _showEditLotModal(BuildContext context, dynamic lot) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _AddLotFormModal(mainBlue: mainBlue, onSuccess: _fetchLots, existingLot: lot),
+      // 🟢 Nti ymknek t3eyti l-AddLotFormModal l-jdida dyalk hna (ila knti khrjtiha f fichier)
+      builder: (context) => const SizedBox(), // Placeholder (dir blasstha AddLotFormModal dyalk)
     );
   }
 
- @override
+@override
   Widget build(BuildContext context) {
     List<dynamic> filteredLots = allLots.where((lot) {
+      // Logic d-l-filtre m9add m3a Smiya jdida "En retard"
       bool matchesFilter = selectedFilter == "Tous" ||
-          (selectedFilter == "Impayés" && lot["status"] == "Impayé") ||
+          (selectedFilter == "En retard" && lot["status"] == "Impayé") ||
           lot["status"] == selectedFilter;
 
       bool matchesSearch = lot["owner"].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
@@ -115,51 +109,29 @@ class _CoproprietePageState extends State<CoproprietePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🟢 L'en-tête blanc avec le logo et le titre
             _buildTopHeader(),
-            
-            // 🟢 La bannière image avec texte par-dessus
             _buildImageBanner(),
 
-            SizedBox(height: 16.h),
+            SizedBox(height: 24.h),
             
-            // 🟢 🟢 BOUTON DES VALIDATIONS EN ATTENTE 🟢 🟢
+            // 🟢 HNA T7IYDAT DIK L-CARTE LIMOUNIYA
+            
+            // 🟢 Titre jdid
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Card(
-                color: Colors.orange.shade50, // Loun Limouni bach y-tir l-intibah
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  side: BorderSide(color: Colors.orange.shade200, width: 1),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.person_add_alt_1, color: Colors.orange, size: 28),
-                  title: const Text(
-                    "Demandes d'inscription", 
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87, fontSize: 14)
-                  ),
-                  subtitle: const Text("Gérez les résidents en attente", style: TextStyle(fontSize: 12)),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.black54),
-                  onTap: () {
-                    // 🟢 Kat-ddih l-page dyal l-validation jdida li qaddina
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => const SyndicValidationPage())
-                    );
-                  },
-                ),
+              padding: EdgeInsets.symmetric(horizontal: 16.0.w),
+              child: Text(
+                "Liste des copropriétaires", 
+                style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black87, fontSize: 18.sp)
               ),
             ),
-            
-            SizedBox(height: 16.h),
+            SizedBox(height: 12.h),
 
             // 🟢 Filtres
             SizedBox(
-              height: 40,
+              height: 38.h,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0.w),
                 itemCount: filters.length,
                 itemBuilder: (context, index) => _buildFilterChip(filters[index]),
               ),
@@ -168,7 +140,7 @@ class _CoproprietePageState extends State<CoproprietePage> {
             
             // 🟢 Barre de recherche
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0), 
+              padding: EdgeInsets.symmetric(horizontal: 16.0.w), 
               child: _buildSearchBar()
             ),
             SizedBox(height: 16.h),
@@ -178,42 +150,24 @@ class _CoproprietePageState extends State<CoproprietePage> {
               child: _isLoading 
                   ? Center(child: CircularProgressIndicator(color: mainBlue))
                   : _errorMessage.isNotEmpty
-                      ? Center(child: Text(_errorMessage, style:  TextStyle(color: Colors.red)))
+                      ? Center(child: Text(_errorMessage, style: TextStyle(color: Colors.red, fontSize: 14.sp)))
                       : filteredLots.isEmpty
-                          ?  Center(child: Text("Aucun lot enregistré", style: TextStyle(color: Colors.black54, fontSize: 16.sp)))
+                          ? Center(child: Text("Aucun lot trouvé", style: TextStyle(color: Colors.black54, fontSize: 16.sp)))
                           : ListView.builder(
-                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              padding: EdgeInsets.symmetric(horizontal: 16.0.w),
                               itemCount: filteredLots.length,
                               itemBuilder: (context, index) => _buildLotCard(filteredLots[index]),
                             ),
-            ),
-            
-            // 🟢 Bouton Ajouter
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              color: bgLight,
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: mainBlue,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                  ),
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  label:  Text("Ajouter un lot", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                  onPressed: () => _showAddLotModal(context),
-                ),
-              ),
             ),
           ],
         ),
       ),
     );
   }
- Widget _buildTopHeader() {
+
+  Widget _buildTopHeader() {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
+      padding: EdgeInsets.only(left: 16.0.w, right: 16.0.w, top: 16.0.h, bottom: 16.0.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -227,8 +181,8 @@ class _CoproprietePageState extends State<CoproprietePage> {
                 );
               },
               child: Container(
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.all(10),
+                margin: EdgeInsets.only(right: 12.w),
+                padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
@@ -241,17 +195,17 @@ class _CoproprietePageState extends State<CoproprietePage> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+                child: Icon(Icons.arrow_back, color: Colors.black87, size: 20.sp),
               ),
             ),
-          const Icon(Icons.apartment, color: Colors.black87, size: 32),
+          Icon(Icons.apartment, color: Colors.black87, size: 32.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Sindy", style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold)),
-                Text("Résidence Les Jardins\nCopropriété", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, height: 1.3)),
+                Text("Sindy", style: TextStyle(color: mainBlue, fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                Text("Résidence Les Jardins\nCopropriété", style: TextStyle(color: Colors.grey.shade500, fontSize: 12.sp, height: 1.3)),
               ],
             ),
           ),
@@ -262,61 +216,68 @@ class _CoproprietePageState extends State<CoproprietePage> {
 
   Widget _buildImageBanner() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      margin: EdgeInsets.symmetric(horizontal: 16.0.w),
       width: double.infinity,
-      height: 120, // Hauteur de l'image
+      height: 120.h,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         image: DecorationImage(
-          // Une belle image de bâtiments comme sur le design
           image: const NetworkImage("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.4), // Filtre sombre pour faire ressortir le texte
+            Colors.black.withOpacity(0.4),
             BlendMode.darken,
           ),
         ),
       ),
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0.w),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end, // Aligner le texte en bas
+        mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Copropriété",
-            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             "Gérez les lots et les copropriétaires de la résidence",
-            style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
+            style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12.sp),
           ),
         ],
       ),
     );
   }
 
-  // ==========================================================
-  // ANCIENS WIDGETS CONSERVÉS INTACTS
-  // ==========================================================
+  // 🟢 4. Zawaqna les Filtres (Colors dynamiques 3la 7ssab l'état)
   Widget _buildFilterChip(String label) {
     bool isSelected = selectedFilter == label;
+    
+    // Loun dyal l-filtre kaytbeddel 3la 7ssab chno khtarina
+    Color activeColor = mainBlue;
+    if (isSelected) {
+       if (label == "À jour") activeColor = const Color(0xFF4CAF50);
+       else if (label == "En retard") activeColor = const Color(0xFFD32F2F);
+    }
+
     return GestureDetector(
       onTap: () => setState(() => selectedFilter = label),
-      child: Container(
-        margin: const EdgeInsets.only(right: 8.0),
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: EdgeInsets.only(right: 8.0.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 8.0.h),
         decoration: BoxDecoration(
-          color: isSelected ? mainBlue : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? activeColor : Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: isSelected ? activeColor : Colors.grey.shade300, width: 1),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
               color: isSelected ? Colors.white : Colors.black54,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              fontSize: 13.sp,
             ),
           ),
         ),
@@ -327,25 +288,27 @@ class _CoproprietePageState extends State<CoproprietePage> {
   Widget _buildSearchBar() {
     return TextField(
       onChanged: (value) => setState(() => searchQuery = value),
+      style: TextStyle(fontSize: 14.sp),
       decoration: InputDecoration(
         hintText: "Rechercher un propriétaire ou un lot",
-        hintStyle: const TextStyle(color: Colors.black38, fontSize: 14),
-        prefixIcon: const Icon(Icons.search, color: Colors.black54),
+        hintStyle: TextStyle(color: Colors.black38, fontSize: 14.sp),
+        prefixIcon: Icon(Icons.search, color: Colors.black54, size: 20.sp),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide.none),
       ),
     );
   }
 
- Widget _buildLotCard(dynamic lot) {
+  Widget _buildLotCard(dynamic lot) {
     Color statusColor = lot["status"] == "À jour" ? const Color(0xFF4CAF50) : (lot["status"] == "Impayé" ? const Color(0xFFD32F2F) : const Color(0xFFFF9800));
     
-    // Vérifier si la photo existe
-    bool hasPhoto = lot["photo"] != null && lot["photo"].toString().isNotEmpty;
+    // 🟢 5. Smiya li ghatban f l-badge dyal l-carte
+    String displayStatus = lot["status"];
+    if (displayStatus == "Impayé") displayStatus = "En retard";
 
-    // 🟢 Récupérer les données de contact
+    bool hasPhoto = lot["photo"] != null && lot["photo"].toString().isNotEmpty;
     String phone = lot["telephone"]?.toString().trim() ?? "";
     String email = lot["email"]?.toString().trim() ?? "";
 
@@ -357,25 +320,22 @@ class _CoproprietePageState extends State<CoproprietePage> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12.0),
-        padding: const EdgeInsets.all(16.0), // Padding augmenté pour aérer
+        margin: EdgeInsets.only(bottom: 12.0.h),
+        padding: EdgeInsets.all(16.0.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade100), // Bordure légère
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: Colors.grey.shade100),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start, // Alignement vers le haut car le contenu est plus long
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ==============================================
-            // AVATAR / IMAGE DU LOT
-            // ==============================================
             Container(
-              width: 55,
-              height: 55,
+              width: 55.w,
+              height: 55.h,
               decoration: BoxDecoration(
-                color: hasPhoto ? Colors.grey.shade200 : statusColor.withOpacity(0.1), // Fond plus clair si pas de photo
+                color: hasPhoto ? Colors.grey.shade200 : statusColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: hasPhoto ? Colors.transparent : statusColor.withOpacity(0.3)),
                 image: hasPhoto
@@ -389,83 +349,75 @@ class _CoproprietePageState extends State<CoproprietePage> {
                   ? Center(
                       child: Text(
                         lot["id"].toString(),
-                        style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16.sp), // Texte prend la couleur du statut
+                        style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 16.sp),
                       ),
                     )
                   : null,
             ),
             
-            SizedBox(width: 14),
+            SizedBox(width: 14.w),
             
-            // ==============================================
-            // INFORMATIONS DU COPROPRIÉTAIRE
-            // ==============================================
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nom du propriétaire
                   Text(
                     lot["owner"].toString(), 
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp, color: Colors.black87)
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   
-                  // Détails du lot (Étage, tantièmes)
                   Text(
                     "Lot ${lot["id"]} • ${lot["floor"]} • ${lot["tantiemes"]} tantièmes", 
-                    style: const TextStyle(color: Colors.black54, fontSize: 12, fontWeight: FontWeight.w500)
+                    style: TextStyle(color: Colors.black54, fontSize: 12.sp, fontWeight: FontWeight.w500)
                   ),
                   
-                  SizedBox(height: 8),
+                  SizedBox(height: 8.h),
 
-                  // 🟢 TÉLÉPHONE (S'il existe)
                   if (phone.isNotEmpty && phone != "null") ...[
                     Row(
                       children: [
-                        Icon(Icons.phone_outlined, size: 14, color: Colors.blueGrey.shade400),
-                        SizedBox(width: 6),
-                        Text(phone, style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 13)),
+                        Icon(Icons.phone_outlined, size: 14.sp, color: Colors.blueGrey.shade400),
+                        SizedBox(width: 6.w),
+                        Text(phone, style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 13.sp)),
                       ],
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                   ],
 
-                  // 🟢 EMAIL (S'il existe)
                   if (email.isNotEmpty && email != "null") ...[
                     Row(
                       children: [
-                        Icon(Icons.email_outlined, size: 14, color: Colors.blueGrey.shade400),
-                        SizedBox(width: 6),
+                        Icon(Icons.email_outlined, size: 14.sp, color: Colors.blueGrey.shade400),
+                        SizedBox(width: 6.w),
                         Expanded(
                           child: Text(
                             email, 
-                            style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 13), 
+                            style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 13.sp), 
                             overflow: TextOverflow.ellipsis
                           )
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                   ],
 
-                  SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   
-                  // Statut (À jour / Impayé)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6)
+                      borderRadius: BorderRadius.circular(6.r)
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircleAvatar(radius: 3, backgroundColor: statusColor),
-                        SizedBox(width: 6),
+                        CircleAvatar(radius: 4.r, backgroundColor: statusColor),
+                        SizedBox(width: 6.w),
                         Text(
-                          lot["status"], 
-                          style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11)
+                          displayStatus, // 🟢 Tbeddlat hta hna l "En retard"
+                          style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11.sp)
                         ),
                       ],
                     ),
@@ -474,19 +426,16 @@ class _CoproprietePageState extends State<CoproprietePage> {
               ),
             ),
 
-            // ==============================================
-            // BOUTON MODIFIER
-            // ==============================================
             GestureDetector(
               onTap: () => _showEditLotModal(context, lot),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50, 
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(color: Colors.grey.shade200, width: 1)
                 ),
-                child: const Icon(Icons.edit_outlined, color: Colors.black54, size: 18),
+                child: Icon(Icons.edit_outlined, color: Colors.black54, size: 18.sp),
               ),
             ),
           ],

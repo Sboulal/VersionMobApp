@@ -334,33 +334,7 @@ class _AssembleesPageState extends State<AssembleesPage> {
                         ),
             ),
             
-            // 🟢 BOUTON FLOTTANT EN BAS
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -4))]),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  label:  Text("Planifier une AG", style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                  onPressed: () async {
-                    // 🟢 SOLUTION 2 : Ntsnnaw rjou3 o n-actualisiw
-                    final result = await Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => const CreateAssembleePage())
-                    );
-                    
-                    if (result == true) { // Ila rj3at 'true' ya3ni tssjlat
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("AG planifiée avec succès !"), backgroundColor: Colors.green)
-                      );
-                      _fetchAssemblees(); // Fetch b tari9a s7i7a
-                    }
-                  },
-                ),
-              ),
-            ),
+          
           ],
         ),
       ),

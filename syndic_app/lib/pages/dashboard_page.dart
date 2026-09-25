@@ -210,15 +210,153 @@ class _DashboardPageState extends State<DashboardPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildHeader(),
-                        SizedBox(height: 24),
+                        SizedBox(height: 24.h),
                         _buildWalletCard(), // 🟢 L-karta z-zr9a ghadi tbqa hna
-                        SizedBox(height: 24),
+                        SizedBox(height: 24.h),
+                        _buildAnnonceBanner(),
+                        SizedBox(height: 24.h),
                         _buildStatistiquesSection(),
-                        SizedBox(height: 24),
+                        SizedBox(height: 24.h),
                         _buildActivitesSection(),
                       ],
                     ),
                   ),
+      ),
+    );
+  }
+
+ // ==========================================================
+  // 🟢 BANNIÈRE STYLE "PROMO / ALERTE" (DESIGN PREMIUM & CLEAN)
+  // ==========================================================
+  Widget _buildAnnonceBanner() {
+    final derniereAnnonce = _dashboardData?['derniere_annonce'];
+    
+    final titre = derniereAnnonce?['titre'] ?? "Réunion de copropriété";
+    final description = derniereAnnonce?['description'] ?? "N'oubliez pas l'assemblée générale extraordinaire ce weekend.";
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()));
+      },
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.r),
+          // 🟢 Gradient zwin b l-zre9 mftou7 bash tbiyen l-kettba dima
+          gradient: const LinearGradient(
+            colors: [Color(0xFFE8F0FE), Color(0xFFD2E3FC)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.15),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // 🟢 Zwaq d l-khalfia (Icone kbira mkhbiya chwiya)
+            Positioned(
+              right: -10.w,
+              bottom: -15.h,
+              child: Icon(
+                Icons.campaign_rounded,
+                size: 100.sp,
+                color: Colors.blue.shade900.withOpacity(0.05),
+              ),
+            ),
+            
+            Padding(
+              padding: EdgeInsets.all(20.w),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 🟢 Badge Rouge "NOUVELLE ANNONCE"
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            borderRadius: BorderRadius.circular(6.r),
+                            boxShadow: [
+                              BoxShadow(color: Colors.redAccent.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))
+                            ],
+                          ),
+                          child: Text(
+                            "NOUVELLE ANNONCE", 
+                            style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.bold, letterSpacing: 0.5)
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        
+                        // 🟢 Titre (Beloun l-Gham9 bash yban)
+                        Text(
+                          titre,
+                          style: TextStyle(color: mainBlueDark, fontSize: 17.sp, fontWeight: FontWeight.w900),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 6.h),
+                        
+                        // 🟢 Description
+                        Text(
+                          description,
+                          style: TextStyle(color: Colors.black87, fontSize: 13.sp, height: 1.4, fontWeight: FontWeight.w500),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 14.h),
+                        
+                        // 🟢 Bouton "Lire la suite" b-chekel dyal Pilule
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                            color: mainBlueDark,
+                            borderRadius: BorderRadius.circular(20.r),
+                            boxShadow: [
+                              BoxShadow(color: mainBlueDark.withOpacity(0.3), blurRadius: 6, offset: const Offset(0, 3))
+                            ]
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text("Lire la suite", style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                              SizedBox(width: 4.w),
+                              Icon(Icons.arrow_forward_ios, color: Colors.white, size: 10.sp),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(width: 16.w),
+                  
+                  // 🟢 Icone l-Limouniya f Jnb
+                  Container(
+                    width: 60.w,
+                    height: 60.w, // kanderou .w l-height hta hwa bash ybqa carré/cercle m9ad
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(Icons.campaign_rounded, color: const Color(0xFFFF9800), size: 30.sp),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -242,14 +380,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-      crossAxisAlignment: CrossAxisAlignment.start, // 🟢 Darouriya bach les icones yb9aw lfoq ila kan text fih 2 stoura
+      crossAxisAlignment: CrossAxisAlignment.center, 
       children: [
         // ==============================================
         // 🟢 PARTIE GAUCHE: Textes (Nom & Résidence)
         // ==============================================
         Expanded(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center, 
             children: [
               if (widget.showBackButton)
                 GestureDetector(
@@ -258,24 +396,26 @@ class _DashboardPageState extends State<DashboardPage> {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Padding(
-                    padding: EdgeInsets.only(right: 12.0, top: 4.0), // Ajusté m3a l'ktaba
-                    child: Icon(Icons.arrow_back_ios, color: Colors.black87, size: 22),
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 12.0.w), 
+                    child: Icon(Icons.arrow_back_ios, color: Colors.black87, size: 22.sp),
                   ),
                 ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center, 
                   children: [
                     Text(
                       "Bonjour $prenom!", 
-                      style:  TextStyle(color: Colors.black54, fontSize: 14.sp, fontWeight: FontWeight.w500)
+                      style: TextStyle(color: Colors.black54, fontSize: 14.sp, fontWeight: FontWeight.w500)
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 4.h), 
                     Text(
                       coproNom, 
-                      style:  TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, fontSize: 20.sp, height: 1.2), 
-                      maxLines: 3, 
+                      // 🟢 HNA BDLLNA L-LOUN: redinaha mainBlueDark bash t-ji m-nass9a m3a l-appli
+                      style: TextStyle(color: mainBlueDark, fontWeight: FontWeight.w900, fontSize: 18.sp, height: 1.2), 
+                      maxLines: 2, 
                       overflow: TextOverflow.ellipsis
                     ),
                   ],
@@ -285,13 +425,14 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
         
-        SizedBox(width: 16),
+        SizedBox(width: 16.w), 
 
         // ==============================================
-        // 🟢 PARTIE DROITE: Cloche + Photo (Mêmes dimensions)
+        // 🟢 PARTIE DROITE: Cloche + Photo
         // ==============================================
         Row(
           mainAxisSize: MainAxisSize.min, 
+          crossAxisAlignment: CrossAxisAlignment.center, 
           children: [
             // 1. ICONE DE NOTIFICATION
             GestureDetector(
@@ -310,34 +451,34 @@ class _DashboardPageState extends State<DashboardPage> {
                 clipBehavior: Clip.none,
                 children: [
                   Container(
-                    width: 44, // 🟢 3bar fixe bach yji cercle parfait
-                    height: 44,
+                    width: 42.w, 
+                    height: 42.w,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))], // Ombre khfifa b7al tswira
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))], 
                     ),
-                    child: const Icon(Icons.notifications_none, color: Colors.black87, size: 24),
+                    child: Icon(Icons.notifications_none, color: mainBlueDark, size: 22.sp), // 🟢 Hta l-icone d-jrass rdinaha zr9a
                   ),
                   if (_unreadCount > 0)
                     Positioned(
-                      right: -2,
-                      top: -2,
+                      right: -2.w,
+                      top: -2.h,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: EdgeInsets.all(4.w),
                         decoration: BoxDecoration(
                           color: Colors.redAccent,
                           shape: BoxShape.circle,
-                          border: Border.all(color: bgLight, width: 2), // 🟢 Bordure plus nette
+                          border: Border.all(color: bgLight, width: 2), 
                         ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
+                        constraints: BoxConstraints(
+                          minWidth: 18.w,
+                          minHeight: 18.h,
                         ),
                         child: Center(
                           child: Text(
                             _unreadCount > 9 ? '9+' : '$_unreadCount',
-                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -374,17 +515,17 @@ class _DashboardPageState extends State<DashboardPage> {
               },
               itemBuilder: (BuildContext context) => [
                 _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
-                _buildPopupMenuItem('espace_copro', Icons.swap_horiz, 'Espace Résident'),
+                _buildPopupMenuItem('espace_copro', Icons.swap_horiz, 'Mon Espace Copropriété'),
                 _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
                 const PopupMenuDivider(),
                 _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
               ],
               child: Container(
-                width: 44, // 🟢 Nafs l'3bar dyal l'cloche (44x44)
-                height: 44,
+                width: 42.w, 
+                height: 42.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2), // Bordure bayda r9i9a
+                  border: Border.all(color: Colors.white, width: 2), 
                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: CircleAvatar(
@@ -398,6 +539,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ],
     );
   }
+  
   PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
     final color = isDestructive ? Colors.redAccent : mainBlueDark;
     return PopupMenuItem<String>(
@@ -411,21 +553,20 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
-  Widget _buildWalletCard() {
+Widget _buildWalletCard() {
     final solde = _formatMontant(_dashboardData?['kpis']['solde']);
     final nbLots = _dashboardData?['kpis']['lots'] ?? 0;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.w), 
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [mainBlueDark, mainBlueLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(color: mainBlueDark.withOpacity(0.4), blurRadius: 15, offset: const Offset(0, 8))
         ],
@@ -438,103 +579,76 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.account_balance_wallet, color: Colors.white.withOpacity(0.8), size: 20),
-                  SizedBox(width: 8),
-                  Text("Solde de la copropriété", style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14)),
+                  Icon(Icons.account_balance_wallet, color: Colors.white.withOpacity(0.8), size: 20.sp),
+                  SizedBox(width: 8.w),
+                  Text("Solde de la copropriété", style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14.sp)),
                 ],
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.domain, color: Colors.white, size: 14),
-                    SizedBox(width: 4),
-                    Text("$nbLots Lots", style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Icon(Icons.domain, color: Colors.white, size: 14.sp),
+                    SizedBox(width: 4.w),
+                    Text("$nbLots Lots", style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12),
-          Text(
-            "$solde MAD",
-            style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 30),
           
-      // 🟢 Flèches Khdamin (Clickables m3a Animation)
+          SizedBox(height: 24.h),
+          
+          // 🟢 PRIX CENTERED
           Row(
+            mainAxisAlignment: MainAxisAlignment.center, 
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // ⬅️ Flèche dyal l-issar (Gauche)
-              GestureDetector(
-                onTap: () {
-                  if (_horizontalScrollController.hasClients) {
-                    final target = _horizontalScrollController.offset - 150.0; // rje3 b 150
-                    _horizontalScrollController.animateTo(
-                      target < 0 ? 0 : target,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                  color: Colors.transparent, // bach ykon l-click sahel
-                  child: Icon(Icons.arrow_back_ios, color: Colors.white.withOpacity(0.8), size: 18),
+              Text(
+                solde,
+                style: TextStyle(
+                  color: Colors.white, 
+                  fontSize: 40.sp, 
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.0, 
                 ),
               ),
-              
-              SizedBox(width: 4),
-              
-              // 🟢 Zone dyal l-Boutons (Scrollable)
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _horizontalScrollController, // 🟢 Darouriiiiiiiii tkon hadi hna!
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      _buildInnerActionBtn(Icons.add, "Appel de fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
-                      SizedBox(width: 16),
-                      _buildInnerActionBtn(Icons.send, "Paiement", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
-                      SizedBox(width: 16),
-                      _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
-                      SizedBox(width: 16),
-                      _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
-                      SizedBox(width: 16),
-                      _buildInnerActionBtn(Icons.groups, "Assemblées", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssembleesPage()))),
-                      SizedBox(width: 16),
-                      _buildInnerActionBtn(Icons.folder_open, "Documents", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsPage()))),
-                    ],
+              SizedBox(width: 8.w),
+              Padding(
+                padding: EdgeInsets.only(bottom: 6.h), 
+                child: Text(
+                  "MAD",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8), 
+                    fontSize: 16.sp, 
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              
-              SizedBox(width: 4),
-              
-              // ➡️ Flèche dyal l-imin (Droite)
-              GestureDetector(
-                onTap: () {
-                  if (_horizontalScrollController.hasClients) {
-                    final maxScroll = _horizontalScrollController.position.maxScrollExtent;
-                    final target = _horizontalScrollController.offset + 150.0; // zid l-gddam b 150
-                    _horizontalScrollController.animateTo(
-                      target > maxScroll ? maxScroll : target,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                  color: Colors.transparent, // bach ykon l-click sahel
-                  child: Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.8), size: 18),
-                ),
-              ),
+            ],
+          ),
+          
+          // 🟢 HNA NQESNA L-ESPACE LI KAN KBIR (Rddinah 12.h blast 32.h)
+          SizedBox(height: 12.h), 
+          
+          // 🟢 Jouj stoura m9addin b Expanded
+          Row(
+            children: [
+              _buildInnerActionBtn(Icons.add, "Appel fond", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ChargesPage()))),
+              _buildInnerActionBtn(Icons.send, "Cotisation", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaiementsPage()))),
+              _buildInnerActionBtn(Icons.receipt_long, "Dépense", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DepensesPage()))),
+            ],
+          ),
+          SizedBox(height: 16.h), 
+          Row(
+            children: [
+              _buildInnerActionBtn(Icons.campaign, "Annonce", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AnnoncesPage()))),
+              _buildInnerActionBtn(Icons.groups, "Assemblées", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AssembleesPage()))),
+              _buildInnerActionBtn(Icons.folder_open, "Documents", () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsPage()))),
             ],
           )
         ],
@@ -542,29 +656,36 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
   
-  Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(14),
+Widget _buildInnerActionBtn(IconData icon, String label, VoidCallback onTap) {
+    return Expanded( // 🟢 L-Expanded khelihom yt9assmou l-3erd d l-écran b-3dal (1/3 l-koul wa7d)
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque, // Bach l-zone kamla t-clicka machi ghir l-icone
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14.r),
+              ),
+              child: Icon(icon, color: Colors.white, size: 22.sp),
             ),
-            child: Icon(icon, color: Colors.white, size: 22),
-          ),
-          SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
-          ),
-        ],
+            SizedBox(height: 8.h),
+            Text(
+              label,
+              style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+              maxLines: 1, 
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
-
+  
   Widget _buildStatistiquesSection() {
     final kpis = _dashboardData?['kpis'] ?? {};
     
@@ -579,7 +700,7 @@ class _DashboardPageState extends State<DashboardPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
            Text("Synthèse Financière", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
-          SizedBox(height: 20),
+          SizedBox(height: 20.h),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -628,7 +749,7 @@ class _DashboardPageState extends State<DashboardPage> {
             Row(
               children: [
                 Icon(icon, color: iconColor, size: 20),
-                SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     title,
@@ -639,7 +760,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ],
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               "$amount MAD",
               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: iconColor),

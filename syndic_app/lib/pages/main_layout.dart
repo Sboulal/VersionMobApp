@@ -10,6 +10,14 @@ import 'package:syndic_app/pages/documents_page.dart';
 import 'package:syndic_app/pages/charges_page.dart'; 
 import 'package:syndic_app/pages/assemblees_page.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:syndic_app/pages/add_lot_modal.dart';
+import 'package:syndic_app/pages/add_assemblee_modal.dart';
+import 'package:syndic_app/pages/add_paiement_modal.dart';
+import 'package:syndic_app/pages/syndic_validation_page.dart';
+
+// 🟢 ZIDNA LES IMPORTS DYAL LES FICHIERS JDAD LI KRÉYITI
+import 'package:syndic_app/pages/add_depense_modal.dart';
+import 'package:syndic_app/pages/add_annonce_modal.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -21,7 +29,7 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
-  // 🟢 Variables dyal l'ajout (Formulaire Modal)
+  // Variables dyal l'ajout Appel Fonds (Formulaire Modal)
   final TextEditingController _titreController = TextEditingController();
   final TextEditingController _montantController = TextEditingController();
   DateTime? _dateEcheance;
@@ -35,7 +43,7 @@ class _MainLayoutState extends State<MainLayout> {
     const UnifiedProfilePage(), // 5. Profil
   ];
 
-  // 🟢 L'API Bach t-généri l'Appel de Fonds
+  // L'API Bach t-généri l'Appel de Fonds
   Future<void> _ajouterAppelFonds(StateSetter setModalState, BuildContext modalContext) async {
     if (_titreController.text.isEmpty || _montantController.text.isEmpty || _dateEcheance == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,13 +102,172 @@ class _MainLayoutState extends State<MainLayout> {
     }
   }
 
-  // 🟢 Fonction li katl3 l'Modal dyal l'appel de fonds w fiha l'formulaire
-  void _showAddModal() {
+void _showActionMenu() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, 
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Padding(
+            // 🟢 Zidna padding l-te7t bash ma-dkhlsh l-modal f l-barre d-navigation dyal l-iphone
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // 🟢 Hna s-ser: kat-goul l-modal takhod ghir l-3bar li fih l-contenu
+              children: [
+                SizedBox(height: 12.h),
+                Center(
+                  child: Container(
+                    width: 50.w, 
+                    height: 5.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300, 
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 14.h),
+                Text(
+                  "Que souhaitez-vous ajouter ?", 
+                  style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFF003366))
+                ),
+                SizedBox(height: 10.h),
+                
+                // 🟢 BDLLNA "Expanded" b "Flexible" bash l-khwa l-lta7t y-t7iyd
+                Flexible(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.only(bottom: 16.h),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min, // 🟢 Hta hadi darouriya l-SingleChildScrollView
+                      children: [
+                        _buildMenuItem(Icons.account_balance_wallet, "Nouvel appel de fonds", () {
+                          Navigator.pop(context);
+                          _showAppelFondsModal();
+                        }),
+                        
+                        _buildMenuItem(Icons.apartment, "Ajouter un lot / copropriétaire", () {
+                          Navigator.pop(context);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => AddLotFormModal(
+                              mainBlue: const Color(0xFF1A5EAC), 
+                              onSuccess: () {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lot ajouté avec succès!"), backgroundColor: Colors.green));
+                              }
+                            ),
+                          );
+                        }),
+                        
+                        _buildMenuItem(Icons.payment, "Enregistrer une cotisation", () {
+                          Navigator.pop(context);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => AddPaiementModal(
+                              mainBlue: const Color(0xFF1A5EAC), 
+                              onSuccess: () {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Paiement enregistré avec succès !"), backgroundColor: Colors.green));
+                              }
+                            ),
+                          );
+                        }),
+                        
+                        _buildMenuItem(Icons.receipt_long, "Enregistrer une dépense", () {
+                          Navigator.pop(context);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => AddDepenseModal(
+                              mainBlue: const Color(0xFF1A5EAC),
+                              onSuccess: () {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Dépense enregistrée avec succès !"), backgroundColor: Colors.green));
+                              }
+                            ),
+                          );
+                        }),
+                        
+                        _buildMenuItem(Icons.event_note, "Nouvelle planification", () {
+                          Navigator.pop(context);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => AddAssembleeModal(
+                              mainBlue: const Color(0xFF1A5EAC), 
+                              onSuccess: () {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("AG planifiée avec succès !"), backgroundColor: Colors.green));
+                              }
+                            ),
+                          );
+                        }),
+                        
+                        _buildMenuItem(Icons.campaign, "Publier une annonce", () {
+                          Navigator.pop(context);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => AddAnnonceModal(
+                              mainBlue: const Color(0xFF1A5EAC),
+                              onSuccess: () {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Annonce publiée avec succès !"), backgroundColor: Colors.green));
+                              }
+                            ),
+                          );
+                        }),
+                        
+                        _buildMenuItem(Icons.person_add_alt_1, "Demandes d'inscription", () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context, 
+                            MaterialPageRoute(builder: (context) => const SyndicValidationPage())
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+// 🟢 Sghrna l-padding dyal item chwiya bash y-jiw m-sttfin n9iyin
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      dense: true, // 🟢 Kay-n9ess l-ertefa3 l-zayed
+      visualDensity: const VisualDensity(vertical: -1),
+      contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h),
+      leading: Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFF003366).withOpacity(0.08),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: const Color(0xFF003366), size: 20.sp),
+      ),
+      title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5.sp)),
+      trailing: Icon(Icons.chevron_right, size: 18.sp, color: Colors.grey.shade400),
+      onTap: onTap,
+    );
+  }
+
+  void _showAppelFondsModal() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       builder: (BuildContext modalContext) {
         return StatefulBuilder(
@@ -108,7 +275,7 @@ class _MainLayoutState extends State<MainLayout> {
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(modalContext).viewInsets.bottom,
-                left: 24, right: 24, top: 24,
+                left: 24.w, right: 24.w, top: 24.h,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -116,17 +283,17 @@ class _MainLayoutState extends State<MainLayout> {
                 children: [
                   Center(
                     child: Container(
-                      width: 50, height: 5,
-                      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+                      width: 50.w, height: 5.h,
+                      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10.r)),
                     ),
                   ),
-                  SizedBox(height: 24),
-                  const Text("Nouvel Appel de Fonds", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
-                  Text("Remplissez les détails pour générer l'appel.", style: TextStyle(color: Colors.grey.shade600)),
-                  SizedBox(height: 24),
+                  SizedBox(height: 24.h),
+                  Text("Nouvel Appel de Fonds", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8.h),
+                  Text("Remplissez les détails pour générer l'appel.", style: TextStyle(color: Colors.grey.shade600, fontSize: 14.sp)),
+                  SizedBox(height: 24.h),
                   
-                  // 🟢 Input Titre
+                  // Input Titre
                   TextField(
                     controller: _titreController,
                     decoration: InputDecoration(
@@ -138,7 +305,7 @@ class _MainLayoutState extends State<MainLayout> {
                   ),
                   SizedBox(height: 16.h),
                   
-                  // 🟢 Input Montant Total
+                  // Input Montant Total
                   TextField(
                     controller: _montantController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -151,7 +318,7 @@ class _MainLayoutState extends State<MainLayout> {
                   ),
                   SizedBox(height: 16.h),
                   
-                  // 🟢 Input Date
+                  // Input Date
                   InkWell(
                     onTap: () async {
                       DateTime? picked = await showDatePicker(
@@ -175,7 +342,7 @@ class _MainLayoutState extends State<MainLayout> {
                       }
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey.shade400),
                         borderRadius: BorderRadius.circular(12.r),
@@ -183,7 +350,7 @@ class _MainLayoutState extends State<MainLayout> {
                       child: Row(
                         children: [
                           const Icon(Icons.calendar_month, color: Colors.grey),
-                           SizedBox(width: 12),
+                          SizedBox(width: 12.w),
                           Text(
                             _dateEcheance == null 
                                 ? "Date d'échéance" 
@@ -197,9 +364,9 @@ class _MainLayoutState extends State<MainLayout> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 32),
+                  SizedBox(height: 32.h),
                   
-                  // 🟢 Bouton Valider
+                  // Bouton Valider
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -211,16 +378,16 @@ class _MainLayoutState extends State<MainLayout> {
                       ),
                       child: _isCreating
                           ? SizedBox(
-                              width: 24, height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              width: 24.w, height: 24.w,
+                              child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                             )
-                          :  Text(
+                          : Text(
                               "Générer l'appel de fonds",
                               style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
                             ),
                     ),
                   ),
-                  SizedBox(height: 32),
+                  SizedBox(height: 32.h),
                 ],
               ),
             );
@@ -232,8 +399,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   void _onItemTapped(int index) {
     if (index == 2) {
-      // 🟢 Ila kllika 3la l'bouton f l'west, tl3 modal bla matbdel l'page
-      _showAddModal();
+      _showActionMenu();
     } else {
       setState(() {
         _selectedIndex = index;
@@ -246,7 +412,7 @@ class _MainLayoutState extends State<MainLayout> {
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, // Darouri bach ibano b 5
+        type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
         elevation: 10,
         items: <BottomNavigationBarItem>[
@@ -261,11 +427,10 @@ class _MainLayoutState extends State<MainLayout> {
             label: 'Copropriété',
           ),
           
-          // 🟢 Hada l'bouton + li f blast Charges (Index 2)
           BottomNavigationBarItem(
             icon: Container(
-              margin: const EdgeInsets.only(bottom: 4),
-              padding: const EdgeInsets.all(10),
+              margin: EdgeInsets.only(bottom: 4.h),
+              padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
                 color: const Color(0xFF003366), 
                 shape: BoxShape.circle,
@@ -273,13 +438,13 @@ class _MainLayoutState extends State<MainLayout> {
                   BoxShadow(color: const Color(0xFF003366).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
                 ]
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 24),
+              child: Icon(Icons.add, color: Colors.white, size: 24.sp),
             ),
-            label: '', // Khlitha khawya bach yban l'bouton n9i w mcenter
+            label: '',
           ),
           
           const BottomNavigationBarItem(
-            icon: Icon(Icons.folder_outlined), // Ou Icons.description_outlined
+            icon: Icon(Icons.folder_outlined),
             activeIcon: Icon(Icons.folder),
             label: 'Assemblées',
           ),
@@ -290,11 +455,10 @@ class _MainLayoutState extends State<MainLayout> {
           ),
         ],
         currentIndex: _selectedIndex,
-        // Loun zre9 li ghadi m3a l-maquette jdida (Dark Blue)
         selectedItemColor: const Color(0xFF003366), 
         unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontSize: 11),
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
+        unselectedLabelStyle: TextStyle(fontSize: 11.sp),
         onTap: _onItemTapped,
       ),
     );
