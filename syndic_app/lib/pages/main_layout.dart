@@ -242,23 +242,26 @@ void _showActionMenu() {
       }
     );
   }
-// 🟢 Sghrna l-padding dyal item chwiya bash y-jiw m-sttfin n9iyin
+// 🟢 Widget m-qadd bach y-7iyd l-erreur dyal l-ink splashes
   Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
-    return ListTile(
-      dense: true, // 🟢 Kay-n9ess l-ertefa3 l-zayed
-      visualDensity: const VisualDensity(vertical: -1),
-      contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h),
-      leading: Container(
-        padding: EdgeInsets.all(8.w),
-        decoration: BoxDecoration(
-          color: const Color(0xFF003366).withOpacity(0.08),
-          shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent, // 🟢 Darouriya bach t-khelli l-fond y-ban
+      child: ListTile(
+        dense: true, 
+        visualDensity: const VisualDensity(vertical: -1),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h),
+        leading: Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFF003366).withOpacity(0.08),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: const Color(0xFF003366), size: 20.sp),
         ),
-        child: Icon(icon, color: const Color(0xFF003366), size: 20.sp),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5.sp)),
+        trailing: Icon(Icons.chevron_right, size: 18.sp, color: Colors.grey.shade400),
+        onTap: onTap,
       ),
-      title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5.sp)),
-      trailing: Icon(Icons.chevron_right, size: 18.sp, color: Colors.grey.shade400),
-      onTap: onTap,
     );
   }
 

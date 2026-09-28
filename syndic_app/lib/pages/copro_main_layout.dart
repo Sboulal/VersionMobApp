@@ -38,7 +38,7 @@ class _CoproMainLayoutState extends State<CoproMainLayout> {
         unselectedLabelStyle: const TextStyle(fontSize: 10),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Accueil"),       // Index 0
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: "Charges"), // Index 1
+          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: "Appels de fonds"), // Index 1
           BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Assemblées"),   // Index 2
           BottomNavigationBarItem(icon: Icon(Icons.campaign), label: "Annonces"),  // Index 3
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),      // Index 4

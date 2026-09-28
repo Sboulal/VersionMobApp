@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syndic_app/widgets/custom_header.dart'; 
 import 'package:syndic_app/pages/main_layout.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 // ==========================================
 // WIDGET RÉUTILISABLE : CUSTOM HEADER (DESIGN ÉPURÉ / BLANC)
 // ==========================================
@@ -41,7 +42,7 @@ class CustomHeader extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 20),
           SizedBox(width: 12.w),
-          Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14)),
+          Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w500, fontSize: 14.sp)),
         ],
       ),
     );
@@ -53,81 +54,53 @@ class CustomHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      // 🟢 7yedna l'fond zre9 w tswira, khelina l'fond transparent bach yakhod loun dyal l'ecran
       color: Colors.transparent, 
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        bottom: 16,
-        left: 20,
-        right: 20,
-      ),
+      padding: EdgeInsets.only(bottom: 8.h), // 🟢 Padding m-qadd bach may-ji-ch zayed mn l-fo9
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center, // 🟢 L-Flèche w l-Icone w T-text m-centriyin f nfs s-ster
         children: [
-          // ==========================================
-          // 🟢 PARTIE GAUCHE : Bouton retour, Icone, Textes
-          // ==========================================
+          // 1. Bouton Retour (Flèche clean)
+          if (showBackButton && onBackTap != null)
+            GestureDetector(
+              onTap: onBackTap,
+              child: Padding(
+                padding: EdgeInsets.only(right: 12.0.w),
+                child: Icon(Icons.arrow_back_ios, color: Colors.black87, size: 22.sp),
+              ),
+            ),
+          
+          // 2. Icone de l'immeuble
+          Padding(
+            padding: EdgeInsets.only(right: 12.0.w),
+            child: Icon(Icons.apartment, color: Colors.black87, size: 32.sp),
+          ),
+          
+          // 3. Textes (Titre + Subtitle)
           Expanded(
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center, 
               children: [
-                // Bouton Retour rond (b7al f tswira dyalek)
-                if (showBackButton && onBackTap != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: GestureDetector(
-                      onTap: onBackTap,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
-                          ],
-                        ),
-                        child: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
-                      ),
-                    ),
-                  ),
-                
-                // Icone de l'immeuble
-                const Padding(
-                  padding: EdgeInsets.only(top: 2.0),
-                  child: Icon(Icons.apartment, color: Colors.black87, size: 28),
+                Text(
+                  title,
+                  style: TextStyle(color: mainBlue, fontSize: 18.sp, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(width: 12.w),
-                
-                // Textes
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Sindy",
-                        style: TextStyle(color: mainBlue, fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        residenceName.isNotEmpty ? "$residenceName\n$title" : title,
-                        style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.4),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                SizedBox(height: 4.h),
+                Text(
+                  subtitle, // 🟢 Hna 7iydna t-tikrar dyal Sindy w khllina ghir l-Subtitle
+                  style: TextStyle(color: Colors.black54, fontSize: 13.sp, height: 1.4),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          
-      
         ],
       ),
     );
   }
 }
+
 // ==========================================
 // 1. VUE D'ENSEMBLE (Écran 08)
 // ==========================================
@@ -153,13 +126,14 @@ class _ChargesPageState extends State<ChargesPage> {
     _fetchCharges();
   }
 
-  Future<void> _fetchCharges() async {
+ Future<void> _fetchCharges() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
     try {
       final response = await http.get(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges"),
+        // 🟢 HNA BEDDELNA L-LIEN L-SERVEUR LOCAL DYAL ANDROID
+        Uri.parse("http://10.0.2.2:8000/api/mobile/syndic/charges"),
         headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
       );
 
@@ -180,7 +154,6 @@ class _ChargesPageState extends State<ChargesPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Filtrer l'historique pour ne pas réafficher le dernier appel deux fois
     List<dynamic> historique = appelsList.where((appel) {
       String appelId = (appel['id'] ?? appel['af_identifier']).toString();
       String latestId = latestAppel?['id'].toString() ?? "";
@@ -209,7 +182,6 @@ class _ChargesPageState extends State<ChargesPage> {
               ),
               SizedBox(height: 16.h),
 
-              // 🟢 Banner Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(16.r),
                 child: Stack(
@@ -232,7 +204,6 @@ class _ChargesPageState extends State<ChargesPage> {
               ),
               SizedBox(height: 24.h),
 
-              // 🟢 Le Dernier Appel (Mise en avant)
               if (latestAppel != null) ...[
                 Text("Dernier Appel : ${latestAppel!['title']}", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
                 SizedBox(height: 12.h),
@@ -261,18 +232,14 @@ class _ChargesPageState extends State<ChargesPage> {
                           ],
                         ),
                         SizedBox(height: 20.h),
-                        _buildStatusRow(Colors.green, "${latestAppel!['payes']} Payés"),
+                        _buildStatusRow(const Color(0xFF4CAF50), "${latestAppel!['a_jour'] ?? 0} À jour"),
                         SizedBox(height: 8.h),
-                        _buildStatusRow(Colors.orange, "${latestAppel!['partiels']} Partiellement Payés"),
-                        SizedBox(height: 8.h),
-                        _buildStatusRow(Colors.red, "${latestAppel!['impayes']} Impayés"),
-                        // 🟢 T7IYED L-BOUTON MN HNA B-SIFA NIHA2IYA
+                        _buildStatusRow(const Color(0xFFD32F2F), "${latestAppel!['en_retard'] ?? 0} En retard"),
                       ],
                     ),
                   ),
                 ),
                 
-                // 🟢 Affichage de l'historique des appels
                 if (historique.isNotEmpty) ...[
                   SizedBox(height: 32.h),
                   Text("Historique des appels", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
@@ -281,7 +248,6 @@ class _ChargesPageState extends State<ChargesPage> {
                 ],
 
               ] else ...[
-                // Cas où il n'y a aucun appel du tout
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(24.0.w),
@@ -350,6 +316,296 @@ class _ChargesPageState extends State<ChargesPage> {
 }
 
 // ==========================================
+// 2. CRÉER UN APPEL (Écran 09) - ADAPTÉ MAROC
+// ==========================================
+class CreateChargePage extends StatefulWidget {
+  const CreateChargePage({super.key});
+
+  @override
+  State<CreateChargePage> createState() => _CreateChargePageState();
+}
+
+class _CreateChargePageState extends State<CreateChargePage> {
+  final Color mainBlue = const Color(0xFF1A5EAC);
+  final TextEditingController _titleController = TextEditingController(text: "Charges T4 2026");
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController(text: "2026-10-31");
+  
+  bool _isSubmitting = false;
+  String _selectedMode = 'forfait'; // 'forfait' ou 'tantiemes' par défaut
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+    try {
+      if (_dateController.text.isNotEmpty) {
+        initialDate = DateTime.parse(_dateController.text);
+      }
+    } catch (_) {}
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: mainBlue, 
+              onPrimary: Colors.white, 
+              onSurface: Colors.black87, 
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        String formattedDate = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        _dateController.text = formattedDate;
+      });
+    }
+  }
+
+  Future<void> _submitCharge() async {
+    if (_amountController.text.isEmpty || _titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Veuillez remplir le montant et le titre.")));
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges"),
+        headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
+        body: jsonEncode({
+          "title": _titleController.text,
+          "amount": num.tryParse(_amountController.text) ?? 0,
+          "due_date": _dateController.text,
+          "mode_calcul": _selectedMode 
+        }),
+      );
+
+      if (response.statusCode == 404) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur 404: Route introuvable. Vérifiez api.php"), backgroundColor: Colors.redAccent));
+        setState(() => _isSubmitting = false);
+        return;
+      }
+      if (response.statusCode == 500) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur 500: Erreur interne du serveur (Database)."), backgroundColor: Colors.redAccent));
+        setState(() => _isSubmitting = false);
+        return;
+      }
+
+      final data = jsonDecode(response.body);
+      if (!mounted) return;
+      if (response.statusCode == 200 && data['success']) {
+        setState(() {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Appel créé et réparti avec succès.", style: TextStyle(color: Colors.white)), backgroundColor: Colors.green));
+          Navigator.pop(context); 
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? "Erreur"), backgroundColor: Colors.redAccent));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Détail de l'erreur: $e"), backgroundColor: Colors.redAccent));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  void _showConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title:  Center(child: Text("CONFIRMATION", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+             Text("Confirmez-vous la création de l'appel de fonds ?", textAlign: TextAlign.center, style: TextStyle(fontSize: 14.sp)),
+            SizedBox(height: 16.h),
+            Row(
+              children: [
+                const Icon(Icons.info, color: Colors.green, size: 18),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedMode == 'forfait' 
+                      ? "Chaque lot se verra facturer exactement ce montant fixe." 
+                      : "Le montant sera réparti automatiquement selon les tantièmes.", 
+                    style: const TextStyle(fontSize: 12, color: Colors.black54)
+                  )
+                ),
+              ],
+            )
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: mainBlue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+              onPressed: () {
+                Navigator.pop(context);
+                _submitCharge();
+              },
+              child: _isSubmitting ? const CircularProgressIndicator(color: Colors.white) : const Text("CONFIRMER ET CRÉER", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("ANNULER", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F9),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const CustomHeader(title: "Sindy", subtitle: "Nouvel appel de fonds", residenceName: "", photoUrl: "", showBackButton: true),
+              SizedBox(height: 8),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildModeSelector(), 
+                    SizedBox(height: 20),
+                    
+                    _buildInput("Titre / Description", _titleController),
+                    SizedBox(height: 16.h),
+                    
+                    _buildInput(
+                      _selectedMode == 'forfait' ? "Montant par appartement (MAD)" : "Montant global à répartir (MAD)", 
+                      _amountController, 
+                      isNumber: true
+                    ),
+                    SizedBox(height: 16.h),
+                    
+                    _buildInput(
+                      "Date d'échéance", 
+                      _dateController, 
+                      readOnly: true, 
+                      onTap: () => _selectDate(context),
+                      suffixIcon: Icon(Icons.calendar_month, color: mainBlue, size: 20),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 24),
+              
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: mainBlue, padding: EdgeInsets.symmetric(vertical: 16.h), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r))),
+                  onPressed: _showConfirmation,
+                  child: const Text("CRÉER L'APPEL", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Méthode de calcul", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedMode = 'forfait'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: _selectedMode == 'forfait' ? mainBlue : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _selectedMode == 'forfait' ? mainBlue : Colors.grey.shade300)
+                  ),
+                  child: Center(child: Text("Forfait Fixe", style: TextStyle(color: _selectedMode == 'forfait' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold))),
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedMode = 'tantiemes'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: _selectedMode == 'tantiemes' ? mainBlue : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _selectedMode == 'tantiemes' ? mainBlue : Colors.grey.shade300)
+                  ),
+                  child: Center(child: Text("Tantièmes", style: TextStyle(color: _selectedMode == 'tantiemes' ? Colors.white : Colors.black87, fontWeight: FontWeight.bold))),
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        Text(
+          _selectedMode == 'forfait' 
+            ? "💡 Idéal Maroc: Chaque résident paiera exactement le montant saisi." 
+            : "⚖️ Loi 18-00: Le montant sera divisé selon la quote-part de chaque lot.",
+          style: const TextStyle(fontSize: 11, color: Colors.grey, fontStyle: FontStyle.italic),
+        )
+      ],
+    );
+  }
+
+  Widget _buildInput(String label, TextEditingController controller, {bool isNumber = false, bool readOnly = false, VoidCallback? onTap, Widget? suffixIcon}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
+        SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+          readOnly: readOnly,
+          onTap: onTap,
+          decoration: InputDecoration(
+            filled: true, 
+            fillColor: Colors.grey.shade50,
+            suffixIcon: suffixIcon,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: mainBlue, width: 1.5)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ==========================================
 // 3. DÉTAILS D'UN APPEL (Écran 10)
 // ==========================================
 class ChargeDetailsPage extends StatefulWidget {
@@ -372,13 +628,14 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
     _fetchDetails();
   }
 
-  Future<void> _fetchDetails() async {
+ Future<void> _fetchDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
     try {
       final response = await http.get(
-        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges/${widget.appelId}"),
+        // 🟢 HNA BEDDELNA L-LIEN L-SERVEUR LOCAL DYAL ANDROID
+        Uri.parse("http://10.0.2.2:8000/api/mobile/syndic/charges/${widget.appelId}"),
         headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
       );
 
@@ -394,7 +651,6 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
       setState(() => _isLoading = false);
     }
   }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -405,8 +661,8 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
       return const Scaffold(body: Center(child: Text("Détails introuvables.")));
     }
 
-    int payes = lignes.where((l) => l['status'] == 'Payé').length;
-    int impayes = lignes.where((l) => l['status'] == 'Impayé').length;
+    int aJour = lignes.where((l) => l['status'] == 'À jour').length;
+    int enRetard = lignes.where((l) => l['status'] == 'En retard').length;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
@@ -455,9 +711,9 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
                   children: [
                     _buildSummaryRow("Total appelé :", "${appelDetails!['amount']} MAD", Colors.black87),
                     Divider(height: 24.h),
-                    _buildSummaryRow("Lots payés :", "$payes", Colors.green, isDot: true),
+                    _buildSummaryRow("Lots à jour :", "$aJour", const Color(0xFF4CAF50), isDot: true),
                     SizedBox(height: 8.h),
-                    _buildSummaryRow("Lots impayés :", "$impayes", Colors.red, isDot: true),
+                    _buildSummaryRow("Lots en retard :", "$enRetard", const Color(0xFFD32F2F), isDot: true),
                   ],
                 ),
               ),
@@ -479,7 +735,7 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
                           l['owner'].toString(), 
                           "${l['amount']} MAD", 
                           l['status'], 
-                          color: l['status'] == 'Payé' ? Colors.green : (l['status'] == 'Impayé' ? Colors.red : Colors.orange)
+                          color: l['status'] == 'À jour' ? const Color(0xFF4CAF50) : const Color(0xFFD32F2F)
                         ),
                         const Divider(),
                       ],

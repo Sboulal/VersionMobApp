@@ -1191,7 +1191,7 @@ class _CoproDashboardPageState
                       const Color(0xFF8B5CF6),
 
                   title:
-                      'Charges',
+                      'Appels de fonds',
 
                   subtitle:
                       'Détails & Appels',

@@ -17,6 +17,7 @@ class CustomHeader extends StatelessWidget {
   final String residenceName;
   final String photoUrl;
   final bool showBackButton;
+  
   final String userRole;
   final VoidCallback? onBackTap;
   final VoidCallback? onNotificationTap;
@@ -33,41 +34,26 @@ class CustomHeader extends StatelessWidget {
     this.onNotificationTap,
   });
 
-  PopupMenuButton<String> _buildPopupMenu(BuildContext context) {
-    return PopupMenuButton<String>(
-      offset: const Offset(0, 50),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      color: Colors.white,
-      elevation: 4,
-      // 🟢 ZIDNA Hadi bach l-menu ywlli khdam w y-dir l-action !
-      onSelected: (String value) async {
-        if (value == 'profile') {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const UnifiedProfilePage()));
-        } else if (value == 'logout') {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.remove('auth_token');
-          if (context.mounted) {
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
-          }
-        }
-      },
-      itemBuilder: (BuildContext context) => [
-        const PopupMenuItem(value: 'profile', child: Text('Profil')),
-        const PopupMenuItem(value: 'logout', child: Text('Déconnexion', style: TextStyle(color: Colors.red))),
-      ],
-      child: Container(
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2),
-        ),
-        child: CircleAvatar(
-          radius: 22,
-          backgroundColor: Colors.white,
-          backgroundImage: photoUrl.isNotEmpty
-              ? NetworkImage(photoUrl)
-              : const NetworkImage("https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&bold=true"),
-        ),
+  // Fonction pour créer les items du menu déroulant
+  PopupMenuItem<String> _buildPopupMenuItem(String value, IconData icon, String text, {bool isDestructive = false}) {
+    final Color mainBlue = const Color(0xFF1A5EAC);
+    final color = isDestructive ? Colors.redAccent : mainBlue;
+
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          SizedBox(width: 12.w),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w500,
+              fontSize: 14.sp,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -81,9 +67,14 @@ class CustomHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: mainBlue,
         image: DecorationImage(
-          image: const NetworkImage("https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop"),
+          image: const NetworkImage(
+            "https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=2070&auto=format&fit=crop",
+          ),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(mainBlue.withOpacity(0.85), BlendMode.srcOver),
+          colorFilter: ColorFilter.mode(
+            mainBlue.withOpacity(0.85),
+            BlendMode.srcOver,
+          ),
         ),
       ),
       padding: EdgeInsets.only(
@@ -96,8 +87,10 @@ class CustomHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (showBackButton && onBackTap != null)
+              // Bouton Retour
+              if (showBackButton && onBackTap != null) 
                 InkWell(
                   onTap: onBackTap,
                   child: const Padding(
@@ -105,30 +98,99 @@ class CustomHeader extends StatelessWidget {
                     child: Icon(Icons.arrow_back, color: Colors.white, size: 26),
                   ),
                 ),
+              
               const Icon(Icons.apartment, color: Colors.white, size: 24),
               SizedBox(width: 8),
+              
+              // Nom de la résidence
               Expanded(
                 child: Text(
                   residenceName.isNotEmpty ? "Sindy | $residenceName" : "Sindy",
-                  style:  TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  style:  TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              SizedBox(width: 8),
+              
+              // Bouton Notifications
               InkWell(
-                onTap: onNotificationTap ?? () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationsScreen(role: userRole)));
-                },
-                child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
-              ),
+             onTap: onNotificationTap ?? () {
+               // 🟢 S'il n'y a pas d'action définie, on ouvre la page par défaut
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                   builder: (context) => NotificationsScreen(role: userRole),
+                 ),
+               );
+             },
+             child: const Icon(Icons.notifications_none, color: Colors.white, size: 26),
+           ),
               SizedBox(width: 12.w),
-              _buildPopupMenu(context),
+              
+           // ======================================================
+              // USER DROPDOWN (AVATAR)
+              // ======================================================
+              PopupMenuButton<String>(
+                offset: const Offset(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                color: Colors.white,
+                elevation: 4,
+                // ... (khlli l'code dyal onSelected kima howa) ...
+                itemBuilder: (BuildContext context) => [
+                  _buildPopupMenuItem('profile', Icons.person_outline, 'Profil'),
+                  _buildPopupMenuItem('password', Icons.lock_outline, 'Changer mot de passe'),
+                  const PopupMenuDivider(),
+                  _buildPopupMenuItem('logout', Icons.logout, 'Déconnexion', isDestructive: true),
+                ],
+                child: Container(
+                  // 🟢 Nzidou padding sghir bach tban l'bordure mzyan
+                  padding: const EdgeInsets.all(2), 
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2), // L'khat lbyed li dayr b tswira
+                  ),
+                  child: CircleAvatar(
+                    radius: 22, // 🔥 HNA KBERNA TSWIRA (kanet 14, redinaha 22)
+                    backgroundColor: Colors.white,
+                    backgroundImage: photoUrl.isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : const NetworkImage(
+                            "https://ui-avatars.com/api/?name=Copro&background=ffffff&color=1A5EAC&size=128&bold=true",
+                          ),
+                  ),
+                ),
+              ),
             ],
           ),
           SizedBox(height: 20),
-          Text(title, style: const TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w800)),
+          
+          // Titre de la page
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 23,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           SizedBox(height: 3),
-          Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 12, fontWeight: FontWeight.w500)),
+          
+          // Sous-titre
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
@@ -209,7 +271,7 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
         child: Column(
           children: [
             CustomHeader(
-              title: "Mes Charges",
+              title: "Mes Appels de fonds",
               subtitle: "Consultez l'état de vos cotisations",
               residenceName: _residenceName,
               photoUrl: _photoUrl, 
@@ -227,7 +289,7 @@ class _CoproChargesPageState extends State<CoproChargesPage> {
                           _buildSoldeCard(),
                           SizedBox(height: 24),
                            Text(
-                            "Historique de mes charges",
+                            "Historique de mes appels de fonds",
                             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: Colors.black87),
                           ),
                           SizedBox(height: 12),
