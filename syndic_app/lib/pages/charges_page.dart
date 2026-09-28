@@ -133,7 +133,7 @@ class _ChargesPageState extends State<ChargesPage> {
     try {
       final response = await http.get(
         // 🟢 HNA BEDDELNA L-LIEN L-SERVEUR LOCAL DYAL ANDROID
-        Uri.parse("http://10.0.2.2:8000/api/mobile/syndic/charges"),
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges"),
         headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
       );
 
@@ -635,7 +635,7 @@ class _ChargeDetailsPageState extends State<ChargeDetailsPage> {
     try {
       final response = await http.get(
         // 🟢 HNA BEDDELNA L-LIEN L-SERVEUR LOCAL DYAL ANDROID
-        Uri.parse("http://10.0.2.2:8000/api/mobile/syndic/charges/${widget.appelId}"),
+        Uri.parse("https://api.syndify.nomade-cloud.com/api/mobile/syndic/charges/${widget.appelId}"),
         headers: {"Content-Type": "application/json", "Authorization": "Bearer $token"},
       );
 
